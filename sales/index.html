@@ -69,7 +69,7 @@ const DEFAULT_TARGETS = {
  CUSTOM: { bigLake: 5000000, gonzalez: 4500000, liveOak: 1500000 },
 };
 
-const SALES_REP = { name: "BROOKS", role: "Sales — Solids Disposal", baseSalary: 90000 };
+const SALES_REP = { name: "BROOKS", role: "Sales — Solids Disposal" };
 
 const INIT = {
  months: ['Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'],
@@ -741,13 +741,12 @@ function App() {
  {view === "plan" && (
  <div>
  <Card padding={28} style={{ marginBottom: 20 }}>
- <Eyebrow style={{ marginBottom: 18 }}>Your compensation</Eyebrow>
+ <Eyebrow style={{ marginBottom: 18 }}>Bonus plan</Eyebrow>
  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 16 }}>
  {[
- { l: "Base salary", v: fmtBonus(SALES_REP.baseSalary), c: tj.navy900 },
  { l: "Target bonus", v: fmtBonus(20000), c: tj.ok },
  { l: "Stretch bonus", v: fmtBonus(20000), c: tj.ok },
- { l: "Max earning potential", v: fmtBonus(SALES_REP.baseSalary + 40000), c: tj.crimson },
+ { l: "Max bonus", v: fmtBonus(40000), c: tj.crimson },
  ].map((x, i) => (
  <Card key={i} cream padding={16}>
  <Eyebrow>{x.l}</Eyebrow>
