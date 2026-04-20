@@ -429,6 +429,7 @@ function App() {
   const [D, setD] = useState(INIT);
   const [W, setW] = useState(null);
   const [archive, setArchive] = useState([]);
+  const [benchTargets, setBenchTargets] = useState(BENCH);
   const [msg, setMsg] = useState("");
   const [stalenessDismissed, setStalenessDismissed] = useState(false);
   const [, forceTick] = useState(0);
@@ -438,9 +439,11 @@ function App() {
       try { const s = await window.storage.get("tejas-coo-m"); if (s?.value) setD(JSON.parse(s.value)); } catch (e) {}
       try { const s = await window.storage.get("tejas-coo-w"); if (s?.value) setW(JSON.parse(s.value)); } catch (e) {}
       try { const s = await window.storage.get("tejas-coo-archive"); if (s?.value) setArchive(JSON.parse(s.value)); } catch (e) {}
+      try { const s = await window.storage.get("tejas-coo-benchmarks"); if (s?.value) setBenchTargets(JSON.parse(s.value)); } catch (e) {}
     })();
   }, []);
   useEffect(() => { const id = setInterval(() => forceTick(n => n + 1), 60000); return () => clearInterval(id); }, []);
+  useEffect(() => { (async () => { try { await window.storage.set("tejas-coo-benchmarks", JSON.stringify(benchTargets)); } catch (e) {} })(); }, [benchTargets]);
 
   // ── Snapshot builders ─────────────────────────────────────────────
   // Condense an upload into the small fixed-shape record we keep forever.
@@ -1062,8 +1065,9 @@ function App() {
             { name: "Gonzalez", key: "gonzalez", color: tj.warn },
             { name: "Live Oak", key: "liveOak", color: tj.crimson },
           ];
+          const totalBenchTarget = (benchTargets.bigLake?.target || 0) + (benchTargets.gonzalez?.target || 0) + (benchTargets.liveOak?.target || 0);
           const locData = locs.map(loc => {
-            const bench = BENCH[loc.key];
+            const bench = benchTargets[loc.key] || BENCH[loc.key];
             const revArr = D[loc.key]?.rev || [];
             const ytdClosed = jan26Idx >= 0 ? revArr.slice(jan26Idx).reduce((s, v) => s + v, 0) : 0;
             const wLoc = W?.locations?.find(l => l.name.toLowerCase().includes(loc.name.split(" ")[0].toLowerCase()));
@@ -1078,8 +1082,8 @@ function App() {
             return { ...loc, bench, ytdClosed, mtd, ytdTotal, pctDone, gap, annualized, monthlyNeeded, avgMonthly, onPace };
           });
           const totalYTD = locData.reduce((s, l) => s + l.ytdTotal, 0);
-          const totalGap = BENCH.total.target - totalYTD;
-          const totalPct = BENCH.total.target > 0 ? totalYTD / BENCH.total.target : 0;
+          const totalGap = totalBenchTarget - totalYTD;
+          const totalPct = totalBenchTarget > 0 ? totalYTD / totalBenchTarget : 0;
           const totalAnn = ytdMonths > 0 ? (locData.reduce((s, l) => s + l.ytdClosed, 0) / ytdMonths) * 12 : 0;
           const totalMonthlyNeeded = totalGap > 0 ? totalGap / remainingMonths : 0;
 
@@ -1089,9 +1093,9 @@ function App() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
                   <div>
                     <Eyebrow style={{ marginBottom: 6 }}>2026 Company Target</Eyebrow>
-                    <div style={{ fontFamily: tj.fontSerif, fontSize: 38, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em" }}>{fmtF(BENCH.total.target)}</div>
+                    <div style={{ fontFamily: tj.fontSerif, fontSize: 38, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em" }}>{fmtF(totalBenchTarget)}</div>
                     <div style={{ fontSize: 12, color: tj.gray700, marginTop: 4, fontFamily: tj.fontSerif, fontStyle: "italic" }}>
-                      2025 actual: {fmtF(BENCH.total.prior)} · {((BENCH.total.target / BENCH.total.prior - 1) * 100).toFixed(1)}% growth required
+                      2025 actual: {fmtF(BENCH.total.prior)} · {((totalBenchTarget / BENCH.total.prior - 1) * 100).toFixed(1)}% growth required
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
@@ -1113,8 +1117,38 @@ function App() {
 
                 <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
                   <div><Eyebrow color={tj.gray700}>Gap</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: tj.crimson, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalGap)}</div></div>
-                  <div><Eyebrow color={tj.gray700}>Annualized Pace</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: totalAnn >= BENCH.total.target ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalAnn)}</div></div>
+                  <div><Eyebrow color={tj.gray700}>Annualized Pace</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: totalAnn >= totalBenchTarget ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalAnn)}</div></div>
                   <div><Eyebrow color={tj.gray700}>Need / Month</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: tj.warn, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalMonthlyNeeded)}<span style={{ fontSize: 12, color: tj.gray700 }}> × {remainingMonths}mo</span></div></div>
+                </div>
+              </Card>
+
+              <Card padding={24} style={{ marginBottom: 20 }}>
+                <Eyebrow style={{ marginBottom: 14 }}>Adjust benchmark targets</Eyebrow>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
+                  {[
+                    { key: "bigLake", label: "Big Lake" },
+                    { key: "gonzalez", label: "Gonzalez" },
+                    { key: "liveOak", label: "Live Oak" },
+                  ].map(item => (
+                    <div key={item.key}>
+                      <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700, marginBottom: 6 }}>{item.label}</div>
+                      <input
+                        type="number"
+                        step="1000"
+                        value={benchTargets[item.key]?.target || 0}
+                        onChange={e => setBenchTargets(prev => ({
+                          ...prev,
+                          [item.key]: { ...(prev[item.key] || BENCH[item.key]), target: Number(e.target.value || 0) },
+                          total: { ...(prev.total || BENCH.total), target: ["bigLake", "gonzalez", "liveOak"].reduce((s, k) => s + (k === item.key ? Number(e.target.value || 0) : (prev[k]?.target || BENCH[k].target || 0)), 0), prior: BENCH.total.prior }
+                        }))}
+                        style={{ width: "100%", padding: "10px 12px", border: `1px solid ${tj.border}`, fontFamily: tj.fontMono, fontSize: 14, color: tj.navy900, background: tj.surfaceCream }}
+                      />
+                    </div>
+                  ))}
+                  <div>
+                    <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700, marginBottom: 6 }}>Company Total</div>
+                    <div style={{ padding: "10px 12px", border: `1px solid ${tj.border}`, fontFamily: tj.fontMono, fontSize: 14, color: tj.navy900, background: tj.gray100 }}>{fmtF(totalBenchTarget)}</div>
+                  </div>
                 </div>
               </Card>
 
@@ -1177,13 +1211,13 @@ function App() {
                     ))}
                     <tr>
                       <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, color: tj.navy900 }}>Total</td>
-                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700 }}>{fmtF(BENCH.total.target)}</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700 }}>{fmtF(totalBenchTarget)}</td>
                       <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700 }}>{fmtF(totalYTD)}</td>
-                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700, color: totalAnn >= BENCH.total.target ? tj.ok : tj.crimson }}>{fmtF(totalAnn)}</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700, color: totalAnn >= totalBenchTarget ? tj.ok : tj.crimson }}>{fmtF(totalAnn)}</td>
                       <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700, color: tj.crimson }}>{fmtF(totalGap)}</td>
                       <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700, color: tj.warn }}>{fmt(totalMonthlyNeeded)}</td>
                       <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right" }}>
-                        <span style={{ background: totalAnn >= BENCH.total.target ? tj.okBg : tj.badBg, color: totalAnn >= BENCH.total.target ? tj.ok : tj.crimson, padding: "3px 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{totalAnn >= BENCH.total.target ? "On Pace" : "Behind"}</span>
+                        <span style={{ background: totalAnn >= totalBenchTarget ? tj.okBg : tj.badBg, color: totalAnn >= totalBenchTarget ? tj.ok : tj.crimson, padding: "3px 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{totalAnn >= totalBenchTarget ? "On Pace" : "Behind"}</span>
                       </td>
                     </tr>
                   </tbody>
