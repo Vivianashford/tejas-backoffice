@@ -1,258 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tejas Environmental COO Dashboard</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; background: #F9FAFB; }
-    button:hover, label:hover, a:hover { opacity: .92; }
-    @media (max-width: 900px) {
-      .grid-2 { grid-template-columns: 1fr !important; }
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tejas Environmental COO Dashboard</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+html, body { margin: 0; padding: 0; }
+* { box-sizing: border-box; }
+</style>
+<script>
+window.storage = {
+  async get(key) { const v = localStorage.getItem(key); return v ? { value: v } : null; },
+  async set(key, value) { localStorage.setItem(key, value); },
+  async delete(key) { localStorage.removeItem(key); }
+};
+</script>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useCallback, useEffect } = React;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TEJAS DESIGN TOKENS
+// Lifted from /Tejas_Design_System/colors_and_type.css
+// ═══════════════════════════════════════════════════════════════════════════
 const tj = {
- navy900: "#002060", navy800: "#002868", navy700: "#0A3A7A", navy600: "#143F83",
- crimson: "#BF0A30", crimson700: "#99082A",
- sky: "#5B9BD5",
- ink: "#1C1C1E",
- gray700: "#6B7280", gray500: "#9CA3AF", gray300: "#D6D0C8",
- gray100: "#F1F3F5", gray50: "#F9FAFB", white: "#FFFFFF",
- ok: "#2F7A4F", okBg: "#E8F1EA",
- warn: "#B78119", warnBg: "#FBF1DC",
- bad: "#BF0A30", badBg: "#FBE8EC",
- surface: "#FFFFFF", surfaceCream: "#FBFAF7", bg: "#F9FAFB", border: "#D6D0C8",
- fontSerif: "Georgia, 'Times New Roman', serif",
- fontSans: "Calibri, Carlito, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
- fontMono: "ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace",
+  navy900: "#002060", navy800: "#002868", navy700: "#0A3A7A", navy600: "#143F83",
+  crimson: "#BF0A30", crimson700: "#99082A",
+  sky: "#5B9BD5",
+  ink: "#1C1C1E",
+  gray700: "#6B7280", gray500: "#9CA3AF", gray300: "#D6D0C8",
+  gray100: "#F1F3F5", gray50: "#F9FAFB", white: "#FFFFFF",
+  ok: "#2F7A4F", okBg: "#E8F1EA",
+  warn: "#B78119", warnBg: "#FBF1DC",
+  bad: "#BF0A30", badBg: "#FBE8EC",
+  surface: "#FFFFFF", surfaceCream: "#FBFAF7", bg: "#F9FAFB", border: "#D6D0C8",
+  fontSerif: "Georgia, 'Times New Roman', serif",
+  fontSans: "Calibri, Carlito, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
+  fontMono: "ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace",
 };
 
-window.storage = {
- async get(k){ const v = localStorage.getItem(k); return v == null ? null : { value: v }; },
- async set(k,v){ localStorage.setItem(k,v); },
- async delete(k){ localStorage.removeItem(k); }
-};
-
+// ═══════════════════════════════════════════════════════════════════════════
+// SHAREPOINT LINKS (optional one-click downloads)
+// ═══════════════════════════════════════════════════════════════════════════
 const SOURCE_LINKS = {
- weekly: {
-  label: "Jessica's Weekly File",
-  url: "https://swanenergyinc-my.sharepoint.com/:x:/r/personal/jbaustert_njectllc_com/_layouts/15/Doc.aspx?sourcedoc=%7B5B5D9BE1-9C3B-487E-BB0B-C257200800C7%7D&file=Tejas%20Volumes%20and%20Profits.xlsx&fromShare=true&action=default&mobileredirect=true",
- },
- monthly: { label: "QBO P&L (from Tom)", url: "" },
+  weekly: {
+    label: "Jessica's Weekly File",
+    url: "https://swanenergyinc-my.sharepoint.com/:x:/r/personal/jbaustert_njectllc_com/_layouts/15/Doc.aspx?sourcedoc=%7B5B5D9BE1-9C3B-487E-BB0B-C257200800C7%7D&file=Tejas%20Volumes%20and%20Profits.xlsx&fromShare=true&action=default&mobileredirect=true",
+  },
+  monthly: { label: "QBO P&L (from Tom)", url: "" },
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PRE-LOADED DATA + BENCHMARKS
+// ═══════════════════════════════════════════════════════════════════════════
 const INIT = {
- months: ['Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'],
- shortMo: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
- revenue: [853531,959001,667685,393807,467210,640384,667988,557451,523789,456085,455833,607202],
- grossProfit: [366243,521316,215299,-45295,26323,134330,134475,118928,63412,42026,53970,147162],
- ebitda: [423332,578730,268131,2264,73552,169669,168868,153155,43318,64596,80136,178462],
- adjEbitda: [467734,587880,365982,351857,350703,205969,205908,162305,132812,74596,90136,216856],
- ttmEbitda: [4837080,4861787,4896161,4876935,4910261,4904501,4758524,4640847,4077328,3551918,3212738,3212738],
- fixedCosts: [332514,342561,331376,308275,334163,334614,394176,335257,347355,321501,323772,370729],
- variableCosts: [154774,95125,121010,130827,106723,171439,139337,103266,113022,92558,78092,89310],
- labor: [83720,89154,87113,59645,73400,82906,85726,77838,74591,60628,54222,69351],
- netIncome: [265522,409689,109650,-156314,-90777,609,14254,-7984,-122666,-90808,-87769,27475],
- interest: [48825,48312,37752,37879,43599,48330,33884,40409,45255,34675,34185,29891],
- liquid: [72958,65083,83559,55648,63643,78741,83301,75838,55550,48512,51333,80146],
- solids: [530040,687614,389073,258303,296087,385615,418514,347711,318511,274941,304287,312850],
- skimOil: [138782,122799,135555,45954,58083,90801,91849,70326,87568,84227,44634,152038],
- washout: [112740,84890,59380,33902,49397,84709,74324,63575,61745,49695,56520,62130],
- bigLake: { rev: [487288,437686,452386,439102,440887,506053,324366,268190,234200,230852,175968,235449], ni: [200680,292990,78038,-44655,-3037,13270,168069,128122,61432,108852,61058,82640] },
- gonzalez: { rev: [341403,498225,202692,0,0,0,291953,241249,275716,202692,236473,269889], ni: [78181,126395,36461,0,0,0,-24350,-20835,-16360,-39515,5396,25615] },
- liveOak: { rev: [24839,23091,12607,-45295,26323,134330,51669,48012,13345,22540,43392,101347], ni: [-13339,-9696,-4850,-111659,-87740,-12661,-45063,-26155,-64772,-54283,-34553,18037] },
- source: "Pre-loaded (Mar 2026)",
- uploadedAt: null,
+  months: ['Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'],
+  shortMo: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+  revenue: [853531,959001,667685,393807,467210,640384,667988,557451,523789,456085,455833,607202],
+  grossProfit: [366243,521316,215299,-45295,26323,134330,134475,118928,63412,42026,53970,147162],
+  ebitda: [423332,578730,268131,2264,73552,169669,168868,153155,43318,64596,80136,178462],
+  adjEbitda: [467734,587880,365982,351857,350703,205969,205908,162305,132812,74596,90136,216856],
+  ttmEbitda: [4837080,4861787,4896161,4876935,4910261,4904501,4758524,4640847,4077328,3551918,3212738,3212738],
+  fixedCosts: [332514,342561,331376,308275,334163,334614,394176,335257,347355,321501,323772,370729],
+  variableCosts: [154774,95125,121010,130827,106723,171439,139337,103266,113022,92558,78092,89310],
+  labor: [83720,89154,87113,59645,73400,82906,85726,77838,74591,60628,54222,69351],
+  netIncome: [265522,409689,109650,-156314,-90777,609,14254,-7984,-122666,-90808,-87769,27475],
+  interest: [48825,48312,37752,37879,43599,48330,33884,40409,45255,34675,34185,29891],
+  liquid: [72958,65083,83559,55648,63643,78741,83301,75838,55550,48512,51333,80146],
+  solids: [530040,687614,389073,258303,296087,385615,418514,347711,318511,274941,304287,312850],
+  skimOil: [138782,122799,135555,45954,58083,90801,91849,70326,87568,84227,44634,152038],
+  washout: [112740,84890,59380,33902,49397,84709,74324,63575,61745,49695,56520,62130],
+  bigLake: { rev: [487288,437686,452386,439102,440887,506053,324366,268190,234200,230852,175968,235449], ni: [200680,292990,78038,-44655,-3037,13270,168069,128122,61432,108852,61058,82640] },
+  gonzalez: { rev: [341403,498225,202692,0,0,0,291953,241249,275716,202692,236473,269889], ni: [78181,126395,36461,0,0,0,-24350,-20835,-16360,-39515,5396,25615] },
+  liveOak: { rev: [24839,23091,12607,-45295,26323,134330,51669,48012,13345,22540,43392,101347], ni: [-13339,-9696,-4850,-111659,-87740,-12661,-45063,-26155,-64772,-54283,-34553,18037] },
+  source: "Pre-loaded (Mar 2026)",
+  uploadedAt: null,
 };
 
 const BENCH = {
- bigLake: { target: 4350000, prior: 4047205 },
- gonzalez: { target: 3925000, prior: 3650786 },
- liveOak: { target: 1200000, prior: 1110433 },
- total: { target: 9475000, prior: 8808424 },
+  bigLake:  { target: 4350000, prior: 4047205 },
+  gonzalez: { target: 3925000, prior: 3650786 },
+  liveOak:  { target: 1200000, prior: 1110433 },
+  total:    { target: 9475000, prior: 8808424 },
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PARSERS — full-featured (Brooks's parser was simplified; this needs the lot)
+// ═══════════════════════════════════════════════════════════════════════════
 function parseXLSX(buffer) {
- try {
- const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
- const conName = wb.SheetNames.find(n => /consol/i.test(n)) || wb.SheetNames[0];
- const raw = XLSX.utils.sheet_to_json(wb.Sheets[conName], { header: 1, defval: 0 });
- if (raw.length < 50) return null;
- let monthRow = -1;
- for (let r = 0; r < 10; r++) {
- const hits = (raw[r] || []).filter(c => typeof c === "string" && /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+2\d$/i.test(String(c).trim()));
- if (hits.length >= 6) { monthRow = r; break; }
- }
- if (monthRow < 0) return null;
- const monthCols = [];
- for (let c = 0; c < (raw[monthRow] || []).length; c++) {
- const v = String(raw[monthRow][c] || "").trim();
- if (/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+2\d$/i.test(v)) monthCols.push({ col: c, label: v });
- }
- const last12 = monthCols.slice(-12);
- const months = last12.map(m => m.label);
- const shortMo = months.map(m => m.split(" ")[0]);
- const cols = last12.map(m => m.col);
- const findRow = (search, from = 0) => {
- const s = search.toLowerCase();
- for (let r = from; r < raw.length; r++)
- for (let c = 0; c < Math.min(8, (raw[r] || []).length); c++)
- if (String(raw[r][c] || "").trim().toLowerCase().includes(s)) return r;
- return -1;
- };
- const getVals = (rowIdx) => rowIdx < 0 || !raw[rowIdx] ? cols.map(() => 0) :
- cols.map(c => { const v = raw[rowIdx]?.[c]; return typeof v === "number" ? v : parseFloat(String(v || "0").replace(/[$,()]/g, "")) || 0; });
- const gpRow = findRow("Gross Profit");
- const result = {
- months, shortMo,
- revenue: getVals(findRow("Total Income")),
- grossProfit: getVals(gpRow),
- ebitda: getVals(findRow("EBITDA")),
- adjEbitda: getVals(findRow("Adjusted EBITDA")),
- ttmEbitda: getVals(findRow("TTM EBITDA")),
- fixedCosts: getVals(findRow("Total Total Fixed Cost")),
- variableCosts: getVals(findRow("Total Total Variable Cost")),
- labor: getVals(findRow("641202")),
- netIncome: getVals(findRow("Net Income", Math.max(0, gpRow))),
- interest: getVals(findRow("Total 6605")),
- liquid: getVals(findRow("Total 6001")),
- solids: getVals(findRow("Total 6002")),
- skimOil: getVals(findRow("Total 6003")),
- washout: getVals(findRow("Total 6004")),
- source: `Uploaded P&L (${months[months.length - 1]})`,
- uploadedAt: new Date().toISOString(),
- };
- for (const [key, search] of [["bigLake", "Big Lake"], ["gonzalez", "Gonzal"], ["liveOak", "Live Oak"]]) {
- const sn = wb.SheetNames.find(n => new RegExp(search, "i").test(n));
- if (!sn) { result[key] = { rev: cols.map(() => 0), ni: cols.map(() => 0) }; continue; }
- const lraw = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: 0 });
- const lCols = [];
- for (let r = 0; r < 10; r++) {
- for (let c = 0; c < (lraw[r] || []).length; c++)
- if (typeof lraw[r][c] === "string" && /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+2\d$/i.test(lraw[r][c].trim())) lCols.push(c);
- if (lCols.length >= 6) break;
- }
- const ll12 = lCols.slice(-12);
- const lFind = (s, from = 0) => { for (let r = from; r < lraw.length; r++) for (let c = 0; c < 8; c++) if (String(lraw[r]?.[c] || "").toLowerCase().includes(s.toLowerCase())) return r; return -1; };
- const lVals = (ri) => ri < 0 ? ll12.map(() => 0) : ll12.map(c => typeof lraw[ri]?.[c] === "number" ? lraw[ri][c] : 0);
- const revR = lFind("Total Income");
- const niR = lFind("Net Income", Math.max(0, lFind("Gross Profit")));
- result[key] = { rev: lVals(revR), ni: lVals(niR) };
- }
- return result;
- } catch (e) { console.error("XLSX parse error:", e); return null; }
+  try {
+    const wb = XLSX.read(new Uint8Array(buffer), { type: "array" });
+    const conName = wb.SheetNames.find(n => /consol/i.test(n)) || wb.SheetNames[0];
+    const raw = XLSX.utils.sheet_to_json(wb.Sheets[conName], { header: 1, defval: 0 });
+    if (raw.length < 50) return null;
+    let monthRow = -1;
+    for (let r = 0; r < 10; r++) {
+      const hits = (raw[r] || []).filter(c => typeof c === "string" && /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+2\d$/i.test(String(c).trim()));
+      if (hits.length >= 6) { monthRow = r; break; }
+    }
+    if (monthRow < 0) return null;
+    const monthCols = [];
+    for (let c = 0; c < (raw[monthRow] || []).length; c++) {
+      const v = String(raw[monthRow][c] || "").trim();
+      if (/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+2\d$/i.test(v)) monthCols.push({ col: c, label: v });
+    }
+    const last12 = monthCols.slice(-12);
+    const months = last12.map(m => m.label);
+    const shortMo = months.map(m => m.split(" ")[0]);
+    const cols = last12.map(m => m.col);
+    const findRow = (search, from = 0) => {
+      const s = search.toLowerCase();
+      for (let r = from; r < raw.length; r++)
+        for (let c = 0; c < Math.min(8, (raw[r] || []).length); c++)
+          if (String(raw[r][c] || "").trim().toLowerCase().includes(s)) return r;
+      return -1;
+    };
+    const getVals = (rowIdx) => rowIdx < 0 || !raw[rowIdx] ? cols.map(() => 0) :
+      cols.map(c => { const v = raw[rowIdx]?.[c]; return typeof v === "number" ? v : parseFloat(String(v || "0").replace(/[$,()]/g, "")) || 0; });
+    const gpRow = findRow("Gross Profit");
+    const result = {
+      months, shortMo,
+      revenue: getVals(findRow("Total Income")),
+      grossProfit: getVals(gpRow),
+      ebitda: getVals(findRow("EBITDA")),
+      adjEbitda: getVals(findRow("Adjusted EBITDA")),
+      ttmEbitda: getVals(findRow("TTM EBITDA")),
+      fixedCosts: getVals(findRow("Total Total Fixed Cost")),
+      variableCosts: getVals(findRow("Total Total Variable Cost")),
+      labor: getVals(findRow("641202")),
+      netIncome: getVals(findRow("Net Income", Math.max(0, gpRow))),
+      interest: getVals(findRow("Total 6605")),
+      liquid: getVals(findRow("Total 6001")),
+      solids: getVals(findRow("Total 6002")),
+      skimOil: getVals(findRow("Total 6003")),
+      washout: getVals(findRow("Total 6004")),
+      source: `Uploaded P&L (${months[months.length - 1]})`,
+      uploadedAt: new Date().toISOString(),
+    };
+    for (const [key, search] of [["bigLake", "Big Lake"], ["gonzalez", "Gonzal"], ["liveOak", "Live Oak"]]) {
+      const sn = wb.SheetNames.find(n => new RegExp(search, "i").test(n));
+      if (!sn) { result[key] = { rev: cols.map(() => 0), ni: cols.map(() => 0) }; continue; }
+      const lraw = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: 0 });
+      const lCols = [];
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < (lraw[r] || []).length; c++)
+          if (typeof lraw[r][c] === "string" && /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+2\d$/i.test(lraw[r][c].trim())) lCols.push(c);
+        if (lCols.length >= 6) break;
+      }
+      const ll12 = lCols.slice(-12);
+      const lFind = (s, from = 0) => { for (let r = from; r < lraw.length; r++) for (let c = 0; c < 8; c++) if (String(lraw[r]?.[c] || "").toLowerCase().includes(s.toLowerCase())) return r; return -1; };
+      const lVals = (ri) => ri < 0 ? ll12.map(() => 0) : ll12.map(c => typeof lraw[ri]?.[c] === "number" ? lraw[ri][c] : 0);
+      const revR = lFind("Total Income");
+      const niR = lFind("Net Income", Math.max(0, lFind("Gross Profit")));
+      result[key] = { rev: lVals(revR), ni: lVals(niR) };
+    }
+    return result;
+  } catch (e) { console.error("XLSX parse error:", e); return null; }
 }
 
 function parseNum(s) {
- if (!s || typeof s !== "string") return 0;
- s = s.trim().replace(/[$,\s]/g, "");
- if (s === "-" || s === "" || s === "n/a" || s.includes("DIV")) return 0;
- const neg = s.startsWith("(") && s.endsWith(")");
- if (neg) s = s.slice(1, -1);
- const n = parseFloat(s);
- return isNaN(n) ? 0 : neg ? -n : n;
+  if (!s || typeof s !== "string") return 0;
+  s = s.trim().replace(/[$,\s]/g, "");
+  if (s === "-" || s === "" || s === "n/a" || s.includes("DIV")) return 0;
+  const neg = s.startsWith("(") && s.endsWith(")");
+  if (neg) s = s.slice(1, -1);
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : neg ? -n : n;
 }
 
 function parseCSV(text) {
- const rows = [];
- let cur = "", inQ = false;
- for (const ch of text) {
- if (ch === '"') { inQ = !inQ; cur += ch; }
- else if (ch === '\n' && !inQ) { rows.push(cur); cur = ""; }
- else cur += ch;
- }
- if (cur.trim()) rows.push(cur);
- return rows.map(r => {
- const f = []; let field = "", q = false;
- for (const ch of r.replace(/\r/g, "")) {
- if (ch === '"') q = !q;
- else if (ch === "," && !q) { f.push(field.trim()); field = ""; }
- else field += ch;
- }
- f.push(field.trim());
- return f;
- });
+  const rows = [];
+  let cur = "", inQ = false;
+  for (const ch of text) {
+    if (ch === '"') { inQ = !inQ; cur += ch; }
+    else if (ch === '\n' && !inQ) { rows.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  if (cur.trim()) rows.push(cur);
+  return rows.map(r => {
+    const f = []; let field = "", q = false;
+    for (const ch of r.replace(/\r/g, "")) {
+      if (ch === '"') q = !q;
+      else if (ch === "," && !q) { f.push(field.trim()); field = ""; }
+      else field += ch;
+    }
+    f.push(field.trim());
+    return f;
+  });
 }
 
 function extractWeekly(csvText) {
- const rows = parseCSV(csvText);
- if (rows.length < 10) return null;
- let dates = [], dayNames = [], updatedThru = "";
- const dp = /\d{1,2}-[A-Za-z]{3}/;
- for (let i = 0; i < 12; i++) {
- const r = rows[i];
- if (r && r.filter(c => dp.test(c)).length >= 3) {
- for (let c = 3; c < 22; c += 3) if (dp.test(r[c])) dates.push(r[c].trim());
- break;
- }
- }
- for (let i = 0; i < 8; i++) {
- const r = rows[i] || [];
- for (let c = 3; c < 22; c += 3)
- if (/Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday/i.test(r[c]))
- dayNames.push(r[c].trim());
- }
- for (let i = 0; i < 5; i++)
- if (rows[i]?.[0] && /updated/i.test(rows[i][0]))
- updatedThru = rows[i][0].replace(/Updated thru\s*/i, "").trim();
- const locNames = ["Big Lake", "Gonzales", "Gonzalez", "Live Oak"];
- const locations = [];
- for (let i = 0; i < rows.length; i++) {
- const r = rows[i];
- if (!r?.[0]) continue;
- const lm = locNames.find(n => r[0].trim().toLowerCase().includes(n.toLowerCase()));
- if (!lm) continue;
- const ln = lm === "Gonzales" ? "Gonzalez" : lm;
- const loc = { name: ln };
- const fields = ["water", "solids", "solidsRev", "washouts", "oilSold", "totalRevenue", "laborCost", "overhead", "pl"];
- fields.forEach(f => { loc[f] = { daily: [], weekTotal: 0, mtd: 0 }; });
- for (let d = 0; d < 7; d++) {
- const b = 3 + d * 3;
- loc.water.daily.push({ day: parseNum(r[b]), night: parseNum(r[b + 1]), total: parseNum(r[b + 2]) });
- }
- loc.water.weekTotal = parseNum(r[24]);
- loc.water.mtd = parseNum(r[27]);
- for (let j = i + 1; j < Math.min(i + 15, rows.length); j++) {
- const sr = rows[j];
- if (!sr?.[1]) continue;
- const lb = sr[1].trim().toLowerCase();
- let t = null;
- if (lb.includes("solids") && lb.includes("revenue")) t = loc.solidsRev;
- else if (lb.includes("solid")) t = loc.solids;
- else if (lb.includes("washout")) t = loc.washouts;
- else if (lb.includes("oil sold")) t = loc.oilSold;
- else if (lb.includes("total revenue")) t = loc.totalRevenue;
- else if (lb.includes("labor")) t = loc.laborCost;
- else if (lb.includes("facility") || lb.includes("overhead")) t = loc.overhead;
- else if (lb === "p/l") t = loc.pl;
- if (t) {
- t.daily = [];
- for (let d = 0; d < 7; d++) {
- const b = 3 + d * 3;
- t.daily.push({ day: parseNum(sr[b]), night: parseNum(sr[b + 1]), total: parseNum(sr[b + 2]) });
- }
- t.weekTotal = parseNum(sr[24]);
- t.mtd = parseNum(sr[27]);
- }
- if (sr[0]?.trim() && locNames.some(n => sr[0].trim().toLowerCase().includes(n.toLowerCase()))) break;
- if (lb === "p/l") break;
- }
- locations.push(loc);
- }
- return { dates, dayNames, updatedThru, locations, uploadedAt: new Date().toISOString() };
+  const rows = parseCSV(csvText);
+  if (rows.length < 10) return null;
+  let dates = [], dayNames = [], updatedThru = "";
+  const dp = /\d{1,2}-[A-Za-z]{3}/;
+  for (let i = 0; i < 12; i++) {
+    const r = rows[i];
+    if (r && r.filter(c => dp.test(c)).length >= 3) {
+      for (let c = 3; c < 22; c += 3) if (dp.test(r[c])) dates.push(r[c].trim());
+      break;
+    }
+  }
+  for (let i = 0; i < 8; i++) {
+    const r = rows[i] || [];
+    for (let c = 3; c < 22; c += 3)
+      if (/Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday/i.test(r[c]))
+        dayNames.push(r[c].trim());
+  }
+  for (let i = 0; i < 5; i++)
+    if (rows[i]?.[0] && /updated/i.test(rows[i][0]))
+      updatedThru = rows[i][0].replace(/Updated thru\s*/i, "").trim();
+  const locNames = ["Big Lake", "Gonzales", "Gonzalez", "Live Oak"];
+  const locations = [];
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r?.[0]) continue;
+    const lm = locNames.find(n => r[0].trim().toLowerCase().includes(n.toLowerCase()));
+    if (!lm) continue;
+    const ln = lm === "Gonzales" ? "Gonzalez" : lm;
+    const loc = { name: ln };
+    const fields = ["water", "solids", "solidsRev", "washouts", "oilSold", "totalRevenue", "laborCost", "overhead", "pl"];
+    fields.forEach(f => { loc[f] = { daily: [], weekTotal: 0, mtd: 0 }; });
+    for (let d = 0; d < 7; d++) {
+      const b = 3 + d * 3;
+      loc.water.daily.push({ day: parseNum(r[b]), night: parseNum(r[b + 1]), total: parseNum(r[b + 2]) });
+    }
+    loc.water.weekTotal = parseNum(r[24]);
+    loc.water.mtd = parseNum(r[27]);
+    for (let j = i + 1; j < Math.min(i + 15, rows.length); j++) {
+      const sr = rows[j];
+      if (!sr?.[1]) continue;
+      const lb = sr[1].trim().toLowerCase();
+      let t = null;
+      if (lb.includes("solids") && lb.includes("revenue")) t = loc.solidsRev;
+      else if (lb.includes("solid")) t = loc.solids;
+      else if (lb.includes("washout")) t = loc.washouts;
+      else if (lb.includes("oil sold")) t = loc.oilSold;
+      else if (lb.includes("total revenue")) t = loc.totalRevenue;
+      else if (lb.includes("labor")) t = loc.laborCost;
+      else if (lb.includes("facility") || lb.includes("overhead")) t = loc.overhead;
+      else if (lb === "p/l") t = loc.pl;
+      if (t) {
+        t.daily = [];
+        for (let d = 0; d < 7; d++) {
+          const b = 3 + d * 3;
+          t.daily.push({ day: parseNum(sr[b]), night: parseNum(sr[b + 1]), total: parseNum(sr[b + 2]) });
+        }
+        t.weekTotal = parseNum(sr[24]);
+        t.mtd = parseNum(sr[27]);
+      }
+      if (sr[0]?.trim() && locNames.some(n => sr[0].trim().toLowerCase().includes(n.toLowerCase()))) break;
+      if (lb === "p/l") break;
+    }
+    locations.push(loc);
+  }
+  return { dates, dayNames, updatedThru, locations, uploadedAt: new Date().toISOString() };
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
 const fmt = (n) => { if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(1)}M`; if (Math.abs(n) >= 1000) return `$${(n / 1000).toFixed(0)}K`; return `$${n.toFixed(0)}`; };
 const fmtF = (n) => { if (n === 0) return "—"; const s = `$${Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`; return n < 0 ? `(${s})` : s; };
 const pct = (n) => `${(n * 100).toFixed(1)}%`;
@@ -260,786 +273,1352 @@ const pctD = (a, b) => b === 0 ? "—" : `${((a / b) * 100).toFixed(1)}%`;
 const fmtV = (n) => n === 0 ? "—" : n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
 function timeAgo(iso) {
- if (!iso) return "never";
- const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
- if (sec < 60) return "just now";
- if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
- if (sec < 86400) return `${Math.floor(sec / 3600)} hr ago`;
- const days = Math.floor(sec / 86400);
- if (days < 30) return `${days}d ago`;
- return `${Math.floor(days / 30)}mo ago`;
+  if (!iso) return "never";
+  const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (sec < 60) return "just now";
+  if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
+  if (sec < 86400) return `${Math.floor(sec / 3600)} hr ago`;
+  const days = Math.floor(sec / 86400);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
 }
 
 function ageDays(iso) { if (!iso) return null; return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); }
 
+// "Mar 26" → "2026-03" for chronological sorting (string-compare works correctly).
+// Handles 2-digit years by prefixing "20" — fine until 2099.
+const MONTH_MAP = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
+function monthToSort(label) {
+  const parts = String(label || "").trim().split(/\s+/);
+  if (parts.length < 2) return String(label);
+  const mm = MONTH_MAP[parts[0]] || "01";
+  const yy = parts[1].length === 2 ? "20" + parts[1] : parts[1];
+  return `${yy}-${mm}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
 function Eyebrow({ children, color, style }) {
- return (
- <div style={{
- fontFamily: tj.fontSans, fontSize: 11, letterSpacing: "0.12em",
- textTransform: "uppercase", fontWeight: 700, color: color || tj.sky, ...style,
- }}>{children}</div>
- );
+  return (
+    <div style={{
+      fontFamily: tj.fontSans, fontSize: 11, letterSpacing: "0.12em",
+      textTransform: "uppercase", fontWeight: 700, color: color || tj.sky, ...style,
+    }}>{children}</div>
+  );
 }
 
 function Card({ children, accent, accentSide = "top", cream, style, padding = 24 }) {
- const accentBorder = accent ? { [`border${accentSide === "top" ? "Top" : "Left"}`]: `3px solid ${accent}` } : {};
- return (
- <div style={{
- background: cream ? tj.surfaceCream : tj.surface,
- border: `1px solid ${tj.border}`,
- padding,
- boxShadow: "0 2px 8px rgba(0, 32, 96, 0.08)",
- ...accentBorder, ...style,
- }}>{children}</div>
- );
+  const accentBorder = accent ? { [`border${accentSide === "top" ? "Top" : "Left"}`]: `3px solid ${accent}` } : {};
+  return (
+    <div style={{
+      background: cream ? tj.surfaceCream : tj.surface,
+      border: `1px solid ${tj.border}`,
+      padding,
+      boxShadow: "0 2px 8px rgba(0, 32, 96, 0.08)",
+      ...accentBorder, ...style,
+    }}>{children}</div>
+  );
 }
 
 function Btn({ children, primary, accent, onClick, style }) {
- const base = {
- fontFamily: tj.fontSans, fontSize: 11, fontWeight: 700,
- letterSpacing: "0.08em", textTransform: "uppercase",
- padding: "9px 16px", border: `1px solid ${tj.navy900}`,
- cursor: "pointer", transition: "all 150ms ease", borderRadius: 4,
- };
- const variant = primary ? { background: tj.navy900, color: "#fff" }
- : accent ? { background: tj.crimson, color: "#fff", borderColor: tj.crimson }
- : { background: "transparent", color: tj.navy900 };
- return <button onClick={onClick} style={{ ...base, ...variant, ...style }}>{children}</button>;
+  const base = {
+    fontFamily: tj.fontSans, fontSize: 11, fontWeight: 700,
+    letterSpacing: "0.08em", textTransform: "uppercase",
+    padding: "9px 16px", border: `1px solid ${tj.navy900}`,
+    cursor: "pointer", transition: "all 150ms ease", borderRadius: 4,
+  };
+  const variant = primary ? { background: tj.navy900, color: "#fff" }
+                : accent  ? { background: tj.crimson, color: "#fff", borderColor: tj.crimson }
+                : { background: "transparent", color: tj.navy900 };
+  return <button onClick={onClick} style={{ ...base, ...variant, ...style }}>{children}</button>;
 }
 
+// Sparkline — same intent as before, restyled in navy/crimson
 function Spark({ data, color = tj.navy900, height: h = 32, width: w = 120 }) {
- if (!data || data.length < 2) return null;
- const mn = Math.min(...data), mx = Math.max(...data), rng = mx - mn || 1;
- const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - mn) / rng) * (h - 4) - 2}`).join(" ");
- return (
- <svg width={w} height={h} style={{ display: "block" }}>
- <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
- <circle cx={w} cy={parseFloat(pts.split(" ").pop().split(",")[1])} r="2.5" fill={color} />
- </svg>
- );
+  if (!data || data.length < 2) return null;
+  const mn = Math.min(...data), mx = Math.max(...data), rng = mx - mn || 1;
+  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - mn) / rng) * (h - 4) - 2}`).join(" ");
+  return (
+    <svg width={w} height={h} style={{ display: "block" }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={w} cy={parseFloat(pts.split(" ").pop().split(",")[1])} r="2.5" fill={color} />
+    </svg>
+  );
 }
 
+// Bar chart — Tejas palette, no rounded corners
 function Bars({ data, labels, height: h = 140, colorFn, width: w = 300 }) {
- if (!data || data.length === 0) return null;
- const mx = Math.max(...data.map(Math.abs), 1);
- const hasNeg = data.some(d => d < 0);
- const bw = Math.min(28, (w - 20) / data.length - 4);
- const chartH = hasNeg ? h * 0.6 : h - 20;
- const negH = hasNeg ? h * 0.35 : 0;
- const bl = chartH;
- return (
- <svg width={w} height={h + 24} style={{ display: "block" }}>
- {data.map((v, i) => {
- const x = i * ((w - 20) / data.length) + 10;
- const barH = (Math.abs(v) / mx) * (v >= 0 ? chartH : negH);
- const y = v >= 0 ? bl - barH : bl;
- const c = colorFn ? colorFn(v) : v >= 0 ? tj.ok : tj.crimson;
- return (
- <g key={i}>
- <rect x={x} y={y} width={bw} height={Math.max(barH, 1)} fill={c} opacity={0.85} />
- {labels && <text x={x + bw / 2} y={h + 16} textAnchor="middle" fontSize="9" fill={tj.gray700} fontFamily={tj.fontSans} letterSpacing="0.06em">{labels[i]}</text>}
- </g>
- );
- })}
- <line x1={8} y1={bl} x2={w - 8} y2={bl} stroke={tj.navy900} strokeWidth="1" />
- </svg>
- );
+  if (!data || data.length === 0) return null;
+  const mx = Math.max(...data.map(Math.abs), 1);
+  const hasNeg = data.some(d => d < 0);
+  const bw = Math.min(28, (w - 20) / data.length - 4);
+  const chartH = hasNeg ? h * 0.6 : h - 20;
+  const negH = hasNeg ? h * 0.35 : 0;
+  const bl = chartH;
+  return (
+    <svg width={w} height={h + 24} style={{ display: "block" }}>
+      {data.map((v, i) => {
+        const x = i * ((w - 20) / data.length) + 10;
+        const barH = (Math.abs(v) / mx) * (v >= 0 ? chartH : negH);
+        const y = v >= 0 ? bl - barH : bl;
+        const c = colorFn ? colorFn(v) : v >= 0 ? tj.ok : tj.crimson;
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={bw} height={Math.max(barH, 1)} fill={c} opacity={0.85} />
+            {labels && <text x={x + bw / 2} y={h + 16} textAnchor="middle" fontSize="9" fill={tj.gray700} fontFamily={tj.fontSans} letterSpacing="0.06em">{labels[i]}</text>}
+          </g>
+        );
+      })}
+      <line x1={8} y1={bl} x2={w - 8} y2={bl} stroke={tj.navy900} strokeWidth="1" />
+    </svg>
+  );
 }
 
+// Scorecard row — replaces the dark-theme version
 function ScoreRow({ label, value, target, status, trend, sparkData, sparkColor, sub }) {
- const statusColor = { green: tj.ok, red: tj.crimson, yellow: tj.warn }[status];
- const arrows = { up: "▲", down: "▼", flat: "—" };
- const arrowColor = { up: tj.ok, down: tj.crimson, flat: tj.gray500 }[trend];
- return (
- <div style={{ display: "flex", alignItems: "center", padding: "14px 0", borderBottom: `1px solid ${tj.border}`, gap: 12 }}>
- <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
- <div style={{ flex: 1, minWidth: 0 }}>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 15, color: tj.navy900, fontWeight: 700 }}>{label}</div>
- {sub && <div style={{ fontSize: 11, color: tj.gray500, marginTop: 2, fontStyle: "italic", fontFamily: tj.fontSerif }}>{sub}</div>}
- </div>
- <div style={{ textAlign: "right", marginRight: 12 }}>
- <div style={{ fontSize: 17, fontWeight: 700, color: tj.ink, fontFamily: tj.fontMono, fontVariantNumeric: "tabular-nums" }}>{value}</div>
- <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.06em", textTransform: "uppercase" }}>target: {target}</div>
- </div>
- <div style={{ fontSize: 12, color: arrowColor, width: 20, textAlign: "center" }}>{arrows[trend]}</div>
- {sparkData && <Spark data={sparkData} color={sparkColor || statusColor} />}
- </div>
- );
+  const statusColor = { green: tj.ok, red: tj.crimson, yellow: tj.warn }[status];
+  const arrows = { up: "▲", down: "▼", flat: "—" };
+  const arrowColor = { up: tj.ok, down: tj.crimson, flat: tj.gray500 }[trend];
+  return (
+    <div style={{ display: "flex", alignItems: "center", padding: "14px 0", borderBottom: `1px solid ${tj.border}`, gap: 12 }}>
+      <div style={{ width: 8, height: 8, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: tj.fontSerif, fontSize: 15, color: tj.navy900, fontWeight: 700 }}>{label}</div>
+        {sub && <div style={{ fontSize: 11, color: tj.gray500, marginTop: 2, fontStyle: "italic", fontFamily: tj.fontSerif }}>{sub}</div>}
+      </div>
+      <div style={{ textAlign: "right", marginRight: 12 }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: tj.ink, fontFamily: tj.fontMono, fontVariantNumeric: "tabular-nums" }}>{value}</div>
+        <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.06em", textTransform: "uppercase" }}>target: {target}</div>
+      </div>
+      <div style={{ fontSize: 12, color: arrowColor, width: 20, textAlign: "center" }}>{arrows[trend]}</div>
+      {sparkData && <Spark data={sparkData} color={sparkColor || statusColor} />}
+    </div>
+  );
 }
 
 function StalenessBanner({ monthlyAge, weeklyAge, onDismiss, dismissed }) {
- if (dismissed) return null;
- const monthlyStale = monthlyAge !== null && monthlyAge > 35;
- const weeklyStale = weeklyAge !== null && weeklyAge > 10;
- const monthlyMissing = monthlyAge === null;
- const weeklyMissing = weeklyAge === null;
- if (!monthlyStale && !weeklyStale && !monthlyMissing && !weeklyMissing) return null;
- const warnings = [];
- if (monthlyMissing) warnings.push("P&L: showing pre-loaded sample data (not your live numbers)");
- else if (monthlyStale) warnings.push(`P&L data is ${monthlyAge} days old`);
- if (weeklyMissing) warnings.push("Weekly ops: no file loaded");
- else if (weeklyStale) warnings.push(`Weekly ops is ${weeklyAge} days old`);
- return (
- <Card accent={tj.warn} padding="12px 16px" style={{ background: tj.warnBg, marginBottom: 16, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
- <div style={{ flex: 1, minWidth: 200 }}>
- <Eyebrow color={tj.warn}>Stale Data</Eyebrow>
- <div style={{ fontSize: 12, color: tj.ink, marginTop: 2 }}>{warnings.join(" · ")}</div>
- </div>
- <Btn onClick={onDismiss}>Dismiss</Btn>
- </Card>
- );
+  if (dismissed) return null;
+  const monthlyStale = monthlyAge !== null && monthlyAge > 35;
+  const weeklyStale = weeklyAge !== null && weeklyAge > 10;
+  const monthlyMissing = monthlyAge === null;
+  const weeklyMissing = weeklyAge === null;
+  if (!monthlyStale && !weeklyStale && !monthlyMissing && !weeklyMissing) return null;
+  const warnings = [];
+  if (monthlyMissing) warnings.push("P&L: showing pre-loaded sample data (not your live numbers)");
+  else if (monthlyStale) warnings.push(`P&L data is ${monthlyAge} days old`);
+  if (weeklyMissing) warnings.push("Weekly ops: no file loaded");
+  else if (weeklyStale) warnings.push(`Weekly ops is ${weeklyAge} days old`);
+  return (
+    <Card accent={tj.warn} padding="12px 16px" style={{ background: tj.warnBg, marginBottom: 16, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+      <div style={{ flex: 1, minWidth: 200 }}>
+        <Eyebrow color={tj.warn}>Stale Data</Eyebrow>
+        <div style={{ fontSize: 12, color: tj.ink, marginTop: 2 }}>{warnings.join(" · ")}</div>
+      </div>
+      <Btn onClick={onDismiss}>Dismiss</Btn>
+    </Card>
+  );
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════════════════
 function App() {
- const [view, setView] = useState("scorecard");
- const [D, setD] = useState(INIT);
- const [W, setW] = useState(null);
- const [archive, setArchive] = useState([]);
- const [msg, setMsg] = useState("");
- const [stalenessDismissed, setStalenessDismissed] = useState(false);
- const [, forceTick] = useState(0);
+  const [view, setView] = useState("scorecard");
+  const [D, setD] = useState(INIT);
+  const [W, setW] = useState(null);
+  const [archive, setArchive] = useState([]);
+  const [msg, setMsg] = useState("");
+  const [stalenessDismissed, setStalenessDismissed] = useState(false);
+  const [, forceTick] = useState(0);
 
- useEffect(() => {
- (async () => {
- try { const s = await window.storage.get("tejas-coo-m"); if (s?.value) setD(JSON.parse(s.value)); } catch (e) {}
- try { const s = await window.storage.get("tejas-coo-w"); if (s?.value) setW(JSON.parse(s.value)); } catch (e) {}
- try { const s = await window.storage.get("tejas-coo-archive"); if (s?.value) setArchive(JSON.parse(s.value)); } catch (e) {}
- })();
- }, []);
- useEffect(() => { const id = setInterval(() => forceTick(n => n + 1), 60000); return () => clearInterval(id); }, []);
+  useEffect(() => {
+    (async () => {
+      try { const s = await window.storage.get("tejas-coo-m"); if (s?.value) setD(JSON.parse(s.value)); } catch (e) {}
+      try { const s = await window.storage.get("tejas-coo-w"); if (s?.value) setW(JSON.parse(s.value)); } catch (e) {}
+      try { const s = await window.storage.get("tejas-coo-archive"); if (s?.value) setArchive(JSON.parse(s.value)); } catch (e) {}
+    })();
+  }, []);
+  useEffect(() => { const id = setInterval(() => forceTick(n => n + 1), 60000); return () => clearInterval(id); }, []);
 
- const buildWeeklySnapshot = (parsed, filename) => {
- const wR = parsed.locations.reduce((s, l) => s + (l.totalRevenue?.weekTotal || 0), 0);
- const wP = parsed.locations.reduce((s, l) => s + (l.pl?.weekTotal || 0), 0);
- const wMR = parsed.locations.reduce((s, l) => s + (l.totalRevenue?.mtd || 0), 0);
- const wMP = parsed.locations.reduce((s, l) => s + (l.pl?.mtd || 0), 0);
- const perLoc = {};
- parsed.locations.forEach(l => {
- const key = l.name.toLowerCase().includes("big lake") ? "bigLake"
- : l.name.toLowerCase().includes("live oak") ? "liveOak"
- : "gonzalez";
- perLoc[key] = {
- name: l.name,
- weekRev: l.totalRevenue?.weekTotal || 0,
- weekPL: l.pl?.weekTotal || 0,
- mtdRev: l.totalRevenue?.mtd || 0,
- mtdPL: l.pl?.mtd || 0,
- weekWaterBbl: l.water?.weekTotal || 0,
- weekSolidsBbl: l.solids?.weekTotal || 0,
- };
- });
- return {
- kind: "weekly",
- reportDate: parsed.updatedThru || parsed.dates?.[parsed.dates.length - 1] || "unknown",
- uploadedAt: new Date().toISOString(),
- filename: filename || "weekly.csv",
- weekRev: wR, weekPL: wP, mtdRev: wMR, mtdPL: wMP,
- perLoc,
- updateCount: 1,
- };
- };
+  // ── Snapshot builders ─────────────────────────────────────────────
+  // Condense an upload into the small fixed-shape record we keep forever.
+  // Keep this lean — storage is finite and the projection only needs headline
+  // numbers, not daily drill-down. Full file stays in tejas-coo-m / tejas-coo-w
+  // for the tabs that need drill-down; the archive is just the time series.
+  const buildWeeklySnapshot = (parsed, filename) => {
+    const wR = parsed.locations.reduce((s, l) => s + (l.totalRevenue?.weekTotal || 0), 0);
+    const wP = parsed.locations.reduce((s, l) => s + (l.pl?.weekTotal || 0), 0);
+    const wMR = parsed.locations.reduce((s, l) => s + (l.totalRevenue?.mtd || 0), 0);
+    const wMP = parsed.locations.reduce((s, l) => s + (l.pl?.mtd || 0), 0);
+    const perLoc = {};
+    parsed.locations.forEach(l => {
+      const key = l.name.toLowerCase().includes("big lake") ? "bigLake"
+                : l.name.toLowerCase().includes("live oak") ? "liveOak"
+                : "gonzalez";
+      perLoc[key] = {
+        name: l.name,
+        weekRev: l.totalRevenue?.weekTotal || 0,
+        weekPL:  l.pl?.weekTotal || 0,
+        mtdRev:  l.totalRevenue?.mtd || 0,
+        mtdPL:   l.pl?.mtd || 0,
+        weekWaterBbl:  l.water?.weekTotal || 0,
+        weekSolidsBbl: l.solids?.weekTotal || 0,
+      };
+    });
+    // Sort key: "2026-04-19" from the CSV's "Updated thru" date, or falls back
+    // to upload time if we can't parse it. Chronological string-compare works.
+    const reportDate = parsed.updatedThru || parsed.dates?.[parsed.dates.length - 1] || "unknown";
+    const sortKey = (() => {
+      // Try MM/DD/YYYY or M/D/YYYY first
+      const m1 = reportDate.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m1) return `${m1[3]}-${m1[1].padStart(2, "0")}-${m1[2].padStart(2, "0")}`;
+      // Try "19-Apr" (assume plan year)
+      const m2 = reportDate.match(/(\d{1,2})-([A-Za-z]{3})/);
+      if (m2) {
+        const mm = MONTH_MAP[m2[2].slice(0, 1).toUpperCase() + m2[2].slice(1).toLowerCase()] || "01";
+        return `${new Date().getFullYear()}-${mm}-${m2[1].padStart(2, "0")}`;
+      }
+      return new Date().toISOString().slice(0, 10);
+    })();
+    return {
+      kind: "weekly",
+      reportDate,
+      sortKey,
+      uploadedAt: new Date().toISOString(),
+      batchId: `csv-${Date.now()}`,
+      filename: filename || "weekly.csv",
+      weekRev: wR, weekPL: wP, mtdRev: wMR, mtdPL: wMP,
+      perLoc,
+      updateCount: 1,
+    };
+  };
 
- const buildMonthlySnapshot = (parsed, filename) => {
- const last = parsed.months[parsed.months.length - 1];
- const n = parsed.revenue.length - 1;
- const perLoc = {
- bigLake: { rev: parsed.bigLake?.rev?.[n] || 0, ni: parsed.bigLake?.ni?.[n] || 0 },
- gonzalez: { rev: parsed.gonzalez?.rev?.[n] || 0, ni: parsed.gonzalez?.ni?.[n] || 0 },
- liveOak: { rev: parsed.liveOak?.rev?.[n] || 0, ni: parsed.liveOak?.ni?.[n] || 0 },
- };
- return {
- kind: "monthly",
- reportDate: last,
- uploadedAt: new Date().toISOString(),
- filename: filename || "pnl.xlsx",
- monthRev: parsed.revenue[n] || 0,
- monthEbitda: parsed.ebitda?.[n] || 0,
- monthNI: parsed.netIncome?.[n] || 0,
- ttmEbitda: parsed.ttmEbitda?.[n] || 0,
- perLoc,
- ytdRev: parsed.revenue.reduce((s, v) => s + v, 0),
- monthsInFile: parsed.months.length,
- latestMonth: last,
- updateCount: 1,
- };
- };
+  const buildMonthlySnapshots = (parsed, filename) => {
+    // ONE snapshot per month in the file, not one per file. This is what
+    // turns a single XLSX drop into 12 ledger rows — and lets the
+    // projection chart have 12 data points from a single upload.
+    //
+    // Provenance: every row from the same upload shares a batchId + a
+    // common uploadedAt. If you later ask "which file did Feb 26 come
+    // from?", you can look at .batchId and cross-reference the filename.
+    const batchId = `xlsx-${Date.now()}`;
+    const uploadedAt = new Date().toISOString();
+    const snapshots = [];
+    for (let n = 0; n < parsed.revenue.length; n++) {
+      const label = parsed.months[n];
+      if (!label) continue;
+      const rev = parsed.revenue[n] || 0;
+      const gp  = parsed.grossProfit?.[n] || 0;
+      snapshots.push({
+        kind: "monthly",
+        reportDate: label,
+        sortKey: monthToSort(label),
+        uploadedAt,
+        batchId,
+        filename: filename || "pnl.xlsx",
+        monthRev: rev,
+        monthEbitda: parsed.ebitda?.[n] || 0,
+        monthGrossProfit: gp,
+        monthGrossMargin: rev > 0 ? gp / rev : 0,
+        monthNI: parsed.netIncome?.[n] || 0,
+        monthFixedCosts:    parsed.fixedCosts?.[n] || 0,
+        monthVariableCosts: parsed.variableCosts?.[n] || 0,
+        monthLabor:         parsed.labor?.[n] || 0,
+        ttmEbitda: parsed.ttmEbitda?.[n] || 0,
+        perLoc: {
+          bigLake:  { rev: parsed.bigLake?.rev?.[n]  || 0, ni: parsed.bigLake?.ni?.[n]  || 0 },
+          gonzalez: { rev: parsed.gonzalez?.rev?.[n] || 0, ni: parsed.gonzalez?.ni?.[n] || 0 },
+          liveOak:  { rev: parsed.liveOak?.rev?.[n]  || 0, ni: parsed.liveOak?.ni?.[n]  || 0 },
+        },
+        updateCount: 1,
+      });
+    }
+    return snapshots;
+  };
 
- const mergeIntoArchive = (snap) => {
- setArchive(prev => {
- const idx = prev.findIndex(a => a.kind === snap.kind && a.reportDate === snap.reportDate);
- let next;
- if (idx >= 0) {
- const existing = prev[idx];
- next = [...prev];
- next[idx] = { ...snap, updateCount: (existing.updateCount || 1) + 1 };
- } else {
- next = [...prev, snap];
- }
- next.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
- (async () => { try { await window.storage.set("tejas-coo-archive", JSON.stringify(next)); } catch (e) {} })();
- return next;
- });
- };
+  // Merge one snapshot — or an array of snapshots — into the archive.
+  // Uses functional setState (prev => next) so concurrent uploads cannot
+  // clobber each other via stale-closure captures of `archive`.
+  // Rule: same kind + same reportDate → update in place (increments
+  // updateCount, refreshes uploadedAt and numbers). Different reportDate →
+  // append as new row.
+  const mergeIntoArchive = (snapOrSnaps) => {
+    const incoming = Array.isArray(snapOrSnaps) ? snapOrSnaps : [snapOrSnaps];
+    if (incoming.length === 0) return;
+    setArchive(prev => {
+      let next = [...prev];
+      for (const snap of incoming) {
+        const idx = next.findIndex(a => a.kind === snap.kind && a.reportDate === snap.reportDate);
+        if (idx >= 0) {
+          next[idx] = { ...snap, updateCount: (next[idx].updateCount || 1) + 1 };
+        } else {
+          next.push(snap);
+        }
+      }
+      next.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+      (async () => { try { await window.storage.set("tejas-coo-archive", JSON.stringify(next)); } catch (e) {} })();
+      return next;
+    });
+  };
 
- const deleteArchiveEntry = (reportDate, kind) => {
- setArchive(prev => {
- const next = prev.filter(a => !(a.reportDate === reportDate && a.kind === kind));
- (async () => { try { await window.storage.set("tejas-coo-archive", JSON.stringify(next)); } catch (e) {} })();
- return next;
- });
- };
+  const deleteArchiveEntry = (reportDate, kind) => {
+    setArchive(prev => {
+      const next = prev.filter(a => !(a.reportDate === reportDate && a.kind === kind));
+      (async () => { try { await window.storage.set("tejas-coo-archive", JSON.stringify(next)); } catch (e) {} })();
+      return next;
+    });
+  };
 
- const handleFile = useCallback(async (file) => {
- const name = file.name.toLowerCase();
- if (name.endsWith(".csv")) {
- const text = await file.text();
- const parsed = extractWeekly(text);
- if (parsed && parsed.locations.length > 0) {
- setW(parsed); setMsg("Weekly CSV loaded: " + parsed.updatedThru);
- setView("weekly"); setStalenessDismissed(false);
- try { await window.storage.set("tejas-coo-w", JSON.stringify(parsed)); } catch (e) {}
- mergeIntoArchive(buildWeeklySnapshot(parsed, file.name));
- } else setMsg("Could not parse CSV file");
- } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
- const buf = await file.arrayBuffer();
- const parsed = parseXLSX(buf);
- if (parsed && parsed.revenue?.length > 0) {
- setD(parsed); setMsg("P&L loaded: " + parsed.months[parsed.months.length - 1]);
- setView("scorecard"); setStalenessDismissed(false);
- try { await window.storage.set("tejas-coo-m", JSON.stringify(parsed)); } catch (e) {}
- mergeIntoArchive(buildMonthlySnapshot(parsed, file.name));
- } else setMsg("Could not parse XLSX file");
- } else setMsg("Please upload a .csv or .xlsx file");
- setTimeout(() => setMsg(""), 5000);
- }, []);
- const onDrop = useCallback((e) => { e.preventDefault(); const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); }, [handleFile]);
- const onInput = useCallback((e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }, [handleFile]);
+  const handleFile = useCallback(async (file) => {
+    const name = file.name.toLowerCase();
+    if (name.endsWith(".csv")) {
+      const text = await file.text();
+      const parsed = extractWeekly(text);
+      if (parsed && parsed.locations.length > 0) {
+        setW(parsed); setMsg("Weekly CSV loaded: " + parsed.updatedThru);
+        setView("weekly"); setStalenessDismissed(false);
+        try { await window.storage.set("tejas-coo-w", JSON.stringify(parsed)); } catch (e) {}
+        mergeIntoArchive(buildWeeklySnapshot(parsed, file.name));
+      } else setMsg("Could not parse CSV file");
+    } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+      const buf = await file.arrayBuffer();
+      const parsed = parseXLSX(buf);
+      if (parsed && parsed.revenue?.length > 0) {
+        setD(parsed); setMsg("P&L loaded: " + parsed.months[parsed.months.length - 1]);
+        setView("scorecard"); setStalenessDismissed(false);
+        try { await window.storage.set("tejas-coo-m", JSON.stringify(parsed)); } catch (e) {}
+        mergeIntoArchive(buildMonthlySnapshots(parsed, file.name));
+      } else setMsg("Could not parse XLSX file");
+    } else setMsg("Please upload a .csv or .xlsx file");
+    setTimeout(() => setMsg(""), 5000);
+  }, []);
+  const onDrop = useCallback((e) => { e.preventDefault(); const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); }, [handleFile]);
+  const onInput = useCallback((e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }, [handleFile]);
 
- const clearData = useCallback(async () => {
- if (!window.confirm("Reset both P&L and Weekly data back to pre-loaded samples?\n\nThis does NOT clear your upload archive — use the Reset Archive button on the Projections tab for that.")) return;
- setD(INIT); setW(null); setStalenessDismissed(false);
- try { await window.storage.delete("tejas-coo-m"); await window.storage.delete("tejas-coo-w"); } catch (e) {}
- setMsg("Data reset to pre-loaded samples");
- setTimeout(() => setMsg(""), 5000);
- }, []);
+  const clearData = useCallback(async () => {
+    if (!window.confirm("Reset both P&L and Weekly data back to pre-loaded samples?\n\nThis does NOT clear your upload archive — use the Reset Archive button on the Projections tab for that.")) return;
+    setD(INIT); setW(null); setStalenessDismissed(false);
+    try { await window.storage.delete("tejas-coo-m"); await window.storage.delete("tejas-coo-w"); } catch (e) {}
+    setMsg("Data reset to pre-loaded samples");
+    setTimeout(() => setMsg(""), 5000);
+  }, []);
 
- const clearArchive = useCallback(async () => {
- if (!window.confirm("Wipe the entire upload history? This cannot be undone.")) return;
- setArchive([]);
- try { await window.storage.delete("tejas-coo-archive"); } catch (e) {}
- setMsg("Upload archive cleared");
- setTimeout(() => setMsg(""), 5000);
- }, []);
+  const clearArchive = useCallback(async () => {
+    if (!window.confirm("Wipe the entire upload history? This cannot be undone.")) return;
+    setArchive([]);
+    try { await window.storage.delete("tejas-coo-archive"); } catch (e) {}
+    setMsg("Upload archive cleared");
+    setTimeout(() => setMsg(""), 5000);
+  }, []);
 
- const i = D.revenue.length - 1;
- const curRev = D.revenue[i] || 0;
- const curGM = curRev ? D.grossProfit[i] / curRev : 0;
- const curEbitda = D.ebitda[i] || 0;
- const curEM = curRev ? curEbitda / curRev : 0;
- const curFC = D.fixedCosts[i] ? curRev / D.fixedCosts[i] : 0;
- const curLab = curRev ? (D.labor[i] || 0) / curRev : 0;
- const curVar = curRev ? (D.variableCosts[i] || 0) / curRev : 0;
- const curTTM = D.ttmEbitda?.[i] || 0;
- const a3 = (k) => (D[k] || []).slice(-3).reduce((s, v) => s + v, 0) / 3;
- const a3p = (k) => (D[k] || []).slice(-6, -3).reduce((s, v) => s + v, 0) / 3;
- const tr = (k, inv) => { const d = a3(k) - a3p(k); const t = d > 0 ? "up" : d < 0 ? "down" : "flat"; return inv ? (t === "up" ? "down" : t === "down" ? "up" : t) : t; };
+  // Derived monthly values
+  const i = D.revenue.length - 1;
+  const curRev = D.revenue[i] || 0;
+  const curGM = curRev ? D.grossProfit[i] / curRev : 0;
+  const curEbitda = D.ebitda[i] || 0;
+  const curEM = curRev ? curEbitda / curRev : 0;
+  const curFC = D.fixedCosts[i] ? curRev / D.fixedCosts[i] : 0;
+  const curLab = curRev ? (D.labor[i] || 0) / curRev : 0;
+  const curVar = curRev ? (D.variableCosts[i] || 0) / curRev : 0;
+  const curTTM = D.ttmEbitda?.[i] || 0;
+  const a3 = (k) => (D[k] || []).slice(-3).reduce((s, v) => s + v, 0) / 3;
+  const a3p = (k) => (D[k] || []).slice(-6, -3).reduce((s, v) => s + v, 0) / 3;
+  const tr = (k, inv) => { const d = a3(k) - a3p(k); const t = d > 0 ? "up" : d < 0 ? "down" : "flat"; return inv ? (t === "up" ? "down" : t === "down" ? "up" : t) : t; };
 
- const monthlyAge = ageDays(D.uploadedAt);
- const weeklyAge = ageDays(W?.uploadedAt);
- const wR = W?.locations?.reduce((s, l) => s + l.totalRevenue.weekTotal, 0) || 0;
- const wP = W?.locations?.reduce((s, l) => s + l.pl.weekTotal, 0) || 0;
- const wMR = W?.locations?.reduce((s, l) => s + l.totalRevenue.mtd, 0) || 0;
- const wMP = W?.locations?.reduce((s, l) => s + l.pl.mtd, 0) || 0;
+  const monthlyAge = ageDays(D.uploadedAt);
+  const weeklyAge = ageDays(W?.uploadedAt);
+  const wR = W?.locations?.reduce((s, l) => s + l.totalRevenue.weekTotal, 0) || 0;
+  const wP = W?.locations?.reduce((s, l) => s + l.pl.weekTotal, 0) || 0;
+  const wMR = W?.locations?.reduce((s, l) => s + l.totalRevenue.mtd, 0) || 0;
+  const wMP = W?.locations?.reduce((s, l) => s + l.pl.mtd, 0) || 0;
 
- const tabs = [
- { id: "scorecard", label: "Scorecard" },
- { id: "locations", label: "Locations" },
- { id: "segments", label: "Revenue Mix" },
- { id: "trends", label: "Trends" },
- { id: "weekly", label: "Weekly Ops" },
- { id: "benchmarks", label: "Benchmarks" },
- { id: "projections", label: "Projections" },
- ];
+  const tabs = [
+    { id: "scorecard",   label: "Scorecard" },
+    { id: "locations",   label: "Locations" },
+    { id: "segments",    label: "Revenue Mix" },
+    { id: "trends",      label: "Trends" },
+    { id: "weekly",      label: "Weekly Ops" },
+    { id: "benchmarks",  label: "Benchmarks" },
+    { id: "projections", label: "Projections" },
+  ];
 
- const segData = [
- { name: "Solids", val: D.solids?.[i] || 0, color: tj.navy900 },
- { name: "Skim Oil", val: D.skimOil?.[i] || 0, color: tj.warn },
- { name: "Liquid", val: D.liquid?.[i] || 0, color: tj.sky },
- { name: "Washout", val: D.washout?.[i] || 0, color: tj.crimson },
- ];
- const segTotal = segData.reduce((s, x) => s + x.val, 0) || 1;
+  const segData = [
+    { name: "Solids",   val: D.solids?.[i] || 0,   color: tj.navy900 },
+    { name: "Skim Oil", val: D.skimOil?.[i] || 0,  color: tj.warn },
+    { name: "Liquid",   val: D.liquid?.[i] || 0,   color: tj.sky },
+    { name: "Washout",  val: D.washout?.[i] || 0,  color: tj.crimson },
+  ];
+  const segTotal = segData.reduce((s, x) => s + x.val, 0) || 1;
 
- return (
- <div style={{ background: tj.bg, color: tj.ink, minHeight: "100vh", fontFamily: tj.fontSans }}>
- <div style={{ height: 4, background: tj.crimson }} />
- <div style={{ maxWidth: 1280, margin: "0 auto", padding: "28px 32px 48px" }}>
- <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
- <div>
- <Eyebrow style={{ marginBottom: 6 }}>Operations Dashboard · 2026</Eyebrow>
- <h1 style={{ fontFamily: tj.fontSerif, fontSize: 44, fontWeight: 700, color: tj.navy900, letterSpacing: "0.02em", lineHeight: 1, margin: 0 }}>
- TEJAS ENVIRONMENTAL
- </h1>
- <span style={{ display: "block", height: 3, width: 48, background: tj.crimson, marginTop: 14 }} />
- <div style={{ fontFamily: tj.fontSerif, fontSize: 13, color: tj.gray700, marginTop: 10, fontStyle: "italic" }}>
- {D.source || `Through ${D.months?.[i]}`}
- </div>
- </div>
+  // ═══════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════
+  return (
+    <div style={{ background: tj.bg, color: tj.ink, minHeight: "100vh", fontFamily: tj.fontSans }}>
+      {/* SIGNATURE CRIMSON TOP RULE */}
+      <div style={{ height: 4, background: tj.crimson }} />
 
- <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
- {(SOURCE_LINKS.monthly.url || SOURCE_LINKS.weekly.url) && (
- <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
- {SOURCE_LINKS.monthly.url && (
- <a href={SOURCE_LINKS.monthly.url} target="_blank" rel="noopener noreferrer" style={{ background: tj.surfaceCream, color: tj.navy900, border: `1px solid ${tj.border}`, padding: "6px 12px", fontSize: 10, fontWeight: 700, textDecoration: "none", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: tj.fontSans }}>
- {SOURCE_LINKS.monthly.label} ↗
- </a>
- )}
- {SOURCE_LINKS.weekly.url && (
- <a href={SOURCE_LINKS.weekly.url} target="_blank" rel="noopener noreferrer" style={{ background: tj.surfaceCream, color: tj.navy900, border: `1px solid ${tj.border}`, padding: "6px 12px", fontSize: 10, fontWeight: 700, textDecoration: "none", letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: tj.fontSans }}>
- {SOURCE_LINKS.weekly.label} ↗
- </a>
- )}
- </div>
- )}
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "28px 32px 48px" }}>
+        {/* HEADER */}
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24, gap: 16, flexWrap: "wrap" }}>
+          <div>
+            <Eyebrow style={{ marginBottom: 6 }}>Operations Dashboard · 2026</Eyebrow>
+            <h1 style={{ fontFamily: tj.fontSerif, fontSize: 44, fontWeight: 700, color: tj.navy900,
+                         letterSpacing: "0.02em", lineHeight: 1, margin: 0 }}>
+              TEJAS ENVIRONMENTAL
+            </h1>
+            <span style={{ display: "block", height: 3, width: 48, background: tj.crimson, marginTop: 14 }} />
+            <div style={{ fontFamily: tj.fontSerif, fontSize: 13, color: tj.gray700, marginTop: 10, fontStyle: "italic" }}>
+              {D.source || `Through ${D.months?.[i]}`}
+            </div>
+          </div>
 
- <label onDragOver={e => e.preventDefault()} onDrop={onDrop} style={{ background: tj.surfaceCream, border: `1px dashed ${tj.gray500}`, padding: "10px 18px", fontSize: 11, color: tj.gray700, cursor: "pointer", letterSpacing: "0.05em", textAlign: "center", fontFamily: tj.fontSans }}>
- Drop or click · <b style={{ color: tj.navy900 }}>.xlsx</b> P&amp;L or <b style={{ color: tj.navy900 }}>.csv</b> weekly
- <input type="file" accept=".csv,.xlsx,.xls" onChange={onInput} style={{ display: "none" }} />
- </label>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+            {/* SharePoint quick-open links */}
+            {(SOURCE_LINKS.monthly.url || SOURCE_LINKS.weekly.url) && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                {SOURCE_LINKS.monthly.url && (
+                  <a href={SOURCE_LINKS.monthly.url} target="_blank" rel="noopener noreferrer"
+                     style={{ background: tj.surfaceCream, color: tj.navy900, border: `1px solid ${tj.border}`,
+                              padding: "6px 12px", fontSize: 10, fontWeight: 700, textDecoration: "none",
+                              letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: tj.fontSans }}>
+                    {SOURCE_LINKS.monthly.label} ↗
+                  </a>
+                )}
+                {SOURCE_LINKS.weekly.url && (
+                  <a href={SOURCE_LINKS.weekly.url} target="_blank" rel="noopener noreferrer"
+                     style={{ background: tj.surfaceCream, color: tj.navy900, border: `1px solid ${tj.border}`,
+                              padding: "6px 12px", fontSize: 10, fontWeight: 700, textDecoration: "none",
+                              letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: tj.fontSans }}>
+                    {SOURCE_LINKS.weekly.label} ↗
+                  </a>
+                )}
+              </div>
+            )}
 
- <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
- <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", fontFamily: tj.fontSans }}>
- P&amp;L: <span style={{ color: D.uploadedAt ? (monthlyAge > 35 ? tj.warn : tj.ok) : tj.warn, fontWeight: 700 }}>{timeAgo(D.uploadedAt)}</span>
- {W?.uploadedAt && <span> · Weekly: <span style={{ color: weeklyAge > 10 ? tj.warn : tj.ok, fontWeight: 700 }}>{timeAgo(W.uploadedAt)}</span></span>}
- </div>
- <button onClick={clearData} style={{ background: "transparent", color: tj.gray700, border: `1px solid ${tj.border}`, padding: "4px 10px", fontSize: 9, fontWeight: 700, cursor: "pointer", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: tj.fontSans }}>Reset</button>
- </div>
+            <label
+              onDragOver={e => e.preventDefault()}
+              onDrop={onDrop}
+              style={{
+                background: tj.surfaceCream, border: `1px dashed ${tj.gray500}`,
+                padding: "10px 18px", fontSize: 11, color: tj.gray700, cursor: "pointer",
+                letterSpacing: "0.05em", textAlign: "center", fontFamily: tj.fontSans,
+              }}>
+              Drop or click · <b style={{ color: tj.navy900 }}>.xlsx</b> P&amp;L or <b style={{ color: tj.navy900 }}>.csv</b> weekly
+              <input type="file" accept=".csv,.xlsx,.xls" onChange={onInput} style={{ display: "none" }} />
+            </label>
 
- {msg && <div style={{ fontSize: 11, color: tj.navy900, fontWeight: 700, fontFamily: tj.fontSans }}>{msg}</div>}
- </div>
- </header>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", fontFamily: tj.fontSans }}>
+                P&amp;L: <span style={{ color: D.uploadedAt ? (monthlyAge > 35 ? tj.warn : tj.ok) : tj.warn, fontWeight: 700 }}>{timeAgo(D.uploadedAt)}</span>
+                {W?.uploadedAt && <span> · Weekly: <span style={{ color: weeklyAge > 10 ? tj.warn : tj.ok, fontWeight: 700 }}>{timeAgo(W.uploadedAt)}</span></span>}
+              </div>
+              <button onClick={clearData} style={{
+                background: "transparent", color: tj.gray700, border: `1px solid ${tj.border}`,
+                padding: "4px 10px", fontSize: 9, fontWeight: 700, cursor: "pointer",
+                letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: tj.fontSans,
+              }}>Reset</button>
+            </div>
 
- <StalenessBanner monthlyAge={monthlyAge} weeklyAge={weeklyAge} dismissed={stalenessDismissed} onDismiss={() => setStalenessDismissed(true)} />
+            {msg && <div style={{ fontSize: 11, color: tj.navy900, fontWeight: 700, fontFamily: tj.fontSans }}>{msg}</div>}
+          </div>
+        </header>
 
- <Card padding="0" style={{ marginBottom: 24, display: "flex", flexWrap: "wrap" }}>
- {[
- { label: `${D.shortMo?.[i] || ""} Revenue`, val: fmt(curRev), sub: `3-mo: ${fmt(a3("revenue"))}`, color: curRev >= 650000 ? tj.ok : tj.crimson },
- { label: "Gross Margin", val: pct(curGM), sub: "target ≥ 30%", color: curGM >= 0.3 ? tj.ok : curGM >= 0.2 ? tj.warn : tj.crimson },
- { label: "EBITDA", val: fmt(curEbitda), sub: `margin ${pct(curEM)}`, color: curEM >= 0.2 ? tj.ok : curEM >= 0.1 ? tj.warn : tj.crimson },
- { label: "TTM Adj EBITDA", val: fmt(curTTM), sub: "trailing 12-mo", color: curTTM >= 4e6 ? tj.ok : curTTM >= 3e6 ? tj.warn : tj.crimson },
- ...(W ? [{ label: "This Week", val: fmtF(wP), sub: `rev ${fmtF(wR)}`, color: wP >= 0 ? tj.ok : tj.crimson }] : []),
- ].map((k, idx) => (
- <div key={idx} style={{ flex: "1 1 140px", padding: "16px 20px", borderLeft: idx ? `1px solid ${tj.border}` : "none", minWidth: 120 }}>
- <Eyebrow color={tj.gray700} style={{ marginBottom: 6 }}>{k.label}</Eyebrow>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 28, fontWeight: 700, color: k.color, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums" }}>{k.val}</div>
- <div style={{ fontSize: 11, color: tj.gray500, marginTop: 3, fontFamily: tj.fontSerif, fontStyle: "italic" }}>{k.sub}</div>
- </div>
- ))}
- </Card>
+        <StalenessBanner
+          monthlyAge={monthlyAge} weeklyAge={weeklyAge}
+          dismissed={stalenessDismissed} onDismiss={() => setStalenessDismissed(true)}
+        />
 
- <div style={{ display: "flex", borderBottom: `1px solid ${tj.border}`, marginBottom: 24, flexWrap: "wrap" }}>
- {tabs.map(t => (
- <button key={t.id} onClick={() => setView(t.id)} style={{ background: "transparent", border: "none", borderBottom: `2px solid ${view === t.id ? tj.crimson : "transparent"}`, padding: "10px 2px", marginRight: 28, fontFamily: tj.fontSans, fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: view === t.id ? tj.navy900 : tj.gray700, cursor: "pointer" }}>
- {t.label}
- {t.id === "weekly" && W && <span style={{ marginLeft: 6, width: 6, height: 6, borderRadius: "50%", background: tj.ok, display: "inline-block", verticalAlign: "middle" }} />}
- </button>
- ))}
- </div>
+        {/* KPI STRIP */}
+        <Card padding="0" style={{ marginBottom: 24, display: "flex", flexWrap: "wrap" }}>
+          {[
+            { label: `${D.shortMo?.[i] || ""} Revenue`, val: fmt(curRev), sub: `3-mo: ${fmt(a3("revenue"))}`, color: curRev >= 650000 ? tj.ok : tj.crimson },
+            { label: "Gross Margin",  val: pct(curGM),     sub: "target ≥ 30%",         color: curGM >= 0.3 ? tj.ok : curGM >= 0.2 ? tj.warn : tj.crimson },
+            { label: "EBITDA",        val: fmt(curEbitda), sub: `margin ${pct(curEM)}`, color: curEM >= 0.2 ? tj.ok : curEM >= 0.1 ? tj.warn : tj.crimson },
+            { label: "TTM Adj EBITDA", val: fmt(curTTM),   sub: "trailing 12-mo",       color: curTTM >= 4e6 ? tj.ok : curTTM >= 3e6 ? tj.warn : tj.crimson },
+            ...(W ? [{ label: "This Week", val: fmtF(wP), sub: `rev ${fmtF(wR)}`, color: wP >= 0 ? tj.ok : tj.crimson }] : []),
+          ].map((k, idx) => (
+            <div key={idx} style={{ flex: "1 1 140px", padding: "16px 20px", borderLeft: idx ? `1px solid ${tj.border}` : "none", minWidth: 120 }}>
+              <Eyebrow color={tj.gray700} style={{ marginBottom: 6 }}>{k.label}</Eyebrow>
+              <div style={{ fontFamily: tj.fontSerif, fontSize: 28, fontWeight: 700, color: k.color, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums" }}>{k.val}</div>
+              <div style={{ fontSize: 11, color: tj.gray500, marginTop: 3, fontFamily: tj.fontSerif, fontStyle: "italic" }}>{k.sub}</div>
+            </div>
+          ))}
+        </Card>
 
- {view === "scorecard" && (
- <Card padding="4px 24px">
- <ScoreRow label="Monthly Revenue" sub="Volume drives everything in a high-fixed-cost business" value={fmt(curRev)} target="≥$650K" status={curRev >= 650000 ? "green" : curRev >= 500000 ? "yellow" : "red"} trend={tr("revenue")} sparkData={D.revenue} sparkColor={tj.navy900} />
- <ScoreRow label="Gross Margin %" sub="Pricing power + COGS control" value={pct(curGM)} target="≥30%" status={curGM >= 0.3 ? "green" : curGM >= 0.2 ? "yellow" : "red"} trend={tr("grossProfit")} sparkData={D.revenue.map((r, j) => r > 0 ? D.grossProfit[j] / r : 0)} />
- <ScoreRow label="Fixed Cost Coverage" sub="Revenue ÷ Fixed Costs — must be ≥2.0x" value={`${curFC.toFixed(2)}×`} target="≥2.0×" status={curFC >= 2.0 ? "green" : curFC >= 1.5 ? "yellow" : "red"} trend={tr("revenue")} sparkData={D.revenue.map((r, j) => r / (D.fixedCosts[j] || 1))} sparkColor={tj.sky} />
- <ScoreRow label="EBITDA" sub="The number buyers multiply" value={fmt(curEbitda)} target="≥$200K/mo" status={curEbitda >= 200000 ? "green" : curEbitda >= 100000 ? "yellow" : "red"} trend={tr("ebitda")} sparkData={D.ebitda} />
- <ScoreRow label="Labor % of Revenue" sub="Biggest controllable ops cost" value={pct(curLab)} target="≤14%" status={curLab <= 0.14 ? "green" : curLab <= 0.16 ? "yellow" : "red"} trend={tr("labor", true)} sparkData={D.revenue.map((r, j) => r > 0 ? (D.labor[j] || 0) / r : 0)} />
- <ScoreRow label="Variable Cost Ratio" sub="Variable costs as % of revenue" value={pct(curVar)} target="≤18%" status={curVar <= 0.18 ? "green" : curVar <= 0.22 ? "yellow" : "red"} trend={tr("variableCosts", true)} sparkData={D.revenue.map((r, j) => r > 0 ? (D.variableCosts[j] || 0) / r : 0)} />
- <ScoreRow label="TTM Adjusted EBITDA" sub="Trailing 12-month — drives valuation" value={fmt(curTTM)} target="≥$4.0M" status={curTTM >= 4e6 ? "green" : curTTM >= 3e6 ? "yellow" : "red"} trend={i > 0 && curTTM >= (D.ttmEbitda?.[i - 1] || 0) ? "up" : "down"} sparkData={D.ttmEbitda} />
- </Card>
- )}
+        {/* TABS */}
+        <div style={{ display: "flex", borderBottom: `1px solid ${tj.border}`, marginBottom: 24, flexWrap: "wrap" }}>
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => setView(t.id)} style={{
+              background: "transparent", border: "none",
+              borderBottom: `2px solid ${view === t.id ? tj.crimson : "transparent"}`,
+              padding: "10px 2px", marginRight: 28,
+              fontFamily: tj.fontSans, fontSize: 13, fontWeight: 700,
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              color: view === t.id ? tj.navy900 : tj.gray700, cursor: "pointer",
+            }}>
+              {t.label}
+              {t.id === "weekly" && W && <span style={{ marginLeft: 6, width: 6, height: 6, borderRadius: "50%", background: tj.ok, display: "inline-block", verticalAlign: "middle" }} />}
+            </button>
+          ))}
+        </div>
 
- {view === "locations" && (
- <div>
- <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
- {[{ name: "BIG LAKE", k: "bigLake", st: "healthy" }, { name: "GONZALEZ", k: "gonzalez", st: "watch" }, { name: "LIVE OAK", k: "liveOak", st: "critical" }].map(loc => {
- const d = D[loc.k] || { rev: [], ni: [] };
- const ar = d.rev.slice(-3).reduce((a, b) => a + b, 0) / 3;
- const an = d.ni.slice(-3).reduce((a, b) => a + b, 0) / 3;
- const m = ar > 0 ? an / ar : 0;
- const colors = { healthy: tj.ok, watch: tj.warn, critical: tj.crimson };
- const c = colors[loc.st];
- return (
- <Card key={loc.name} accent={c} padding={20} style={{ flex: "1 1 220px", minWidth: 200 }}>
- <Eyebrow color={c}>{loc.name}</Eyebrow>
- <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, marginBottom: 8 }}>
- <div>
- <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>3-Mo Rev</div>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums" }}>{fmt(ar)}</div>
- </div>
- <div style={{ textAlign: "right" }}>
- <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>3-Mo NI</div>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: an >= 0 ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums" }}>{fmt(an)}</div>
- </div>
- </div>
- <div style={{ fontSize: 12, color: tj.gray700 }}>
- Margin: <b style={{ color: m >= 0.05 ? tj.ok : m >= 0 ? tj.warn : tj.crimson, fontFamily: tj.fontMono }}>{pct(m)}</b>
- </div>
- <div style={{ marginTop: 10 }}><Spark data={d.rev.slice(-6)} color={c} width={180} height={28} /></div>
- </Card>
- );
- })}
- </div>
- <Card padding={24}>
- <Eyebrow style={{ marginBottom: 16 }}>Net Income · last 6 months</Eyebrow>
- <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
- {[{ n: "Big Lake", d: (D.bigLake?.ni || []).slice(-6), c: tj.ok }, { n: "Gonzalez", d: (D.gonzalez?.ni || []).slice(-6), c: tj.warn }, { n: "Live Oak", d: (D.liveOak?.ni || []).slice(-6), c: tj.crimson }].map(l => (
- <div key={l.n} style={{ flex: "1 1 220px" }}>
- <Eyebrow color={l.c} style={{ marginBottom: 8 }}>{l.n}</Eyebrow>
- {l.d.length > 0 && <Bars data={l.d} labels={(D.shortMo || []).slice(-6)} colorFn={v => v >= 0 ? l.c : tj.crimson} />}
- </div>
- ))}
- </div>
- </Card>
- </div>
- )}
+        {/* ═══ SCORECARD ═══ */}
+        {view === "scorecard" && (
+          <Card padding="4px 24px">
+            <ScoreRow label="Monthly Revenue" sub="Volume drives everything in a high-fixed-cost business" value={fmt(curRev)} target="≥$650K" status={curRev >= 650000 ? "green" : curRev >= 500000 ? "yellow" : "red"} trend={tr("revenue")} sparkData={D.revenue} sparkColor={tj.navy900} />
+            <ScoreRow label="Gross Margin %" sub="Pricing power + COGS control" value={pct(curGM)} target="≥30%" status={curGM >= 0.3 ? "green" : curGM >= 0.2 ? "yellow" : "red"} trend={tr("grossProfit")} sparkData={D.revenue.map((r, j) => r > 0 ? D.grossProfit[j] / r : 0)} />
+            <ScoreRow label="Fixed Cost Coverage" sub="Revenue ÷ Fixed Costs — must be ≥2.0x" value={`${curFC.toFixed(2)}×`} target="≥2.0×" status={curFC >= 2.0 ? "green" : curFC >= 1.5 ? "yellow" : "red"} trend={tr("revenue")} sparkData={D.revenue.map((r, j) => r / (D.fixedCosts[j] || 1))} sparkColor={tj.sky} />
+            <ScoreRow label="EBITDA" sub="The number buyers multiply" value={fmt(curEbitda)} target="≥$200K/mo" status={curEbitda >= 200000 ? "green" : curEbitda >= 100000 ? "yellow" : "red"} trend={tr("ebitda")} sparkData={D.ebitda} />
+            <ScoreRow label="Labor % of Revenue" sub="Biggest controllable ops cost" value={pct(curLab)} target="≤14%" status={curLab <= 0.14 ? "green" : curLab <= 0.16 ? "yellow" : "red"} trend={tr("labor", true)} sparkData={D.revenue.map((r, j) => r > 0 ? (D.labor[j] || 0) / r : 0)} />
+            <ScoreRow label="Variable Cost Ratio" sub="Variable costs as % of revenue" value={pct(curVar)} target="≤18%" status={curVar <= 0.18 ? "green" : curVar <= 0.22 ? "yellow" : "red"} trend={tr("variableCosts", true)} sparkData={D.revenue.map((r, j) => r > 0 ? (D.variableCosts[j] || 0) / r : 0)} />
+            <ScoreRow label="TTM Adjusted EBITDA" sub="Trailing 12-month — drives valuation" value={fmt(curTTM)} target="≥$4.0M" status={curTTM >= 4e6 ? "green" : curTTM >= 3e6 ? "yellow" : "red"} trend={i > 0 && curTTM >= (D.ttmEbitda?.[i - 1] || 0) ? "up" : "down"} sparkData={D.ttmEbitda} />
+          </Card>
+        )}
 
- {view === "segments" && (
- <div>
- <Card padding={24} style={{ marginBottom: 16 }}>
- <Eyebrow style={{ marginBottom: 18 }}>{D.months?.[i] || ""} revenue breakdown</Eyebrow>
- <div style={{ display: "flex", gap: 2, height: 28, marginBottom: 18, border: `1px solid ${tj.border}` }}>
- {segData.map((s, idx) => <div key={idx} style={{ flex: s.val / segTotal, background: s.color, opacity: 0.85, minWidth: 2 }} />)}
- </div>
- {segData.map((s, idx) => (
- <div key={idx} style={{ display: "flex", alignItems: "center", padding: "12px 0", borderBottom: idx < 3 ? `1px solid ${tj.border}` : "none" }}>
- <div style={{ width: 12, height: 12, background: s.color, marginRight: 12 }} />
- <div style={{ flex: 1, fontSize: 14, color: tj.ink }}>{s.name}</div>
- <div style={{ fontSize: 16, fontWeight: 700, fontFamily: tj.fontSerif, marginRight: 16, color: tj.navy900, fontVariantNumeric: "tabular-nums" }}>{fmt(s.val)}</div>
- <div style={{ fontSize: 12, color: tj.gray700, width: 60, textAlign: "right", fontFamily: tj.fontMono }}>{pct(s.val / segTotal)}</div>
- </div>
- ))}
- </Card>
- <Card padding={24}>
- <Eyebrow style={{ marginBottom: 16 }}>12-month segment trends</Eyebrow>
- {[{ n: "Solids", d: D.solids, c: tj.navy900 }, { n: "Skim Oil", d: D.skimOil, c: tj.warn }, { n: "Liquid", d: D.liquid, c: tj.sky }, { n: "Wash Out", d: D.washout, c: tj.crimson }].map(s => (
- <div key={s.n} style={{ display: "flex", alignItems: "center", padding: "10px 0", gap: 16, borderBottom: `1px solid ${tj.border}` }}>
- <div style={{ width: 110, fontSize: 12, color: s.c, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.n}</div>
- {s.d && <Spark data={s.d} color={s.c} width={180} height={32} />}
- <div style={{ fontSize: 14, fontWeight: 700, fontFamily: tj.fontMono, color: tj.navy900, marginLeft: "auto" }}>{fmt(s.d?.[i] || 0)}</div>
- </div>
- ))}
- </Card>
- </div>
- )}
+        {/* ═══ LOCATIONS ═══ */}
+        {view === "locations" && (
+          <div>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+              {[{ name: "BIG LAKE", k: "bigLake", st: "healthy" }, { name: "GONZALEZ", k: "gonzalez", st: "watch" }, { name: "LIVE OAK", k: "liveOak", st: "critical" }].map(loc => {
+                const d = D[loc.k] || { rev: [], ni: [] };
+                const ar = d.rev.slice(-3).reduce((a, b) => a + b, 0) / 3;
+                const an = d.ni.slice(-3).reduce((a, b) => a + b, 0) / 3;
+                const m = ar > 0 ? an / ar : 0;
+                const colors = { healthy: tj.ok, watch: tj.warn, critical: tj.crimson };
+                const c = colors[loc.st];
+                return (
+                  <Card key={loc.name} accent={c} padding={20} style={{ flex: "1 1 220px", minWidth: 200 }}>
+                    <Eyebrow color={c}>{loc.name}</Eyebrow>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, marginBottom: 8 }}>
+                      <div>
+                        <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>3-Mo Rev</div>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums" }}>{fmt(ar)}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>3-Mo NI</div>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: an >= 0 ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums" }}>{fmt(an)}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 12, color: tj.gray700 }}>
+                      Margin: <b style={{ color: m >= 0.05 ? tj.ok : m >= 0 ? tj.warn : tj.crimson, fontFamily: tj.fontMono }}>{pct(m)}</b>
+                    </div>
+                    <div style={{ marginTop: 10 }}><Spark data={d.rev.slice(-6)} color={c} width={180} height={28} /></div>
+                  </Card>
+                );
+              })}
+            </div>
+            <Card padding={24}>
+              <Eyebrow style={{ marginBottom: 16 }}>Net Income · last 6 months</Eyebrow>
+              <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+                {[{ n: "Big Lake", d: (D.bigLake?.ni || []).slice(-6), c: tj.ok }, { n: "Gonzalez", d: (D.gonzalez?.ni || []).slice(-6), c: tj.warn }, { n: "Live Oak", d: (D.liveOak?.ni || []).slice(-6), c: tj.crimson }].map(l => (
+                  <div key={l.n} style={{ flex: "1 1 220px" }}>
+                    <Eyebrow color={l.c} style={{ marginBottom: 8 }}>{l.n}</Eyebrow>
+                    {l.d.length > 0 && <Bars data={l.d} labels={(D.shortMo || []).slice(-6)} colorFn={v => v >= 0 ? l.c : tj.crimson} />}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
 
- {view === "trends" && (
- <div>
- <Card padding={24} style={{ marginBottom: 16 }}>
- <Eyebrow style={{ marginBottom: 16 }}>Monthly EBITDA</Eyebrow>
- <Bars data={D.ebitda} labels={D.shortMo} colorFn={v => v >= 200000 ? tj.ok : v >= 100000 ? tj.warn : tj.crimson} width={400} />
- </Card>
- <Card padding={24} style={{ marginBottom: 16 }}>
- <Eyebrow style={{ marginBottom: 16 }}>Monthly Net Income</Eyebrow>
- <Bars data={D.netIncome} labels={D.shortMo} colorFn={v => v >= 0 ? tj.ok : tj.crimson} width={400} />
- <div style={{ fontSize: 13, color: tj.gray700, marginTop: 14, fontFamily: tj.fontSerif }}>
- {D.netIncome.filter(v => v < 0).length} of {D.netIncome.length} months negative · cumulative: <b style={{ color: D.netIncome.reduce((a, b) => a + b, 0) >= 0 ? tj.ok : tj.crimson, fontFamily: tj.fontMono }}>{fmt(D.netIncome.reduce((a, b) => a + b, 0))}</b>
- </div>
- </Card>
- <Card padding={24}>
- <Eyebrow style={{ marginBottom: 16 }}>Cost structure · % of revenue</Eyebrow>
- <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
- {[
- { l: "Fixed Costs", d: D.revenue.map((r, j) => r > 0 ? (D.fixedCosts[j] || 0) / r * 100 : 0), c: tj.crimson, t: "≤50%" },
- { l: "Variable", d: D.revenue.map((r, j) => r > 0 ? (D.variableCosts[j] || 0) / r * 100 : 0), c: tj.warn, t: "≤20%" },
- { l: "Labor", d: D.revenue.map((r, j) => r > 0 ? (D.labor[j] || 0) / r * 100 : 0), c: tj.sky, t: "≤14%" },
- { l: "Interest", d: D.revenue.map((r, j) => r > 0 ? (D.interest[j] || 0) / r * 100 : 0), c: tj.navy900, t: "≤5%" },
- ].map(x => (
- <div key={x.l}>
- <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
- <Eyebrow color={x.c}>{x.l}</Eyebrow>
- <span style={{ fontSize: 11, color: tj.gray500, letterSpacing: "0.08em" }}>target {x.t}</span>
- </div>
- <Spark data={x.d} color={x.c} width={180} height={32} />
- <div style={{ fontSize: 14, fontWeight: 700, fontFamily: tj.fontMono, color: tj.navy900, marginTop: 4 }}>{(x.d[i] || 0).toFixed(1)}%</div>
- </div>
- ))}
- </div>
- </Card>
- </div>
- )}
+        {/* ═══ REVENUE MIX ═══ */}
+        {view === "segments" && (
+          <div>
+            <Card padding={24} style={{ marginBottom: 16 }}>
+              <Eyebrow style={{ marginBottom: 18 }}>{D.months?.[i] || ""} revenue breakdown</Eyebrow>
+              <div style={{ display: "flex", gap: 2, height: 28, marginBottom: 18, border: `1px solid ${tj.border}` }}>
+                {segData.map((s, idx) => <div key={idx} style={{ flex: s.val / segTotal, background: s.color, opacity: 0.85, minWidth: 2 }} />)}
+              </div>
+              {segData.map((s, idx) => (
+                <div key={idx} style={{ display: "flex", alignItems: "center", padding: "12px 0", borderBottom: idx < 3 ? `1px solid ${tj.border}` : "none" }}>
+                  <div style={{ width: 12, height: 12, background: s.color, marginRight: 12 }} />
+                  <div style={{ flex: 1, fontSize: 14, color: tj.ink }}>{s.name}</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, fontFamily: tj.fontSerif, marginRight: 16, color: tj.navy900, fontVariantNumeric: "tabular-nums" }}>{fmt(s.val)}</div>
+                  <div style={{ fontSize: 12, color: tj.gray700, width: 60, textAlign: "right", fontFamily: tj.fontMono }}>{pct(s.val / segTotal)}</div>
+                </div>
+              ))}
+            </Card>
+            <Card padding={24}>
+              <Eyebrow style={{ marginBottom: 16 }}>12-month segment trends</Eyebrow>
+              {[{ n: "Solids", d: D.solids, c: tj.navy900 }, { n: "Skim Oil", d: D.skimOil, c: tj.warn }, { n: "Liquid", d: D.liquid, c: tj.sky }, { n: "Wash Out", d: D.washout, c: tj.crimson }].map(s => (
+                <div key={s.n} style={{ display: "flex", alignItems: "center", padding: "10px 0", gap: 16, borderBottom: `1px solid ${tj.border}` }}>
+                  <div style={{ width: 110, fontSize: 12, color: s.c, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.n}</div>
+                  {s.d && <Spark data={s.d} color={s.c} width={180} height={32} />}
+                  <div style={{ fontSize: 14, fontWeight: 700, fontFamily: tj.fontMono, color: tj.navy900, marginLeft: "auto" }}>{fmt(s.d?.[i] || 0)}</div>
+                </div>
+              ))}
+            </Card>
+          </div>
+        )}
 
- {view === "weekly" && (
- <div>
- {!W ? (
- <Card padding={48} style={{ textAlign: "center" }}>
- <Eyebrow color={tj.gray500} style={{ marginBottom: 14 }}>No weekly data loaded</Eyebrow>
- <div style={{ fontSize: 14, color: tj.gray700, fontFamily: tj.fontSerif, fontStyle: "italic" }}>
- Drop Jessica's weekly CSV using the upload button above.<br />
- Parses her existing format — zero changes to her workflow.
- </div>
- </Card>
- ) : (
- <>
- <Card padding="0" style={{ marginBottom: 16, display: "flex", flexWrap: "wrap" }}>
- {[
- { l: "Week Revenue", v: fmtF(wR), c: wR > 100000 ? tj.ok : tj.warn },
- { l: "Week P&L", v: fmtF(wP), c: wP >= 0 ? tj.ok : tj.crimson },
- { l: "Week Margin", v: pctD(wP, wR), c: wP >= 0 ? tj.ok : tj.crimson },
- { l: "MTD Revenue", v: fmtF(wMR), c: tj.navy900 },
- { l: "MTD P&L", v: fmtF(wMP), c: wMP >= 0 ? tj.ok : tj.crimson },
- ].map((k, idx) => (
- <div key={idx} style={{ flex: "1 1 140px", padding: "16px 20px", borderLeft: idx ? `1px solid ${tj.border}` : "none" }}>
- <Eyebrow color={tj.gray700} style={{ marginBottom: 6 }}>{k.l}</Eyebrow>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 26, fontWeight: 700, color: k.c, fontVariantNumeric: "tabular-nums" }}>{k.v}</div>
- </div>
- ))}
- </Card>
+        {/* ═══ TRENDS ═══ */}
+        {view === "trends" && (
+          <div>
+            <Card padding={24} style={{ marginBottom: 16 }}>
+              <Eyebrow style={{ marginBottom: 16 }}>Monthly EBITDA</Eyebrow>
+              <Bars data={D.ebitda} labels={D.shortMo} colorFn={v => v >= 200000 ? tj.ok : v >= 100000 ? tj.warn : tj.crimson} width={400} />
+            </Card>
+            <Card padding={24} style={{ marginBottom: 16 }}>
+              <Eyebrow style={{ marginBottom: 16 }}>Monthly Net Income</Eyebrow>
+              <Bars data={D.netIncome} labels={D.shortMo} colorFn={v => v >= 0 ? tj.ok : tj.crimson} width={400} />
+              <div style={{ fontSize: 13, color: tj.gray700, marginTop: 14, fontFamily: tj.fontSerif }}>
+                {D.netIncome.filter(v => v < 0).length} of {D.netIncome.length} months negative · cumulative: <b style={{ color: D.netIncome.reduce((a, b) => a + b, 0) >= 0 ? tj.ok : tj.crimson, fontFamily: tj.fontMono }}>{fmt(D.netIncome.reduce((a, b) => a + b, 0))}</b>
+              </div>
+            </Card>
+            <Card padding={24}>
+              <Eyebrow style={{ marginBottom: 16 }}>Cost structure · % of revenue</Eyebrow>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                {[
+                  { l: "Fixed Costs", d: D.revenue.map((r, j) => r > 0 ? (D.fixedCosts[j] || 0) / r * 100 : 0), c: tj.crimson, t: "≤50%" },
+                  { l: "Variable",    d: D.revenue.map((r, j) => r > 0 ? (D.variableCosts[j] || 0) / r * 100 : 0), c: tj.warn, t: "≤20%" },
+                  { l: "Labor",       d: D.revenue.map((r, j) => r > 0 ? (D.labor[j] || 0) / r * 100 : 0), c: tj.sky, t: "≤14%" },
+                  { l: "Interest",    d: D.revenue.map((r, j) => r > 0 ? (D.interest[j] || 0) / r * 100 : 0), c: tj.navy900, t: "≤5%" },
+                ].map(x => (
+                  <div key={x.l}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                      <Eyebrow color={x.c}>{x.l}</Eyebrow>
+                      <span style={{ fontSize: 11, color: tj.gray500, letterSpacing: "0.08em" }}>target {x.t}</span>
+                    </div>
+                    <Spark data={x.d} color={x.c} width={180} height={32} />
+                    <div style={{ fontSize: 14, fontWeight: 700, fontFamily: tj.fontMono, color: tj.navy900, marginTop: 4 }}>{(x.d[i] || 0).toFixed(1)}%</div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
 
- <Card padding={24} style={{ marginBottom: 16 }}>
- <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
- <Eyebrow>Daily P&amp;L · all locations</Eyebrow>
- <span style={{ fontSize: 11, color: tj.gray500, fontFamily: tj.fontMono }}>{W.dates?.[0]} → {W.dates?.[W.dates.length - 1]}</span>
- </div>
- <Bars data={W.locations[0]?.pl.daily.map((_, di) => W.locations.reduce((s, l) => s + (l.pl.daily[di]?.total || 0), 0)) || []} labels={W.dates?.map(d => d.replace(/-.*/, ""))} width={500} height={120} />
- <div style={{ display: "flex", gap: 24, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${tj.border}` }}>
- <div style={{ fontSize: 12, color: tj.gray700 }}>Labor: <b style={{ color: tj.warn, fontFamily: tj.fontMono }}>{fmtF(Math.abs(W.locations.reduce((s, l) => s + l.laborCost.weekTotal, 0)))}</b></div>
- <div style={{ fontSize: 12, color: tj.gray700 }}>Overhead: <b style={{ color: tj.warn, fontFamily: tj.fontMono }}>{fmtF(Math.abs(W.locations.reduce((s, l) => s + l.overhead.weekTotal, 0)))}</b></div>
- </div>
- </Card>
+        {/* ═══ WEEKLY OPS ═══ */}
+        {view === "weekly" && (
+          <div>
+            {!W ? (
+              <Card padding={48} style={{ textAlign: "center" }}>
+                <Eyebrow color={tj.gray500} style={{ marginBottom: 14 }}>No weekly data loaded</Eyebrow>
+                <div style={{ fontSize: 14, color: tj.gray700, fontFamily: tj.fontSerif, fontStyle: "italic" }}>
+                  Drop Jessica's weekly CSV using the upload button above.<br />
+                  Parses her existing format — zero changes to her workflow.
+                </div>
+              </Card>
+            ) : (
+              <>
+                <Card padding="0" style={{ marginBottom: 16, display: "flex", flexWrap: "wrap" }}>
+                  {[
+                    { l: "Week Revenue", v: fmtF(wR), c: wR > 100000 ? tj.ok : tj.warn },
+                    { l: "Week P&L",     v: fmtF(wP), c: wP >= 0 ? tj.ok : tj.crimson },
+                    { l: "Week Margin",  v: pctD(wP, wR), c: wP >= 0 ? tj.ok : tj.crimson },
+                    { l: "MTD Revenue",  v: fmtF(wMR), c: tj.navy900 },
+                    { l: "MTD P&L",      v: fmtF(wMP), c: wMP >= 0 ? tj.ok : tj.crimson },
+                  ].map((k, idx) => (
+                    <div key={idx} style={{ flex: "1 1 140px", padding: "16px 20px", borderLeft: idx ? `1px solid ${tj.border}` : "none" }}>
+                      <Eyebrow color={tj.gray700} style={{ marginBottom: 6 }}>{k.l}</Eyebrow>
+                      <div style={{ fontFamily: tj.fontSerif, fontSize: 26, fontWeight: 700, color: k.c, fontVariantNumeric: "tabular-nums" }}>{k.v}</div>
+                    </div>
+                  ))}
+                </Card>
 
- <Card padding={24} style={{ marginBottom: 16 }}>
- <Eyebrow style={{ marginBottom: 16 }}>Weekly volumes</Eyebrow>
- <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
- {[
- { l: "Water", v: W.locations.reduce((s, l) => s + l.water.weekTotal, 0), u: "bbl", c: tj.sky },
- { l: "Solids", v: W.locations.reduce((s, l) => s + l.solids.weekTotal, 0), u: "bbl", c: tj.navy900 },
- { l: "Skim Oil", v: W.locations.reduce((s, l) => s + l.oilSold.weekTotal, 0), u: "bbl", c: tj.warn },
- { l: "Washouts", v: W.locations.reduce((s, l) => s + l.washouts.weekTotal, 0), u: "jobs", c: tj.crimson },
- ].map((x, xi) => (
- <div key={xi} style={{ flex: "1 1 100px" }}>
- <Eyebrow color={tj.gray500} style={{ fontSize: 10 }}>{x.l}</Eyebrow>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 26, fontWeight: 700, color: x.c, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{fmtV(x.v)}</div>
- <div style={{ fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif }}>{x.u}</div>
- </div>
- ))}
- </div>
- </Card>
+                <Card padding={24} style={{ marginBottom: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+                    <Eyebrow>Daily P&amp;L · all locations</Eyebrow>
+                    <span style={{ fontSize: 11, color: tj.gray500, fontFamily: tj.fontMono }}>{W.dates?.[0]} → {W.dates?.[W.dates.length - 1]}</span>
+                  </div>
+                  <Bars data={W.locations[0]?.pl.daily.map((_, di) => W.locations.reduce((s, l) => s + (l.pl.daily[di]?.total || 0), 0)) || []}
+                        labels={W.dates?.map(d => d.replace(/-.*/, ""))} width={500} height={120} />
+                  <div style={{ display: "flex", gap: 24, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${tj.border}` }}>
+                    <div style={{ fontSize: 12, color: tj.gray700 }}>Labor: <b style={{ color: tj.warn, fontFamily: tj.fontMono }}>{fmtF(Math.abs(W.locations.reduce((s, l) => s + l.laborCost.weekTotal, 0)))}</b></div>
+                    <div style={{ fontSize: 12, color: tj.gray700 }}>Overhead: <b style={{ color: tj.warn, fontFamily: tj.fontMono }}>{fmtF(Math.abs(W.locations.reduce((s, l) => s + l.overhead.weekTotal, 0)))}</b></div>
+                  </div>
+                </Card>
 
- <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
- {W.locations.map((loc, li) => {
- const wk = loc.totalRevenue.weekTotal;
- const pl = loc.pl.weekTotal;
- const st = pl > 0 ? tj.ok : pl > -5000 ? tj.warn : tj.crimson;
- return (
- <Card key={li} accent={st} accentSide="left" padding={18} style={{ flex: "1 1 260px", minWidth: 240 }}>
- <Eyebrow color={st}>{loc.name}</Eyebrow>
- <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 12, marginBottom: 12 }}>
- <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Week Rev</div><div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: tj.navy900 }}>{fmtF(wk)}</div></div>
- <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Week P/L</div><div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: pl >= 0 ? tj.ok : tj.crimson }}>{fmtF(pl)}</div></div>
- <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Margin</div><div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: pl >= 0 ? tj.ok : tj.crimson }}>{pctD(pl, wk)}</div></div>
- </div>
- <Bars data={loc.pl.daily.map(d => d.total)} labels={W.dates?.map(d => d.replace(/-.*/, ""))} colorFn={v => v >= 0 ? st : tj.crimson} width={240} height={70} />
- <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, paddingTop: 8, borderTop: `1px solid ${tj.border}`, fontSize: 11, color: tj.gray700 }}>
- <span>MTD Rev: <b style={{ color: tj.ink, fontFamily: tj.fontMono }}>{fmtF(loc.totalRevenue.mtd)}</b></span>
- <span>MTD P/L: <b style={{ color: loc.pl.mtd >= 0 ? tj.ok : tj.crimson, fontFamily: tj.fontMono }}>{fmtF(loc.pl.mtd)}</b></span>
- </div>
- </Card>
- );
- })}
- </div>
+                <Card padding={24} style={{ marginBottom: 16 }}>
+                  <Eyebrow style={{ marginBottom: 16 }}>Weekly volumes</Eyebrow>
+                  <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+                    {[
+                      { l: "Water",    v: W.locations.reduce((s, l) => s + l.water.weekTotal, 0),    u: "bbl",  c: tj.sky },
+                      { l: "Solids",   v: W.locations.reduce((s, l) => s + l.solids.weekTotal, 0),   u: "bbl",  c: tj.navy900 },
+                      { l: "Skim Oil", v: W.locations.reduce((s, l) => s + l.oilSold.weekTotal, 0),  u: "bbl",  c: tj.warn },
+                      { l: "Washouts", v: W.locations.reduce((s, l) => s + l.washouts.weekTotal, 0), u: "jobs", c: tj.crimson },
+                    ].map((x, xi) => (
+                      <div key={xi} style={{ flex: "1 1 100px" }}>
+                        <Eyebrow color={tj.gray500} style={{ fontSize: 10 }}>{x.l}</Eyebrow>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 26, fontWeight: 700, color: x.c, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{fmtV(x.v)}</div>
+                        <div style={{ fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif }}>{x.u}</div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
 
- <Card padding={24} style={{ overflowX: "auto" }}>
- <Eyebrow style={{ marginBottom: 14 }}>Daily revenue detail</Eyebrow>
- <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
- <thead>
- <tr>
- <th style={{ textAlign: "left", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, fontFamily: tj.fontSans, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: tj.gray700, fontWeight: 700 }}>Location</th>
- {(W.dates || []).map((d, di) => (
- <th key={di} style={{ textAlign: "right", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, fontFamily: tj.fontSans, fontSize: 10, color: tj.gray700, fontWeight: 700, whiteSpace: "nowrap", letterSpacing: "0.06em" }}>
- {d}<br /><span style={{ fontSize: 9, fontWeight: 400 }}>{W.dayNames?.[di] || ""}</span>
- </th>
- ))}
- <th style={{ textAlign: "right", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, color: tj.navy900, fontWeight: 700, background: tj.surfaceCream, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 10 }}>Week</th>
- </tr>
- </thead>
- <tbody>
- {W.locations.map((loc, li) => (
- <tr key={li}>
- <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, fontWeight: 700, color: tj.navy900 }}>{loc.name}</td>
- {loc.totalRevenue.daily.map((d, di) => (
- <td key={di} style={{ textAlign: "right", padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, color: d.total > 0 ? tj.ink : tj.gray500, fontFamily: tj.fontMono }}>{fmtF(d.total)}</td>
- ))}
- <td style={{ textAlign: "right", padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, fontWeight: 700, fontFamily: tj.fontMono, background: tj.surfaceCream }}>{fmtF(loc.totalRevenue.weekTotal)}</td>
- </tr>
- ))}
- <tr>
- <td style={{ padding: "12px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, color: tj.navy900 }}>Total</td>
- {W.locations[0]?.totalRevenue.daily.map((_, di) => {
- const t = W.locations.reduce((s, l) => s + (l.totalRevenue.daily[di]?.total || 0), 0);
- return <td key={di} style={{ textAlign: "right", padding: "12px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, fontFamily: tj.fontMono }}>{fmtF(t)}</td>;
- })}
- <td style={{ textAlign: "right", padding: "12px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, color: tj.ok, fontFamily: tj.fontMono, background: tj.surfaceCream, fontSize: 14 }}>{fmtF(wR)}</td>
- </tr>
- </tbody>
- </table>
- </Card>
- </>
- )}
- </div>
- )}
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
+                  {W.locations.map((loc, li) => {
+                    const wk = loc.totalRevenue.weekTotal;
+                    const pl = loc.pl.weekTotal;
+                    const st = pl > 0 ? tj.ok : pl > -5000 ? tj.warn : tj.crimson;
+                    return (
+                      <Card key={li} accent={st} accentSide="left" padding={18} style={{ flex: "1 1 260px", minWidth: 240 }}>
+                        <Eyebrow color={st}>{loc.name}</Eyebrow>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 12, marginBottom: 12 }}>
+                          <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Week Rev</div><div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: tj.navy900 }}>{fmtF(wk)}</div></div>
+                          <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Week P/L</div><div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: pl >= 0 ? tj.ok : tj.crimson }}>{fmtF(pl)}</div></div>
+                          <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Margin</div><div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: pl >= 0 ? tj.ok : tj.crimson }}>{pctD(pl, wk)}</div></div>
+                        </div>
+                        <Bars data={loc.pl.daily.map(d => d.total)} labels={W.dates?.map(d => d.replace(/-.*/, ""))} colorFn={v => v >= 0 ? st : tj.crimson} width={240} height={70} />
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, paddingTop: 8, borderTop: `1px solid ${tj.border}`, fontSize: 11, color: tj.gray700 }}>
+                          <span>MTD Rev: <b style={{ color: tj.ink, fontFamily: tj.fontMono }}>{fmtF(loc.totalRevenue.mtd)}</b></span>
+                          <span>MTD P/L: <b style={{ color: loc.pl.mtd >= 0 ? tj.ok : tj.crimson, fontFamily: tj.fontMono }}>{fmtF(loc.pl.mtd)}</b></span>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
 
- {view === "benchmarks" && (() => {
- const jan26Idx = D.months.findIndex(m => /Jan\s*26/i.test(m));
- const ytdMonths = jan26Idx >= 0 ? D.months.length - jan26Idx : 0;
- const remainingMonths = Math.max(1, 12 - ytdMonths - (W ? 1 : 0));
+                <Card padding={24} style={{ overflowX: "auto" }}>
+                  <Eyebrow style={{ marginBottom: 14 }}>Daily revenue detail</Eyebrow>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: "left", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, fontFamily: tj.fontSans, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: tj.gray700, fontWeight: 700 }}>Location</th>
+                        {(W.dates || []).map((d, di) => (
+                          <th key={di} style={{ textAlign: "right", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, fontFamily: tj.fontSans, fontSize: 10, color: tj.gray700, fontWeight: 700, whiteSpace: "nowrap", letterSpacing: "0.06em" }}>
+                            {d}<br /><span style={{ fontSize: 9, fontWeight: 400 }}>{W.dayNames?.[di] || ""}</span>
+                          </th>
+                        ))}
+                        <th style={{ textAlign: "right", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, color: tj.navy900, fontWeight: 700, background: tj.surfaceCream, letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 10 }}>Week</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {W.locations.map((loc, li) => (
+                        <tr key={li}>
+                          <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, fontWeight: 700, color: tj.navy900 }}>{loc.name}</td>
+                          {loc.totalRevenue.daily.map((d, di) => (
+                            <td key={di} style={{ textAlign: "right", padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, color: d.total > 0 ? tj.ink : tj.gray500, fontFamily: tj.fontMono }}>{fmtF(d.total)}</td>
+                          ))}
+                          <td style={{ textAlign: "right", padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, fontWeight: 700, fontFamily: tj.fontMono, background: tj.surfaceCream }}>{fmtF(loc.totalRevenue.weekTotal)}</td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={{ padding: "12px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, color: tj.navy900 }}>Total</td>
+                        {W.locations[0]?.totalRevenue.daily.map((_, di) => {
+                          const t = W.locations.reduce((s, l) => s + (l.totalRevenue.daily[di]?.total || 0), 0);
+                          return <td key={di} style={{ textAlign: "right", padding: "12px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, fontFamily: tj.fontMono }}>{fmtF(t)}</td>;
+                        })}
+                        <td style={{ textAlign: "right", padding: "12px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, color: tj.ok, fontFamily: tj.fontMono, background: tj.surfaceCream, fontSize: 14 }}>{fmtF(wR)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </Card>
+              </>
+            )}
+          </div>
+        )}
 
- const locs = [
- { name: "Big Lake", key: "bigLake", color: tj.ok },
- { name: "Gonzalez", key: "gonzalez", color: tj.warn },
- { name: "Live Oak", key: "liveOak", color: tj.crimson },
- ];
- const locData = locs.map(loc => {
- const bench = BENCH[loc.key];
- const revArr = D[loc.key]?.rev || [];
- const ytdClosed = jan26Idx >= 0 ? revArr.slice(jan26Idx).reduce((s, v) => s + v, 0) : 0;
- const wLoc = W?.locations?.find(l => l.name.toLowerCase().includes(loc.name.split(" ")[0].toLowerCase()));
- const mtd = wLoc?.totalRevenue?.mtd || 0;
- const ytdTotal = ytdClosed + mtd;
- const pctDone = bench.target > 0 ? ytdTotal / bench.target : 0;
- const gap = bench.target - ytdTotal;
- const annualized = ytdMonths > 0 ? (ytdClosed / ytdMonths) * 12 : 0;
- const monthlyNeeded = gap > 0 ? gap / remainingMonths : 0;
- const avgMonthly = ytdMonths > 0 ? ytdClosed / ytdMonths : 0;
- const onPace = annualized >= bench.target;
- return { ...loc, bench, ytdClosed, mtd, ytdTotal, pctDone, gap, annualized, monthlyNeeded, avgMonthly, onPace };
- });
- const totalYTD = locData.reduce((s, l) => s + l.ytdTotal, 0);
- const totalGap = BENCH.total.target - totalYTD;
- const totalPct = BENCH.total.target > 0 ? totalYTD / BENCH.total.target : 0;
- const totalAnn = ytdMonths > 0 ? (locData.reduce((s, l) => s + l.ytdClosed, 0) / ytdMonths) * 12 : 0;
- const totalMonthlyNeeded = totalGap > 0 ? totalGap / remainingMonths : 0;
+        {/* ═══ BENCHMARKS ═══ */}
+        {view === "benchmarks" && (() => {
+          const jan26Idx = D.months.findIndex(m => /Jan\s*26/i.test(m));
+          const ytdMonths = jan26Idx >= 0 ? D.months.length - jan26Idx : 0;
+          const remainingMonths = Math.max(1, 12 - ytdMonths - (W ? 1 : 0));
 
- return (
- <div>
- <Card accent={tj.crimson} accentSide="left" padding={28} style={{ marginBottom: 20 }}>
- <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
- <div>
- <Eyebrow style={{ marginBottom: 6 }}>2026 Company Target</Eyebrow>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 38, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em" }}>{fmtF(BENCH.total.target)}</div>
- <div style={{ fontSize: 12, color: tj.gray700, marginTop: 4, fontFamily: tj.fontSerif, fontStyle: "italic" }}>
- 2025 actual: {fmtF(BENCH.total.prior)} · {((BENCH.total.target / BENCH.total.prior - 1) * 100).toFixed(1)}% growth required
- </div>
- </div>
- <div style={{ textAlign: "right" }}>
- <Eyebrow color={tj.gray700} style={{ marginBottom: 6 }}>YTD Actual</Eyebrow>
- <div style={{ fontFamily: tj.fontSerif, fontSize: 32, fontWeight: 700, color: totalPct >= 0.25 ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums" }}>{fmtF(totalYTD)}</div>
- <div style={{ fontSize: 12, color: tj.gray700, marginTop: 4 }}>{(totalPct * 100).toFixed(1)}% of target · {ytdMonths} mo closed{W ? " + MTD" : ""}</div>
- </div>
- </div>
+          const locs = [
+            { name: "Big Lake", key: "bigLake", color: tj.ok },
+            { name: "Gonzalez", key: "gonzalez", color: tj.warn },
+            { name: "Live Oak", key: "liveOak", color: tj.crimson },
+          ];
+          const locData = locs.map(loc => {
+            const bench = BENCH[loc.key];
+            const revArr = D[loc.key]?.rev || [];
+            const ytdClosed = jan26Idx >= 0 ? revArr.slice(jan26Idx).reduce((s, v) => s + v, 0) : 0;
+            const wLoc = W?.locations?.find(l => l.name.toLowerCase().includes(loc.name.split(" ")[0].toLowerCase()));
+            const mtd = wLoc?.totalRevenue?.mtd || 0;
+            const ytdTotal = ytdClosed + mtd;
+            const pctDone = bench.target > 0 ? ytdTotal / bench.target : 0;
+            const gap = bench.target - ytdTotal;
+            const annualized = ytdMonths > 0 ? (ytdClosed / ytdMonths) * 12 : 0;
+            const monthlyNeeded = gap > 0 ? gap / remainingMonths : 0;
+            const avgMonthly = ytdMonths > 0 ? ytdClosed / ytdMonths : 0;
+            const onPace = annualized >= bench.target;
+            return { ...loc, bench, ytdClosed, mtd, ytdTotal, pctDone, gap, annualized, monthlyNeeded, avgMonthly, onPace };
+          });
+          const totalYTD = locData.reduce((s, l) => s + l.ytdTotal, 0);
+          const totalGap = BENCH.total.target - totalYTD;
+          const totalPct = BENCH.total.target > 0 ? totalYTD / BENCH.total.target : 0;
+          const totalAnn = ytdMonths > 0 ? (locData.reduce((s, l) => s + l.ytdClosed, 0) / ytdMonths) * 12 : 0;
+          const totalMonthlyNeeded = totalGap > 0 ? totalGap / remainingMonths : 0;
 
- <div style={{ background: tj.surfaceCream, height: 28, position: "relative", marginBottom: 14, border: `1px solid ${tj.border}` }}>
- <div style={{ background: `linear-gradient(90deg, ${tj.navy900}, ${tj.sky})`, height: "100%", width: `${Math.min(totalPct * 100, 100)}%`, transition: "width 0.5s" }} />
- {[25, 50, 75].map(q => (
- <div key={q} style={{ position: "absolute", left: `${q}%`, top: 0, bottom: 0, width: 1, background: tj.gray500 }}>
- <span style={{ position: "absolute", top: -16, left: -8, fontSize: 9, color: tj.gray700, fontFamily: tj.fontSans, letterSpacing: "0.08em" }}>Q{q / 25}</span>
- </div>
- ))}
- <div style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", fontSize: 12, fontWeight: 700, color: tj.white, fontFamily: tj.fontMono }}>{(totalPct * 100).toFixed(1)}%</div>
- </div>
+          return (
+            <div>
+              <Card accent={tj.crimson} accentSide="left" padding={28} style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+                  <div>
+                    <Eyebrow style={{ marginBottom: 6 }}>2026 Company Target</Eyebrow>
+                    <div style={{ fontFamily: tj.fontSerif, fontSize: 38, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em" }}>{fmtF(BENCH.total.target)}</div>
+                    <div style={{ fontSize: 12, color: tj.gray700, marginTop: 4, fontFamily: tj.fontSerif, fontStyle: "italic" }}>
+                      2025 actual: {fmtF(BENCH.total.prior)} · {((BENCH.total.target / BENCH.total.prior - 1) * 100).toFixed(1)}% growth required
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <Eyebrow color={tj.gray700} style={{ marginBottom: 6 }}>YTD Actual</Eyebrow>
+                    <div style={{ fontFamily: tj.fontSerif, fontSize: 32, fontWeight: 700, color: totalPct >= 0.25 ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums" }}>{fmtF(totalYTD)}</div>
+                    <div style={{ fontSize: 12, color: tj.gray700, marginTop: 4 }}>{(totalPct * 100).toFixed(1)}% of target · {ytdMonths} mo closed{W ? " + MTD" : ""}</div>
+                  </div>
+                </div>
 
- <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
- <div><Eyebrow color={tj.gray700}>Gap</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: tj.crimson, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalGap)}</div></div>
- <div><Eyebrow color={tj.gray700}>Annualized Pace</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: totalAnn >= BENCH.total.target ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalAnn)}</div></div>
- <div><Eyebrow color={tj.gray700}>Need / Month</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: tj.warn, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalMonthlyNeeded)}<span style={{ fontSize: 12, color: tj.gray700 }}> × {remainingMonths}mo</span></div></div>
- </div>
- </Card>
+                <div style={{ background: tj.surfaceCream, height: 28, position: "relative", marginBottom: 14, border: `1px solid ${tj.border}` }}>
+                  <div style={{ background: `linear-gradient(90deg, ${tj.navy900}, ${tj.sky})`, height: "100%", width: `${Math.min(totalPct * 100, 100)}%`, transition: "width 0.5s" }} />
+                  {[25, 50, 75].map(q => (
+                    <div key={q} style={{ position: "absolute", left: `${q}%`, top: 0, bottom: 0, width: 1, background: tj.gray500 }}>
+                      <span style={{ position: "absolute", top: -16, left: -8, fontSize: 9, color: tj.gray700, fontFamily: tj.fontSans, letterSpacing: "0.08em" }}>Q{q / 25}</span>
+                    </div>
+                  ))}
+                  <div style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", fontSize: 12, fontWeight: 700, color: tj.white, fontFamily: tj.fontMono }}>{(totalPct * 100).toFixed(1)}%</div>
+                </div>
 
- <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
- {locData.map((loc, li) => {
- const pctWidth = Math.min(loc.pctDone * 100, 100);
- const pace25 = (1 / 12) * ytdMonths * 100;
- return (
- <Card key={li} accent={loc.color} padding={20} style={{ flex: "1 1 320px", minWidth: 280 }}>
- <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
- <Eyebrow color={loc.color}>{loc.name}</Eyebrow>
- <span style={{ marginLeft: "auto", fontSize: 10, color: loc.onPace ? tj.ok : tj.crimson, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{loc.onPace ? "On Pace" : "Behind"}</span>
- </div>
- <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
- <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>2026 Target</div><div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums" }}>{fmt(loc.bench.target)}</div></div>
- <div style={{ textAlign: "right" }}><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>YTD Actual</div><div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: loc.color, fontVariantNumeric: "tabular-nums" }}>{fmt(loc.ytdTotal)}</div></div>
- </div>
- <div style={{ background: tj.surfaceCream, border: `1px solid ${tj.border}`, height: 22, position: "relative", marginBottom: 12 }}>
- <div style={{ background: loc.color, height: "100%", width: `${pctWidth}%`, opacity: 0.85 }} />
- <div style={{ position: "absolute", left: `${pace25}%`, top: 0, bottom: 0, width: 2, background: tj.navy900, opacity: 0.6 }}>
- <span style={{ position: "absolute", top: -16, left: -16, fontSize: 9, color: tj.gray700, whiteSpace: "nowrap", letterSpacing: "0.08em" }}>should be</span>
- </div>
- <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 11, fontWeight: 700, color: tj.white, fontFamily: tj.fontMono, mixBlendMode: "difference" }}>{(loc.pctDone * 100).toFixed(1)}%</div>
- </div>
- <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12 }}>
- <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Gap</div><div style={{ fontWeight: 700, color: tj.crimson, fontFamily: tj.fontMono }}>{fmtF(loc.gap)}</div></div>
- <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Annualized</div><div style={{ fontWeight: 700, color: loc.onPace ? tj.ok : tj.crimson, fontFamily: tj.fontMono }}>{fmt(loc.annualized)}</div></div>
- <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Avg Month</div><div style={{ fontWeight: 700, fontFamily: tj.fontMono, color: tj.ink }}>{fmt(loc.avgMonthly)}</div></div>
- <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Need / Month</div><div style={{ fontWeight: 700, color: loc.monthlyNeeded > loc.avgMonthly ? tj.crimson : tj.ok, fontFamily: tj.fontMono }}>{fmt(loc.monthlyNeeded)}</div></div>
- </div>
- <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${tj.border}`, fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif }}>
- 2025 actual: {fmtF(loc.bench.prior)} · {((loc.bench.target / loc.bench.prior - 1) * 100).toFixed(1)}% growth required
- </div>
- </Card>
- );
- })}
- </div>
- </div>
- );
- })()}
+                <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
+                  <div><Eyebrow color={tj.gray700}>Gap</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: tj.crimson, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalGap)}</div></div>
+                  <div><Eyebrow color={tj.gray700}>Annualized Pace</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: totalAnn >= BENCH.total.target ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalAnn)}</div></div>
+                  <div><Eyebrow color={tj.gray700}>Need / Month</Eyebrow><div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: tj.warn, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{fmtF(totalMonthlyNeeded)}<span style={{ fontSize: 12, color: tj.gray700 }}> × {remainingMonths}mo</span></div></div>
+                </div>
+              </Card>
 
- {view === "projections" && (
- <div>
- <Card padding={24} style={{ marginBottom: 16 }}>
- <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
- <div>
- <Eyebrow>Upload Archive</Eyebrow>
- <div style={{ fontSize: 12, color: tj.gray700, marginTop: 4 }}>Keeps monthly and weekly snapshots so projections don’t die with one overwrite.</div>
- </div>
- <Btn onClick={clearArchive}>Reset Archive</Btn>
- </div>
- {archive.length === 0 ? (
- <div style={{ fontSize: 13, color: tj.gray700, fontStyle: "italic", fontFamily: tj.fontSerif }}>No archived uploads yet. Upload a weekly CSV or monthly P&amp;L to start building history.</div>
- ) : (
- <div style={{ overflowX: "auto" }}>
- <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
- <thead>
- <tr>
- <th style={{ textAlign: "left", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}` }}>Type</th>
- <th style={{ textAlign: "left", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}` }}>Report Date</th>
- <th style={{ textAlign: "left", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}` }}>Uploaded</th>
- <th style={{ textAlign: "right", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}` }}>Headline</th>
- <th style={{ textAlign: "right", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}` }}>Updates</th>
- <th style={{ textAlign: "right", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}` }}>Action</th>
- </tr>
- </thead>
- <tbody>
- {archive.map((a, idx) => (
- <tr key={idx}>
- <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}` }}>{a.kind}</td>
- <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}` }}>{a.reportDate}</td>
- <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}` }}>{timeAgo(a.uploadedAt)}</td>
- <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right", fontFamily: tj.fontMono }}>{a.kind === "weekly" ? fmtF(a.weekPL) : fmtF(a.monthEbitda)}</td>
- <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right", fontFamily: tj.fontMono }}>{a.updateCount || 1}</td>
- <td style={{ padding: "10px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right" }}><Btn onClick={() => deleteArchiveEntry(a.reportDate, a.kind)} style={{ padding: "6px 10px", fontSize: 9 }}>Delete</Btn></td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- )}
- </Card>
- </div>
- )}
- </div>
- </div>
- );
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+                {locData.map((loc, li) => {
+                  const pctWidth = Math.min(loc.pctDone * 100, 100);
+                  const pace25 = (1 / 12) * ytdMonths * 100;
+                  return (
+                    <Card key={li} accent={loc.color} padding={20} style={{ flex: "1 1 320px", minWidth: 280 }}>
+                      <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+                        <Eyebrow color={loc.color}>{loc.name}</Eyebrow>
+                        <span style={{ marginLeft: "auto", fontSize: 10, color: loc.onPace ? tj.ok : tj.crimson, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{loc.onPace ? "On Pace" : "Behind"}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                        <div><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>2026 Target</div><div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums" }}>{fmt(loc.bench.target)}</div></div>
+                        <div style={{ textAlign: "right" }}><div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>YTD Actual</div><div style={{ fontFamily: tj.fontSerif, fontSize: 22, fontWeight: 700, color: loc.color, fontVariantNumeric: "tabular-nums" }}>{fmt(loc.ytdTotal)}</div></div>
+                      </div>
+                      <div style={{ background: tj.surfaceCream, border: `1px solid ${tj.border}`, height: 22, position: "relative", marginBottom: 12 }}>
+                        <div style={{ background: loc.color, height: "100%", width: `${pctWidth}%`, opacity: 0.85 }} />
+                        <div style={{ position: "absolute", left: `${pace25}%`, top: 0, bottom: 0, width: 2, background: tj.navy900, opacity: 0.6 }}>
+                          <span style={{ position: "absolute", top: -16, left: -16, fontSize: 9, color: tj.gray700, whiteSpace: "nowrap", letterSpacing: "0.08em" }}>should be</span>
+                        </div>
+                        <div style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", fontSize: 11, fontWeight: 700, color: tj.white, fontFamily: tj.fontMono, mixBlendMode: "difference" }}>{(loc.pctDone * 100).toFixed(1)}%</div>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, fontSize: 12 }}>
+                        <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Gap</div><div style={{ fontWeight: 700, color: tj.crimson, fontFamily: tj.fontMono }}>{fmtF(loc.gap)}</div></div>
+                        <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Annualized</div><div style={{ fontWeight: 700, color: loc.onPace ? tj.ok : tj.crimson, fontFamily: tj.fontMono }}>{fmt(loc.annualized)}</div></div>
+                        <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Avg Month</div><div style={{ fontWeight: 700, fontFamily: tj.fontMono, color: tj.ink }}>{fmt(loc.avgMonthly)}</div></div>
+                        <div><div style={{ color: tj.gray500, fontSize: 9, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Need / Month</div><div style={{ fontWeight: 700, color: loc.monthlyNeeded > loc.avgMonthly ? tj.crimson : tj.ok, fontFamily: tj.fontMono }}>{fmt(loc.monthlyNeeded)}</div></div>
+                      </div>
+                      <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${tj.border}`, fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif }}>
+                        2025 actual: {fmtF(loc.bench.prior)} · {((loc.bench.target / loc.bench.prior - 1) * 100).toFixed(1)}% growth required
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              <Card padding={24}>
+                <Eyebrow style={{ marginBottom: 14 }}>Pacing summary · current run rate vs target</Eyebrow>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead><tr>
+                    {["Location", "Target", "YTD", "Annualized", "Gap", "Need/Mo", "Status"].map((h, hi) => (
+                      <th key={hi} style={{ textAlign: hi > 0 ? "right" : "left", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, fontFamily: tj.fontSans, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: tj.gray700, fontWeight: 700 }}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {locData.map((loc, li) => (
+                      <tr key={li}>
+                        <td style={{ padding: "12px 8px", borderBottom: `1px solid ${tj.border}`, fontWeight: 700, color: loc.color }}>{loc.name}</td>
+                        <td style={{ padding: "12px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right", fontFamily: tj.fontMono }}>{fmtF(loc.bench.target)}</td>
+                        <td style={{ padding: "12px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right", fontFamily: tj.fontMono }}>{fmtF(loc.ytdTotal)}</td>
+                        <td style={{ padding: "12px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right", fontFamily: tj.fontMono, color: loc.onPace ? tj.ok : tj.crimson }}>{fmtF(loc.annualized)}</td>
+                        <td style={{ padding: "12px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right", fontFamily: tj.fontMono, color: tj.crimson }}>{fmtF(loc.gap)}</td>
+                        <td style={{ padding: "12px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right", fontFamily: tj.fontMono, color: loc.monthlyNeeded > loc.avgMonthly ? tj.crimson : tj.ok }}>{fmt(loc.monthlyNeeded)}</td>
+                        <td style={{ padding: "12px 8px", borderBottom: `1px solid ${tj.border}`, textAlign: "right" }}>
+                          <span style={{ background: loc.onPace ? tj.okBg : tj.badBg, color: loc.onPace ? tj.ok : tj.crimson, padding: "3px 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{loc.onPace ? "On Pace" : "Behind"}</span>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, fontWeight: 700, color: tj.navy900 }}>Total</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700 }}>{fmtF(BENCH.total.target)}</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700 }}>{fmtF(totalYTD)}</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700, color: totalAnn >= BENCH.total.target ? tj.ok : tj.crimson }}>{fmtF(totalAnn)}</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700, color: tj.crimson }}>{fmtF(totalGap)}</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right", fontFamily: tj.fontMono, fontWeight: 700, color: tj.warn }}>{fmt(totalMonthlyNeeded)}</td>
+                      <td style={{ padding: "14px 8px", borderTop: `2px solid ${tj.navy900}`, textAlign: "right" }}>
+                        <span style={{ background: totalAnn >= BENCH.total.target ? tj.okBg : tj.badBg, color: totalAnn >= BENCH.total.target ? tj.ok : tj.crimson, padding: "3px 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{totalAnn >= BENCH.total.target ? "On Pace" : "Behind"}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style={{ fontFamily: tj.fontSerif, fontSize: 13, color: tj.gray700, marginTop: 14, lineHeight: 1.65, fontStyle: "italic" }}>
+                  Based on {ytdMonths}-month closed average. The company needs <b style={{ color: tj.warn, fontFamily: tj.fontMono, fontStyle: "normal" }}>{fmtF(totalMonthlyNeeded)}/month</b> for the remaining {remainingMonths} months versus the current <b style={{ color: tj.navy900, fontFamily: tj.fontMono, fontStyle: "normal" }}>{fmtF(locData.reduce((s, l) => s + l.avgMonthly, 0))}/month</b> run rate.
+                </div>
+              </Card>
+            </div>
+          );
+        })()}
+
+        {/* ═══ PROJECTIONS ═══ */}
+        {view === "projections" && (() => {
+          // ── Archive → time series ──────────────────────────────────
+          // Monthly snapshots are one row per month. We sort chronologically
+          // by sortKey ("2026-03" format). Deduplicate: if the same month
+          // appears from multiple XLSX uploads, keep the most recently
+          // uploaded one as the source of truth.
+          const monthlyDedup = {};
+          archive.filter(a => a.kind === "monthly").forEach(m => {
+            const existing = monthlyDedup[m.sortKey];
+            if (!existing || new Date(m.uploadedAt) > new Date(existing.uploadedAt)) {
+              monthlyDedup[m.sortKey] = m;
+            }
+          });
+          const monthlySnaps = Object.values(monthlyDedup).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+
+          const weeklySnaps = archive.filter(a => a.kind === "weekly")
+            .sort((a, b) => (a.sortKey || "").localeCompare(b.sortKey || ""));
+
+          const totalEntries = archive.length;
+
+          // ── Plan year from latest monthly entry (or current year) ─
+          const planYear = (() => {
+            const latest = monthlySnaps[monthlySnaps.length - 1];
+            if (!latest) return new Date().getFullYear();
+            const m = latest.reportDate.match(/\b(\d{2})\s*$/);
+            return m ? 2000 + parseInt(m[1], 10) : new Date().getFullYear();
+          })();
+
+          // ── Projection: 3-month weighted moving average + dampened trend ──
+          // Weights 20/30/50 on the last three months (recent months matter
+          // more). Trend = mean month-over-month change across the last 3
+          // changes, dampened by 0.5 to avoid runaway extrapolation.
+          // Only applies trend when we have ≥3 change-points; otherwise
+          // returns a flat forward-projection of the weighted average.
+          const projectForward = (series, n = 6) => {
+            if (!series || series.length < 2) return [];
+            const last3 = series.slice(-3);
+            const wAvg = last3.length >= 3
+              ? last3[0] * 0.2 + last3[1] * 0.3 + last3[2] * 0.5
+              : last3.reduce((s, v) => s + v, 0) / last3.length;
+            // Need at least 3 changes for anything trend-like; with only 1-2
+            // changes, "trend" is noise masquerading as signal.
+            const changes = [];
+            for (let i = Math.max(0, series.length - 4); i < series.length - 1; i++) {
+              changes.push(series[i + 1] - series[i]);
+            }
+            const trend = changes.length >= 3
+              ? changes.reduce((s, v) => s + v, 0) / changes.length
+              : 0;
+            return Array.from({ length: n }, (_, j) => Math.max(0, wAvg + trend * (j + 1) * 0.5));
+          };
+
+          // Std-dev of recent months — used to draw ±1σ uncertainty band
+          // around the projection. An honest visual that the projection is
+          // directional, not a commitment.
+          const sigma = (series) => {
+            const recent = series.slice(-6);
+            if (recent.length < 3) return 0;
+            const m = recent.reduce((s, v) => s + v, 0) / recent.length;
+            return Math.sqrt(recent.reduce((s, v) => s + (v - m) ** 2, 0) / (recent.length - 1));
+          };
+
+          const mRevs     = monthlySnaps.map(m => m.monthRev);
+          const mLabels   = monthlySnaps.map(m => m.reportDate);
+          const mEbitdas  = monthlySnaps.map(m => m.monthEbitda);
+          const mGM       = monthlySnaps.map(m => m.monthGrossMargin);
+          const mNI       = monthlySnaps.map(m => m.monthNI);
+
+          const projRev = projectForward(mRevs, 6);
+          const projEbitda = projectForward(mEbitdas, 6);
+          const projLabels = Array.from({ length: 6 }, (_, j) => `P+${j + 1}`);
+          const sigmaRev = sigma(mRevs);
+
+          // YTD accumulator from monthly entries that fall in this plan year
+          const yrPrefix = String(planYear);
+          const m26 = monthlySnaps.filter(m => m.sortKey.startsWith(yrPrefix));
+          const ytdRev = m26.reduce((s, m) => s + m.monthRev, 0);
+          const monthsRemaining = Math.max(0, 12 - m26.length);
+          const projectedAnnual = ytdRev + projRev.slice(0, monthsRemaining).reduce((s, v) => s + v, 0);
+
+          // Uncertainty on the annual projection: sigma per month × sqrt of
+          // months projected (std-dev of a sum of independent draws)
+          const annualSigma = sigmaRev * Math.sqrt(monthsRemaining);
+
+          const TARGET = 10_000_000;
+          const STRETCH = 14_400_000;
+
+          // ── ProjChart: actual (navy solid) + projected (crimson dashed)
+          // with uncertainty band. All Tejas-branded, light theme. ───
+          const ProjChart = ({ actual, projected, sigma, labels, height: h = 180, width: w = 560, targetLine }) => {
+            if (!actual || actual.length === 0) return (
+              <div style={{ padding: 24, textAlign: "center", color: tj.gray500, fontFamily: tj.fontSerif, fontStyle: "italic", fontSize: 12 }}>
+                No data yet — upload a P&amp;L to populate this chart.
+              </div>
+            );
+            // Combine all values for y-axis range (including ±sigma band)
+            const bandHigh = projected.map(p => p + (sigma || 0));
+            const bandLow  = projected.map(p => Math.max(0, p - (sigma || 0)));
+            const allValues = [...actual, ...projected, ...bandHigh, ...bandLow, 0, ...(targetLine ? [targetLine] : [])];
+            const mx = Math.max(...allValues);
+            const mn = Math.min(...allValues, 0);
+            const range = mx - mn || 1;
+            const nPoints = actual.length + projected.length;
+            const toY = (v) => h - 24 - ((v - mn) / range) * (h - 40);
+            const toX = (i) => 48 + (i / Math.max(1, nPoints - 1)) * (w - 60);
+
+            const actualPts = actual.map((v, i) => `${toX(i)},${toY(v)}`).join(" ");
+            // Connect last actual point to first projected point for visual continuity
+            const projPts = projected.length > 0
+              ? [`${toX(actual.length - 1)},${toY(actual[actual.length - 1])}`,
+                 ...projected.map((v, j) => `${toX(actual.length + j)},${toY(v)}`)].join(" ")
+              : "";
+
+            // Uncertainty band polygon — (high line forward) + (low line backward)
+            const bandPts = projected.length > 0 && sigma > 0
+              ? [
+                  `${toX(actual.length - 1)},${toY(actual[actual.length - 1])}`,
+                  ...bandHigh.map((v, j) => `${toX(actual.length + j)},${toY(v)}`),
+                  ...bandLow.slice().reverse().map((v, j) => {
+                    const idx = projected.length - 1 - j;
+                    return `${toX(actual.length + idx)},${toY(v)}`;
+                  }),
+                  `${toX(actual.length - 1)},${toY(actual[actual.length - 1])}`,
+                ].join(" ")
+              : "";
+
+            const tY = targetLine ? toY(targetLine / 12) : null; // target expressed per-month
+
+            return (
+              <svg width="100%" viewBox={`0 0 ${w} ${h + 20}`} style={{ display: "block" }}>
+                {/* Horizontal gridlines + y-axis labels */}
+                {[0, 0.25, 0.5, 0.75, 1].map(p => {
+                  const y = h - 24 - p * (h - 40);
+                  const val = mn + p * range;
+                  return (
+                    <g key={p}>
+                      <line x1={46} y1={y} x2={w - 10} y2={y} stroke={tj.border} strokeWidth={1} strokeDasharray={p === 0 ? "" : "2,3"} />
+                      <text x={42} y={y + 3} textAnchor="end" fontSize="9" fill={tj.gray500} fontFamily={tj.fontMono}>{fmt(val)}</text>
+                    </g>
+                  );
+                })}
+
+                {/* Zero line if negative values present */}
+                {mn < 0 && <line x1={46} y1={toY(0)} x2={w - 10} y2={toY(0)} stroke={tj.gray500} strokeWidth={1} strokeDasharray="4,4" />}
+
+                {/* Target line (per-month) */}
+                {tY !== null && (
+                  <g>
+                    <line x1={46} y1={tY} x2={w - 10} y2={tY} stroke={tj.navy900} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.55} />
+                    <text x={w - 12} y={tY - 4} textAnchor="end" fontSize="9" fill={tj.navy900} fontFamily={tj.fontSans} letterSpacing="0.06em">target / mo</text>
+                  </g>
+                )}
+
+                {/* Uncertainty band under projection */}
+                {bandPts && <polygon points={bandPts} fill={tj.crimson} opacity={0.1} />}
+
+                {/* Actual line — navy solid */}
+                {actual.length > 1 && <polyline points={actualPts} fill="none" stroke={tj.navy900} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />}
+                {actual.map((v, i) => <circle key={`a${i}`} cx={toX(i)} cy={toY(v)} r={3.5} fill={tj.navy900} />)}
+
+                {/* Projected line — crimson dashed */}
+                {projected.length > 0 && <polyline points={projPts} fill="none" stroke={tj.crimson} strokeWidth={2} strokeDasharray="6,4" strokeLinecap="round" />}
+                {projected.map((v, j) => <circle key={`p${j}`} cx={toX(actual.length + j)} cy={toY(v)} r={3} fill="white" stroke={tj.crimson} strokeWidth={1.5} />)}
+
+                {/* NOW divider */}
+                {projected.length > 0 && (
+                  <g>
+                    <line x1={toX(actual.length - 0.5)} y1={12} x2={toX(actual.length - 0.5)} y2={h - 20} stroke={tj.gray500} strokeWidth={1} strokeDasharray="3,3" />
+                    <text x={toX(actual.length - 0.5)} y={10} fontSize="9" fill={tj.gray700} textAnchor="middle" fontFamily={tj.fontSans} letterSpacing="0.08em">NOW</text>
+                  </g>
+                )}
+
+                {/* X-axis labels — first, last actual, last projected, plus thin intermediaries */}
+                {labels.map((l, i) => {
+                  if (!l) return null;
+                  // Show roughly 6 labels evenly distributed to avoid crowding
+                  const step = Math.max(1, Math.floor(nPoints / 6));
+                  if (i !== 0 && i !== nPoints - 1 && i !== actual.length - 1 && i % step !== 0) return null;
+                  return (
+                    <text key={i} x={toX(i)} y={h + 10} textAnchor="middle" fontSize="9" fill={i < actual.length ? tj.gray700 : tj.crimson} fontFamily={tj.fontSans} letterSpacing="0.06em">
+                      {l}
+                    </text>
+                  );
+                })}
+              </svg>
+            );
+          };
+
+          // Location-level projection data
+          const locKeys = [
+            { name: "Big Lake", key: "bigLake", color: tj.ok },
+            { name: "Gonzalez", key: "gonzalez", color: tj.warn },
+            { name: "Live Oak", key: "liveOak", color: tj.crimson },
+          ];
+
+          return (
+            <div>
+              {/* ─── HEADLINE PROJECTION ─── */}
+              <Card accent={tj.crimson} accentSide="left" padding={28} style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 24 }}>
+                  <div style={{ flex: "1 1 320px" }}>
+                    <Eyebrow style={{ marginBottom: 10 }}>{planYear} Year-End Revenue · Projected</Eyebrow>
+                    <div style={{ fontFamily: tj.fontSerif, fontSize: 56, fontWeight: 700, color: tj.navy900, letterSpacing: "-0.02em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                      {mRevs.length >= 2 ? fmt(projectedAnnual) : <span style={{ color: tj.gray500 }}>—</span>}
+                    </div>
+                    {mRevs.length >= 2 && annualSigma > 0 && (
+                      <div style={{ fontFamily: tj.fontMono, fontSize: 12, color: tj.gray700, marginTop: 10 }}>
+                        range: {fmt(Math.max(0, projectedAnnual - annualSigma))} – {fmt(projectedAnnual + annualSigma)}
+                        <span style={{ color: tj.gray500 }}> · ±1σ from last 6 months of variance</span>
+                      </div>
+                    )}
+                    <div style={{ fontSize: 12, color: tj.gray700, marginTop: 12, fontFamily: tj.fontSerif, fontStyle: "italic", lineHeight: 1.6 }}>
+                      {mRevs.length >= 2
+                        ? <>Method: 3-month weighted average ({monthsRemaining} months to project) with dampened trend. <b style={{ color: tj.crimson, fontStyle: "normal" }}>Directional forecast — not a commitment.</b></>
+                        : <>Need at least 2 months of P&amp;L data in the archive to project. Drop an XLSX and I'll fill in the rest.</>
+                      }
+                    </div>
+                  </div>
+
+                  <div style={{ flex: "0 1 320px", minWidth: 260 }}>
+                    <Eyebrow color={tj.gray700} style={{ marginBottom: 10 }}>vs Targets</Eyebrow>
+                    {mRevs.length >= 2 ? (
+                      [
+                        { label: "Target", val: TARGET, color: tj.navy900 },
+                        { label: "Stretch", val: STRETCH, color: tj.crimson },
+                      ].map((t, ti) => {
+                        const pctToT = t.val > 0 ? projectedAnnual / t.val : 0;
+                        const gap = t.val - projectedAnnual;
+                        const hits = projectedAnnual >= t.val;
+                        return (
+                          <div key={ti} style={{ marginBottom: ti === 0 ? 14 : 0 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                              <span style={{ fontSize: 12, color: t.color, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{t.label} · {fmt(t.val)}</span>
+                              <span style={{ fontFamily: tj.fontMono, fontSize: 13, fontWeight: 700, color: hits ? tj.ok : tj.warn }}>{(pctToT * 100).toFixed(0)}%</span>
+                            </div>
+                            <div style={{ background: tj.surfaceCream, border: `1px solid ${tj.border}`, height: 16, position: "relative" }}>
+                              <div style={{ background: hits ? tj.ok : t.color, height: "100%", width: `${Math.min(pctToT * 100, 100)}%`, opacity: 0.85 }} />
+                            </div>
+                            <div style={{ fontFamily: tj.fontMono, fontSize: 11, color: hits ? tj.ok : tj.crimson, marginTop: 4 }}>
+                              {hits ? `+${fmt(-gap)} above` : `${fmt(gap)} short`}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div style={{ fontSize: 12, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif }}>—</div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+
+              {/* ─── Archive summary ─── */}
+              <Card padding={20} style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                <div>
+                  <Eyebrow style={{ marginBottom: 4 }}>Submission Ledger</Eyebrow>
+                  <div style={{ fontSize: 13, color: tj.gray700, fontFamily: tj.fontSerif }}>
+                    <b style={{ color: tj.navy900, fontFamily: tj.fontMono }}>{monthlySnaps.length}</b> monthly rows from P&amp;L uploads ·{" "}
+                    <b style={{ color: tj.navy900, fontFamily: tj.fontMono }}>{weeklySnaps.length}</b> weekly ops entries ·{" "}
+                    <b style={{ color: tj.crimson, fontFamily: tj.fontMono }}>{totalEntries}</b> total data points
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 12, fontFamily: tj.fontSans, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>
+                  <span style={{ color: tj.navy900 }}><span style={{ display: "inline-block", width: 16, height: 2, background: tj.navy900, verticalAlign: "middle", marginRight: 6 }} />Actual</span>
+                  <span style={{ color: tj.crimson }}><span style={{ display: "inline-block", width: 16, height: 2, background: tj.crimson, verticalAlign: "middle", marginRight: 6, borderTop: `2px dashed ${tj.crimson}`, borderLeft: 0, borderRight: 0, borderBottom: 0 }} />Projected</span>
+                </div>
+              </Card>
+
+              {/* ─── Revenue projection chart ─── */}
+              <Card padding={24} style={{ marginBottom: 20 }}>
+                <Eyebrow style={{ marginBottom: 4 }}>Revenue · actual + {projRev.length}-month projection</Eyebrow>
+                <div style={{ fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif, marginBottom: 14 }}>
+                  Blue target line is {fmt(TARGET)} annual ÷ 12 months. Crimson band is ±1σ uncertainty.
+                </div>
+                <ProjChart
+                  actual={mRevs}
+                  projected={projRev}
+                  sigma={sigmaRev}
+                  labels={[...mLabels, ...projLabels]}
+                  targetLine={TARGET}
+                />
+                {mRevs.length >= 2 && (
+                  <div style={{ display: "flex", gap: 24, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${tj.border}`, flexWrap: "wrap" }}>
+                    <div>
+                      <Eyebrow color={tj.gray500} style={{ fontSize: 10 }}>Projected Annual</Eyebrow>
+                      <div style={{ fontFamily: tj.fontSerif, fontSize: 20, fontWeight: 700, color: projectedAnnual >= TARGET ? tj.ok : tj.crimson, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{fmt(projectedAnnual)}</div>
+                    </div>
+                    <div>
+                      <Eyebrow color={tj.gray500} style={{ fontSize: 10 }}>Target</Eyebrow>
+                      <div style={{ fontFamily: tj.fontSerif, fontSize: 20, fontWeight: 700, color: tj.navy900, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{fmt(TARGET)}</div>
+                    </div>
+                    <div>
+                      <Eyebrow color={tj.gray500} style={{ fontSize: 10 }}>Gap</Eyebrow>
+                      <div style={{ fontFamily: tj.fontSerif, fontSize: 20, fontWeight: 700, color: projectedAnnual >= TARGET ? tj.ok : tj.crimson, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{fmt(TARGET - projectedAnnual)}</div>
+                    </div>
+                    <div>
+                      <Eyebrow color={tj.gray500} style={{ fontSize: 10 }}>Uncertainty (±1σ)</Eyebrow>
+                      <div style={{ fontFamily: tj.fontSerif, fontSize: 20, fontWeight: 700, color: tj.gray700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>±{fmt(annualSigma)}</div>
+                    </div>
+                  </div>
+                )}
+              </Card>
+
+              {/* ─── EBITDA projection ─── */}
+              {mEbitdas.length >= 2 && (
+                <Card padding={24} style={{ marginBottom: 20 }}>
+                  <Eyebrow style={{ marginBottom: 4 }}>EBITDA · actual + projection</Eyebrow>
+                  <div style={{ fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif, marginBottom: 14 }}>
+                    Navy solid = closed months · Crimson dashed = projected · {projEbitda.length && `next month estimated ${fmt(projEbitda[0])}`}
+                  </div>
+                  <ProjChart actual={mEbitdas} projected={projEbitda} sigma={sigma(mEbitdas)} labels={[...mLabels, ...projLabels]} />
+                </Card>
+              )}
+
+              {/* ─── Per-location projections ─── */}
+              {monthlySnaps.length >= 2 && (
+                <Card padding={24} style={{ marginBottom: 20 }}>
+                  <Eyebrow style={{ marginBottom: 14 }}>Per-location projection · vs individual targets</Eyebrow>
+                  {locKeys.map(loc => {
+                    const locRevs = monthlySnaps.map(m => m.perLoc?.[loc.key]?.rev || 0);
+                    const locProj = projectForward(locRevs, 6);
+                    const locTarget = BENCH[loc.key]?.target || 0;
+                    const locSigma = sigma(locRevs);
+                    // Annualized from 12-mo trailing + projected
+                    const locYtd = monthlySnaps.filter(m => m.sortKey.startsWith(yrPrefix))
+                      .reduce((s, m) => s + (m.perLoc?.[loc.key]?.rev || 0), 0);
+                    const locMonthsRem = Math.max(0, 12 - monthlySnaps.filter(m => m.sortKey.startsWith(yrPrefix)).length);
+                    const locProjAnnual = locYtd + locProj.slice(0, locMonthsRem).reduce((s, v) => s + v, 0);
+                    const onPace = locProjAnnual >= locTarget;
+                    return (
+                      <div key={loc.key} style={{ marginBottom: 20, paddingBottom: 16, borderBottom: `1px solid ${tj.border}` }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 8, height: 8, borderRadius: "50%", background: loc.color }} />
+                            <span style={{ fontFamily: tj.fontSerif, fontSize: 16, fontWeight: 700, color: tj.navy900 }}>{loc.name}</span>
+                            <span style={{ background: onPace ? tj.okBg : tj.badBg, color: onPace ? tj.ok : tj.crimson, padding: "2px 10px", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                              {onPace ? "On Pace" : "Behind"}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: 11, color: tj.gray700, fontFamily: tj.fontMono }}>
+                            Target {fmt(locTarget)} · Projected <b style={{ color: onPace ? tj.ok : tj.crimson }}>{fmt(locProjAnnual)}</b>
+                          </div>
+                        </div>
+                        <ProjChart actual={locRevs} projected={locProj} sigma={locSigma} labels={[...mLabels, ...projLabels]} height={110} width={720} />
+                      </div>
+                    );
+                  })}
+                </Card>
+              )}
+
+              {/* ─── Weekly ops trailing feed ─── */}
+              {weeklySnaps.length > 0 && (
+                <Card padding={24} style={{ marginBottom: 20 }}>
+                  <Eyebrow style={{ marginBottom: 14 }}>Weekly ops · submission log</Eyebrow>
+                  <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit, minmax(120px, 1fr))`, gap: 8, marginBottom: 14 }}>
+                    {weeklySnaps.map((w, wi) => {
+                      const isPos = w.weekPL >= 0;
+                      return (
+                        <Card key={wi} cream padding={12} accent={isPos ? tj.ok : tj.crimson} accentSide="left">
+                          <div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>{w.reportDate}</div>
+                          <div style={{ fontFamily: tj.fontSerif, fontSize: 18, fontWeight: 700, color: tj.navy900, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{fmt(w.weekRev)}</div>
+                          <div style={{ fontFamily: tj.fontMono, fontSize: 11, color: isPos ? tj.ok : tj.crimson, marginTop: 2 }}>{fmtF(w.weekPL)}</div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, paddingTop: 10, borderTop: `1px solid ${tj.border}` }}>
+                    <span style={{ fontSize: 11, color: tj.gray700, fontFamily: tj.fontSerif, fontStyle: "italic" }}>Weekly revenue trend:</span>
+                    <Spark data={weeklySnaps.map(w => w.weekRev)} color={tj.navy900} width={240} height={32} />
+                  </div>
+                </Card>
+              )}
+
+              {/* ─── Permanent ledger table ─── */}
+              <Card padding={24}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
+                  <Eyebrow>Permanent ledger · every submission</Eyebrow>
+                  {archive.length > 0 && (
+                    <button onClick={clearArchive} style={{
+                      background: "transparent", color: tj.crimson, border: `1px solid ${tj.crimson}`,
+                      padding: "6px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer",
+                      letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: tj.fontSans,
+                    }}>Reset Archive</button>
+                  )}
+                </div>
+
+                {archive.length === 0 ? (
+                  <div style={{ padding: "28px 0", textAlign: "center" }}>
+                    <div style={{ fontSize: 14, color: tj.gray700, fontFamily: tj.fontSerif, fontStyle: "italic", marginBottom: 8 }}>
+                      No submissions yet.
+                    </div>
+                    <div style={{ fontSize: 12, color: tj.gray500, fontFamily: tj.fontSerif, lineHeight: 1.6 }}>
+                      Drop a CSV or XLSX in the header upload zone.<br />
+                      Every file you submit is logged here, permanently.
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <thead>
+                        <tr>
+                          {["Date", "Kind", "Source", "Revenue", "P&L / EBITDA", "Big Lake", "Gonzalez", "Live Oak", "Uploaded", ""].map((h, hi) => (
+                            <th key={hi} style={{ textAlign: ["Revenue", "P&L / EBITDA", "Big Lake", "Gonzalez", "Live Oak"].includes(h) ? "right" : "left", padding: "10px 8px", borderBottom: `2px solid ${tj.navy900}`, fontFamily: tj.fontSans, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: tj.gray700, fontWeight: 700 }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {archive.slice().sort((a, b) => {
+                          // Sort by sortKey if present, else by uploadedAt; newest first
+                          const ka = a.sortKey || new Date(a.uploadedAt).toISOString();
+                          const kb = b.sortKey || new Date(b.uploadedAt).toISOString();
+                          return kb.localeCompare(ka);
+                        }).map((entry, ei) => (
+                          <tr key={ei} style={{ borderBottom: `1px solid ${tj.border}` }}>
+                            <td style={{ padding: "10px 8px", fontWeight: 700, color: tj.navy900, fontFamily: tj.fontMono }}>{entry.reportDate}</td>
+                            <td style={{ padding: "10px 8px" }}>
+                              <span style={{
+                                background: entry.kind === "weekly" ? tj.badBg : tj.okBg,
+                                color: entry.kind === "weekly" ? tj.crimson : tj.ok,
+                                padding: "2px 8px", fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                              }}>{entry.kind}</span>
+                            </td>
+                            <td style={{ padding: "10px 8px", fontSize: 11, color: tj.gray500, fontFamily: tj.fontMono, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{entry.filename}</td>
+                            <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: tj.fontMono }}>{fmtF(entry.kind === "weekly" ? entry.weekRev : entry.monthRev)}</td>
+                            <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: tj.fontMono, color: ((entry.kind === "weekly" ? entry.weekPL : entry.monthEbitda) || 0) >= 0 ? tj.ok : tj.crimson }}>
+                              {fmtF(entry.kind === "weekly" ? entry.weekPL : entry.monthEbitda)}
+                            </td>
+                            <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: tj.fontMono, fontSize: 11 }}>{fmtF(entry.kind === "weekly" ? entry.perLoc?.bigLake?.weekRev : entry.perLoc?.bigLake?.rev)}</td>
+                            <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: tj.fontMono, fontSize: 11 }}>{fmtF(entry.kind === "weekly" ? entry.perLoc?.gonzalez?.weekRev : entry.perLoc?.gonzalez?.rev)}</td>
+                            <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: tj.fontMono, fontSize: 11 }}>{fmtF(entry.kind === "weekly" ? entry.perLoc?.liveOak?.weekRev : entry.perLoc?.liveOak?.rev)}</td>
+                            <td style={{ padding: "10px 8px", fontSize: 11, color: tj.gray700, fontFamily: tj.fontMono, whiteSpace: "nowrap" }}>{timeAgo(entry.uploadedAt)}{entry.updateCount > 1 && <span style={{ color: tj.warn, marginLeft: 6 }}>×{entry.updateCount}</span>}</td>
+                            <td style={{ padding: "10px 8px", textAlign: "right" }}>
+                              <button onClick={() => { if (window.confirm(`Delete ${entry.kind} entry for ${entry.reportDate}?`)) deleteArchiveEntry(entry.reportDate, entry.kind); }}
+                                      style={{ background: "transparent", border: "none", color: tj.gray500, cursor: "pointer", fontSize: 13, letterSpacing: "0.08em" }}>×</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${tj.border}`, fontSize: 11, color: tj.gray500, fontFamily: tj.fontSerif, fontStyle: "italic", lineHeight: 1.55 }}>
+                  Same-report-date re-uploads update the existing row (Updated × count shown). One XLSX creates 12 rows — one per month. Archive persists across sessions.
+                </div>
+              </Card>
+            </div>
+          );
+        })()}
+
+        {/* FOOTER */}
+        <div style={{ marginTop: 36, paddingTop: 18, borderTop: `1px solid ${tj.border}`, fontSize: 11,
+                      color: tj.gray500, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, letterSpacing: "0.04em" }}>
+          <span>Monthly: {D.source || "QBO P&L"} · Weekly: {W ? `Jessica (${W.updatedThru})` : "not loaded"}</span>
+          <span style={{ fontStyle: "italic", fontFamily: tj.fontSerif }}>Proudly Texas owned and committed.</span>
+        </div>
+      </div>
+    </div>
+  );
 }
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 </body>
 </html>
