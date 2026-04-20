@@ -868,6 +868,44 @@ function App() {
                 {D.netIncome.filter(v => v < 0).length} of {D.netIncome.length} months negative · cumulative: <b style={{ color: D.netIncome.reduce((a, b) => a + b, 0) >= 0 ? tj.ok : tj.crimson, fontFamily: tj.fontMono }}>{fmt(D.netIncome.reduce((a, b) => a + b, 0))}</b>
               </div>
             </Card>
+            <Card padding={24} style={{ marginBottom: 16 }}>
+              <Eyebrow style={{ marginBottom: 18 }}>Location trends</Eyebrow>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+                {[
+                  { n: "Big Lake", rev: D.bigLake?.rev || [], ni: D.bigLake?.ni || [], c: tj.ok },
+                  { n: "Gonzalez", rev: D.gonzalez?.rev || [], ni: D.gonzalez?.ni || [], c: tj.warn },
+                  { n: "Live Oak", rev: D.liveOak?.rev || [], ni: D.liveOak?.ni || [], c: tj.crimson },
+                ].map(loc => (
+                  <Card key={loc.n} cream accent={loc.c} padding={18} style={{ minWidth: 0 }}>
+                    <Eyebrow color={loc.c} style={{ marginBottom: 10 }}>{loc.n}</Eyebrow>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                      <div>
+                        <div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Latest rev</div>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 20, fontWeight: 700, color: tj.navy900, fontVariantNumeric: "tabular-nums" }}>{fmt(loc.rev[i] || 0)}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Latest NI</div>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 20, fontWeight: 700, color: (loc.ni[i] || 0) >= 0 ? tj.ok : tj.crimson, fontVariantNumeric: "tabular-nums" }}>{fmt(loc.ni[i] || 0)}</div>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                        <Eyebrow color={tj.gray700}>Revenue trend</Eyebrow>
+                        <span style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em" }}>12 mo</span>
+                      </div>
+                      <Spark data={loc.rev} color={loc.c} width={220} height={34} />
+                    </div>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                        <Eyebrow color={tj.gray700}>Net income trend</Eyebrow>
+                        <span style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em" }}>last 6</span>
+                      </div>
+                      <Bars data={loc.ni.slice(-6)} labels={(D.shortMo || []).slice(-6)} colorFn={v => v >= 0 ? loc.c : tj.crimson} width={240} height={82} />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </Card>
             <Card padding={24}>
               <Eyebrow style={{ marginBottom: 16 }}>Cost structure · % of revenue</Eyebrow>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
