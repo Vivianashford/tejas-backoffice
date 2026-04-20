@@ -581,36 +581,33 @@ const LIVE_URLS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// OIL TICKER (simulated — swap with live feed when wired up)
+// OIL TICKER (real feed via same-origin JSON)
 // ═══════════════════════════════════════════════════════════════════════════
 const OIL_FEEDS = [{
   sym: 'BRENT',
   name: 'Brent Crude',
-  base: 78.42,
   venue: 'ICE',
   unit: 'USD/bbl'
 }, {
   sym: 'WTI',
   name: 'WTI · Texas',
-  base: 74.18,
   venue: 'NYMEX',
   unit: 'USD/bbl'
 }];
-const sampleFeed = (feed, tick) => {
-  const drift = Math.sin(tick * 0.37 + feed.base) * 0.42 + Math.cos(tick * 0.13) * 0.18;
-  const last = +(feed.base + drift).toFixed(2);
-  const change = +drift.toFixed(2);
-  const pct = +(change / feed.base * 100).toFixed(2);
-  return {
-    last,
-    change,
-    pct
-  };
-};
+const buildFallbackFeed = feed => ({
+  ...feed,
+  last: null,
+  previousClose: null,
+  change: null,
+  pct: null,
+  history: [],
+  asOf: null
+});
 const Spark = ({
   pts,
   up
 }) => {
+  if (!pts || pts.length < 2) return null;
   const w = 80,
     h = 24;
   const min = Math.min(...pts),
@@ -638,19 +635,8 @@ const Spark = ({
 const OilTick = ({
   feed
 }) => {
-  const [tick, setTick] = useState(0);
-  const [history, setHistory] = useState(() => Array.from({
-    length: 20
-  }, (_, i) => sampleFeed(feed, i - 20).last));
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 2800);
-    return () => clearInterval(id);
-  }, []);
-  useEffect(() => {
-    setHistory(h => [...h.slice(-19), sampleFeed(feed, tick).last]);
-  }, [tick]);
-  const s = sampleFeed(feed, tick);
-  const up = s.change >= 0;
+  const hasPrice = typeof feed.last === 'number';
+  const up = (feed.change || 0) >= 0;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -667,7 +653,7 @@ const OilTick = ({
       color: 'var(--tj-gray-500)',
       fontWeight: 700
     }
-  }, feed.sym, " \xB7 ", feed.venue), /*#__PURE__*/React.createElement("div", {
+  }, feed.sym, " · ", feed.venue), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'baseline',
@@ -682,14 +668,14 @@ const OilTick = ({
       color: 'var(--tj-navy-900)',
       letterSpacing: '-0.01em'
     }
-  }, "$", s.last.toFixed(2)), /*#__PURE__*/React.createElement("span", {
+  }, hasPrice ? `$${feed.last.toFixed(2)}` : '—'), hasPrice && /*#__PURE__*/React.createElement("span", {
     className: "mono",
     style: {
       fontSize: 12,
       color: up ? 'var(--bo-ok)' : 'var(--tj-crimson)',
       fontWeight: 700
     }
-  }, up ? '▲' : '▼', " ", Math.abs(s.change).toFixed(2), " \xB7 ", up ? '+' : '', s.pct.toFixed(2), "%")), /*#__PURE__*/React.createElement("div", {
+  }, up ? '▲' : '▼', " ", Math.abs(feed.change).toFixed(2), " · ", up ? '+' : '', feed.pct.toFixed(2), "%")), /*#__PURE__*/React.createElement("div", {
     className: "serif",
     style: {
       fontSize: 10,
@@ -697,16 +683,55 @@ const OilTick = ({
       marginTop: 2,
       fontStyle: 'italic'
     }
-  }, feed.name, " \xB7 ", feed.unit)), /*#__PURE__*/React.createElement(Spark, {
-    pts: history,
+  }, feed.name, " · ", feed.unit)), /*#__PURE__*/React.createElement(Spark, {
+    pts: feed.history,
     up: up
   }));
 };
 const Ticker = () => {
   const [now, setNow] = useState(new Date());
+  const [tickerData, setTickerData] = useState(() => ({
+    loading: true,
+    error: null,
+    updatedAt: null,
+    feeds: OIL_FEEDS.map(buildFallbackFeed)
+  }));
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(id);
+  }, []);
+  useEffect(() => {
+    let live = true;
+    const load = async () => {
+      try {
+        const res = await fetch(`/data/oil.json?ts=${Date.now()}`, {
+          cache: 'no-store'
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const bySym = new Map((data.feeds || []).map(f => [f.sym, f]));
+        if (!live) return;
+        setTickerData({
+          loading: false,
+          error: null,
+          updatedAt: data.updatedAt || null,
+          feeds: OIL_FEEDS.map(f => bySym.get(f.sym) || buildFallbackFeed(f))
+        });
+      } catch (err) {
+        if (!live) return;
+        setTickerData(cur => ({
+          ...cur,
+          loading: false,
+          error: err.message || 'Feed unavailable'
+        }));
+      }
+    };
+    load();
+    const id = setInterval(load, 300000);
+    return () => {
+      live = false;
+      clearInterval(id);
+    };
   }, []);
   const stamp = now.toLocaleString('en-US', {
     weekday: 'short',
@@ -716,6 +741,14 @@ const Ticker = () => {
     minute: '2-digit',
     hour12: true
   });
+  const feedStamp = tickerData.updatedAt ? new Date(tickerData.updatedAt).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'America/Chicago'
+  }) + ' CT' : tickerData.loading ? 'Loading live data…' : tickerData.error ? 'Feed retrying…' : 'Live feed';
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -746,12 +779,12 @@ const Ticker = () => {
     className: "serif",
     style: {
       fontSize: 10,
-      color: 'var(--tj-crimson)',
+      color: tickerData.error ? 'var(--tj-crimson)' : 'var(--tj-gray-500)',
       marginTop: 2,
       fontStyle: 'italic',
       fontWeight: 700
     }
-  }, "Simulated values \xB7 not trading data")), OIL_FEEDS.map(f => /*#__PURE__*/React.createElement(OilTick, {
+  }, tickerData.error ? `Live feed issue · ${tickerData.error}` : `Live futures feed · ${feedStamp}`)), tickerData.feeds.map(f => /*#__PURE__*/React.createElement(OilTick, {
     key: f.sym,
     feed: f
   })), /*#__PURE__*/React.createElement("div", {
@@ -777,7 +810,7 @@ const Ticker = () => {
       marginTop: 4,
       fontWeight: 700
     }
-  }, "Open \xB7 08:00\u201315:00 CT")));
+  }, "Futures · 5 min refresh")));
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
