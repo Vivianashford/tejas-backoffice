@@ -575,6 +575,7 @@ const {
 const LIVE_URLS = {
   salesScoreboard: "https://tejasbackoffice.com/sales/",
   cooDashboard: "https://tejasbackoffice.com/ops/",
+  arDashboard: "https://tejasbackoffice.com/AR/",
   designSystem: "#"
 };
 
@@ -990,7 +991,9 @@ const CATALOG = [{
     title: 'AR / AP',
     links: [{
       label: 'Accounts Receivable Aging',
-      status: 'planned'
+      href: LIVE_URLS.arDashboard,
+      status: 'live',
+      note: 'Collections dashboard'
     }, {
       label: 'Accounts Payable Queue',
       status: 'planned'
