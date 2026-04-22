@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WE Big Lake SWD Well #2 — Rev. 7 Corrected</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0a2749;
+  --navy-deep:#071c36;
+  --crimson:#c8102e;
+  --cream:#f1ece0;
+  --paper:#fcfaf5;
+  --rule:#d8cfb8;
+  --ink:#1a1a1a;
+  --soft:#4a4a4a;
+  --muted:#8a8578;
+  --green:#1b5e20;
+  --green-bg:#eaf4ea;
+  --amber:#d97706;
+  --amber-bg:#fff4e6;
+  --red-bg:#fde2e2;
+  --body:'Inter',sans-serif;
+  --serif:'Fraunces',serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.6}
+.brand{background:var(--navy);color:#fff;border-bottom:3px solid var(--crimson)}
+.brand-inner,.doc{max-width:1280px;margin:0 auto;padding:0 40px}
+.brand-inner{display:flex;justify-content:space-between;align-items:center;gap:24px;padding-top:18px;padding-bottom:18px}
+.logo{font-weight:700;letter-spacing:.08em;font-size:14px}.logo small{display:block;color:#b8c7dc;font-weight:500;letter-spacing:.16em;text-transform:uppercase;font-size:10px}
+.conf{border:1px solid var(--crimson);padding:6px 12px;color:var(--crimson);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+.page{background:#fff;margin:40px 0;padding:56px 64px;box-shadow:0 8px 30px rgba(10,39,73,.08);border-top:1px solid var(--rule)}
+.header{display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid var(--rule);padding-bottom:18px;margin-bottom:32px}
+.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);font-weight:700}
+.meta{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-align:right}
+h1{font-family:var(--serif);font-size:48px;line-height:1.05;color:var(--navy);margin:0 0 10px}
+.subtitle{font-family:var(--serif);font-style:italic;font-size:21px;color:var(--soft);margin:0 0 28px}
+.bar{display:grid;grid-template-columns:repeat(4,1fr);background:var(--cream);border-left:4px solid var(--crimson);margin:0 0 28px}
+.bar .item{padding:18px 20px}.bar .item+.item{border-left:1px solid var(--rule)}
+.label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px}
+.val{font-family:var(--mono);font-size:13px;color:var(--navy)}
+.note,.warn,.ok{padding:18px 22px;margin:24px 0;border-left:4px solid}
+.note{background:#fcfaf5;border-color:var(--navy);color:var(--soft)}
+.warn{background:var(--amber-bg);border-color:var(--amber)}
+.ok{background:var(--green-bg);border-color:var(--green)}
+.grid{display:grid;grid-template-columns:1fr 300px;gap:28px;align-items:start;margin:34px 0}
+.figure{background:linear-gradient(180deg,#fcfaf5,#f4efe2);border:1px solid var(--rule);padding:28px}
+.legend{border:1px solid var(--rule);padding:22px;background:#fff}
+.legend h3,.section h2{font-family:var(--serif);color:var(--navy);margin:0 0 14px}
+.legend h3{font-size:18px;border-bottom:2px solid var(--crimson);padding-bottom:8px}
+.legend .group{margin-bottom:18px}.k{display:flex;gap:10px;align-items:center;padding:4px 0;font-size:12px}.sw{width:22px;height:14px;border:1px solid rgba(0,0,0,.12)}
+.table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
+.table th{background:var(--navy);color:#fff;text-align:left;padding:14px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.table td{padding:14px 16px;border-bottom:1px solid var(--rule);vertical-align:top}.table tr:nth-child(even) td{background:var(--paper)}
+.mono{font-family:var(--mono)}
+.status-ok,.status-new,.status-flag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700}
+.status-ok{background:var(--green-bg);color:#0d3811}.status-new{background:var(--red-bg);color:#8b0f24}.status-flag{background:var(--amber-bg);color:#7a3e00}
+.item-block{border:1px solid var(--rule);margin:0 0 28px;background:#fff}
+.item-head{display:flex;gap:18px;align-items:center;padding:18px 24px;background:var(--cream);border-bottom:1px solid var(--rule)}
+.num{width:42px;height:42px;border-radius:0;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:22px}
+.item-head h3{margin:0;flex:1;font-family:var(--serif);font-size:24px;color:var(--navy)}
+.item-body{padding:24px 28px}
+.footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.small{font-size:12px;color:var(--soft)}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}.bar{grid-template-columns:repeat(2,1fr)}.page{padding:36px 28px}h1{font-size:34px}}
+@media print{body{background:#fff}.page{box-shadow:none;margin:0;page-break-after:always}}
+</style>
+</head>
+<body>
+<header class="brand">
+  <div class="brand-inner">
+    <div class="logo">TEJAS ENVIRONMENTAL<small>Solutions</small></div>
+    <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--crimson);font-weight:700">Proudly Texas Owned</div>
+    <div class="conf">Confidential</div>
+  </div>
+</header>
+
+<div class="doc">
+
+<section class="page">
+  <div class="header">
+    <div>
+      <div class="eyebrow">Well Schematic · Rev. 7 · Current State Corrected</div>
+      <div class="small">Values reconciled against 2014 legacy schematic, 2015 RRC permit amendment, 2018-2019 maintenance records, 2019 CT cleanout reports, and 2023 Tejas workover reports.</div>
+    </div>
+    <div class="meta">April 2026 · Rev. 7<br><span style="color:var(--green);font-weight:700">Current-state values reconciled</span></div>
+  </div>
+
+  <h1>WE Big Lake SWD Well #2</h1>
+  <p class="subtitle">Current state - as last worked in June 2023 by Tejas Environmental.</p>
+
+  <div class="bar">
+    <div class="item"><div class="label">Permit</div><div class="val">#14600 · Commercial Amendment</div></div>
+    <div class="item"><div class="label">API</div><div class="val">42-383-39122</div></div>
+    <div class="item"><div class="label">UIC / District</div><div class="val">000110133 · 7C</div></div>
+    <div class="item"><div class="label">Location</div><div class="val">Reagan County, TX</div></div>
+  </div>
+
+  <div class="note">
+    <strong>CURRENT STATE -</strong> Commercial saltwater disposal well in service since roughly 2015. Waste fluid enters surface facilities, travels down the <strong>4-1/2 in. polycore-lined tubing</strong>, passes through the packer set at <strong>3,120 ft</strong>, and injects into the San Andres disposal interval through <strong>five active perforated intervals from 3,458-3,834 ft</strong>. The upper zone above the packer is currently uncompleted. The most recent major intervention was the June 2023 Tejas workover.
+  </div>
+
+  <div class="ok"><strong>Resolved:</strong> packer depth, packer manufacturer era, active disposal intervals, current PBTD, and current tubing spec have been brought into alignment. The previous volumetric error has also been corrected: <strong>4-1/2 in. polycore with 3.4 in. minimum ID is about 0.01123 bbl/ft</strong>, not 0.00579 bbl/ft.</div>
+
+  <div class="grid">
+    <div class="figure">
+      <svg viewBox="0 0 960 1220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Current state schematic corrected">
+        <defs>
+          <pattern id="cement" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+            <rect width="8" height="8" fill="#c9b890"/>
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#a59479" stroke-width="2"/>
+          </pattern>
+          <pattern id="perf" patternUnits="userSpaceOnUse" width="6" height="10">
+            <rect width="6" height="10" fill="#d49a00"/>
+            <line x1="0" y1="0" x2="6" y2="0" stroke="#000" stroke-width="1"/>
+            <line x1="0" y1="5" x2="6" y2="5" stroke="#000" stroke-width="1"/>
+          </pattern>
+          <pattern id="fill" patternUnits="userSpaceOnUse" width="10" height="10">
+            <rect width="10" height="10" fill="#8a7550"/>
+            <circle cx="2" cy="2" r="1" fill="#6b5830"/>
+            <circle cx="7" cy="4" r="1" fill="#6b5830"/>
+            <circle cx="4" cy="7" r="1" fill="#6b5830"/>
+          </pattern>
+        </defs>
+        <line x1="0" y1="60" x2="960" y2="60" stroke="#6b6242" stroke-dasharray="3,3"/>
+        <text x="10" y="48" font-family="Inter" font-size="11" fill="#6b6242" font-weight="700">GROUND LEVEL · 0 ft</text>
+        <rect x="430" y="20" width="100" height="40" fill="#0a2749"/>
+        <text x="480" y="45" text-anchor="middle" font-family="Inter" font-size="11" fill="#fff" font-weight="700">WELLHEAD</text>
+        <rect x="414" y="60" width="12" height="160" fill="#555b6e"/>
+        <rect x="534" y="60" width="12" height="160" fill="#555b6e"/>
+        <rect x="404" y="60" width="10" height="160" fill="url(#cement)"/>
+        <rect x="546" y="60" width="10" height="160" fill="url(#cement)"/>
+        <text x="705" y="150" font-family="Inter" font-size="12" fill="#1a1a1a" font-weight="700">9-5/8 in. Surface Casing</text>
+        <text x="705" y="166" font-family="Inter" font-size="10" fill="#6b6242">0 - 586 ft · cemented to surface</text>
+        <rect x="420" y="60" width="6" height="1080" fill="#2a3b5a"/>
+        <rect x="534" y="60" width="6" height="1080" fill="#2a3b5a"/>
+        <rect x="426" y="742" width="6" height="398" fill="url(#cement)" opacity=".6"/>
+        <rect x="528" y="742" width="6" height="398" fill="url(#cement)" opacity=".6"/>
+        <text x="705" y="620" font-family="Inter" font-size="12" fill="#1a1a1a" font-weight="700">7 in. Production Casing</text>
+        <text x="705" y="636" font-family="Inter" font-size="10" fill="#6b6242">0 - 4,100 ft · liner shoe at TD</text>
+        <line x1="80" y1="742" x2="426" y2="742" stroke="#a59479" stroke-dasharray="4,3"/>
+        <text x="72" y="746" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#a59479">2,600 ft</text>
+        <text x="404" y="734" text-anchor="end" font-family="Inter" font-size="10" fill="#a59479" font-weight="700">TOP OF CEMENT</text>
+        <rect x="470" y="60" width="20" height="865" fill="#c8102e"/>
+        <text x="160" y="490" font-family="Inter" font-size="12" fill="#c8102e" font-weight="700">4-1/2 in. EUE POLYCORE TUBING</text>
+        <text x="160" y="508" font-family="Inter" font-size="10" fill="#1a1a1a">Western Falcon · 12.75 lb/ft · 3.4 in. min ID</text>
+        <text x="160" y="526" font-family="Inter" font-size="10" fill="#0d3811">Capacity corrected: 0.01123 bbl/ft</text>
+        <line x1="310" y1="500" x2="470" y2="500" stroke="#c8102e" stroke-dasharray="3,3"/>
+        <rect x="408" y="980" width="144" height="14" fill="#0a2749"/>
+        <rect x="408" y="978" width="144" height="2" fill="#c8102e"/>
+        <rect x="408" y="994" width="144" height="2" fill="#c8102e"/>
+        <text x="72" y="992" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#0a2749" font-weight="700">3,120 ft</text>
+        <text x="705" y="972" font-family="Inter" font-size="12" fill="#0a2749" font-weight="700">Packer @ 3,120 ft</text>
+        <text x="705" y="988" font-family="Inter" font-size="10" fill="#6b6242">Versatile On/Off unit · set June 2023</text>
+        <line x1="408" y1="1076" x2="552" y2="1076" stroke="#d97706" stroke-width="28"/>
+        <line x1="408" y1="1116" x2="552" y2="1116" stroke="#d97706" stroke-width="42"/>
+        <line x1="408" y1="1160" x2="552" y2="1160" stroke="#d97706" stroke-width="10"/>
+        <line x1="408" y1="1176" x2="552" y2="1176" stroke="#d97706" stroke-width="14"/>
+        <line x1="408" y1="1198" x2="552" y2="1198" stroke="#d97706" stroke-width="26"/>
+        <text x="72" y="1080" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,458 ft</text>
+        <text x="72" y="1120" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,568 ft</text>
+        <text x="72" y="1202" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,834 ft</text>
+        <text x="705" y="1100" font-family="Inter" font-size="12" fill="#7a3e00" font-weight="700">Active Disposal Perfs</text>
+        <text x="705" y="1116" font-family="Inter" font-size="10" fill="#7a3e00">5 intervals · 3,458-3,834 ft · 318 ft total</text>
+        <rect x="408" y="1112" width="144" height="0" fill="url(#perf)"/>
+        <rect x="408" y="1214" width="144" height="26" fill="url(#fill)"/>
+        <text x="72" y="1232" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#8a7550" font-weight="700">4,002 ft</text>
+        <text x="705" y="1230" font-family="Inter" font-size="12" fill="#6b5830" font-weight="700">PBTD / Fill @ 4,002 ft</text>
+        <text x="705" y="1246" font-family="Inter" font-size="10" fill="#6b6242">98 ft above TD</text>
+        <line x1="420" y1="1140" x2="540" y2="1140" stroke="#0a2749" stroke-width="2.5"/>
+        <text x="72" y="1144" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#0a2749" font-weight="700">4,100 ft TD</text>
+      </svg>
+    </div>
+    <aside class="legend">
+      <h3>Legend</h3>
+      <div class="group">
+        <div class="k"><span class="sw" style="background:#555b6e"></span>Surface casing</div>
+        <div class="k"><span class="sw" style="background:#2a3b5a"></span>Production casing</div>
+        <div class="k"><span class="sw" style="background:#c8102e"></span>Current 4-1/2 in. polycore tubing</div>
+        <div class="k"><span class="sw" style="background:#0a2749"></span>Packer</div>
+        <div class="k"><span class="sw" style="background:#d49a00"></span>Active disposal perforations</div>
+        <div class="k"><span class="sw" style="background:#8a7550"></span>Fill / PBTD</div>
+      </div>
+      <div class="small"><strong>Volumetrics:</strong> current tubing capacity is approximately <strong>0.01123 bbl/ft</strong> at 3.4 in. minimum ID.</div>
+    </aside>
+  </div>
+
+  <div class="section">
+    <h2>Current State — Well Construction Data</h2>
+    <table class="table">
+      <thead><tr><th>Component</th><th>Specification</th><th>Depth (MD)</th><th>Status / Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Conductor</strong></td><td class="mono">14 in.</td><td class="mono">0 - 40 ft</td><td>Original construction.</td></tr>
+        <tr><td><strong>Surface Casing</strong></td><td class="mono">9-5/8 in. · 36 lb/ft · J-55 STC</td><td class="mono">0 - 586 ft</td><td>Cemented to surface.</td></tr>
+        <tr><td><strong>Production Casing</strong></td><td class="mono">7 in. · 26 lb/ft · J-55 LTC</td><td class="mono">0 - 4,100 ft</td><td>Liner shoe at TD.</td></tr>
+        <tr><td><strong>Top of Cement</strong></td><td>Behind 7 in. casing</td><td class="mono">2,600 ft</td><td>Legacy value pending formal verification for future recompletion.</td></tr>
+        <tr><td><strong>Tubing</strong></td><td class="mono">4-1/2 in. EUE polycore · 12.75 lb/ft · 3.4 in. min ID</td><td class="mono">0 - ~3,100 ft</td><td><span class="status-ok">Resolved</span> Current string from 2023. Capacity corrected to <strong>0.01123 bbl/ft</strong>.</td></tr>
+        <tr><td><strong>Packer</strong></td><td>Versatile On/Off</td><td class="mono">3,120 ft</td><td><span class="status-ok">Resolved</span> Current setting from June 2023.</td></tr>
+        <tr><td><strong>Upper Zone</strong></td><td>Not perforated</td><td class="mono">~3,120 - 3,458 ft</td><td>Future target only. Not currently completed.</td></tr>
+        <tr><td><strong>Disposal Perforations</strong></td><td>5 intervals · active</td><td class="mono">3,458 - 3,834 ft</td><td><span class="status-ok">Resolved</span> 318 ft total active perforated interval.</td></tr>
+        <tr><td><strong>PBTD / Fill</strong></td><td>Current fill</td><td class="mono">4,002 - 4,100 ft</td><td><span class="status-ok">Resolved</span> 98 ft fill above TD.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer"><div>Tejas Environmental Solutions · Board-Confidential</div><div>Page 1 of 3 · Current State</div></div>
+</section>
+
+<section class="page">
+  <div class="header">
+    <div>
+      <div class="eyebrow">Well Schematic · Rev. 7 · Future State Corrected</div>
+      <div class="small">Future-state geometry rebuilt so production and disposal intervals no longer overlap.</div>
+    </div>
+    <div class="meta">April 2026 · Rev. 7<br><span style="color:var(--amber);font-weight:700">Concept updated for engineering sign-off</span></div>
+  </div>
+
+  <h1>After the Dual Completion</h1>
+  <p class="subtitle">Corrected concept - oil production from the upper zone while disposal continues below, with the geometry fixed.</p>
+
+  <div class="bar">
+    <div class="item"><div class="label">Permit Path</div><div class="val">W-14 Amendment</div></div>
+    <div class="item"><div class="label">Artificial Lift</div><div class="val">Jet Pump</div></div>
+    <div class="item"><div class="label">Revised Production Perfs</div><div class="val">3,200-3,360 and 3,380-3,448 ft</div></div>
+    <div class="item"><div class="label">Target Packer Window</div><div class="val">~3,450-3,458 ft</div></div>
+  </div>
+
+  <div class="warn">
+    <strong>Critical correction:</strong> the previous revision was geometrically impossible. It placed the future packer at ~3,565 ft while the active disposal zone already begins at 3,458 ft, and it let the proposed production interval overlap the disposal interval by 106 ft. This revision removes that conflict. The future concept now assumes <strong>production interval 2 is shortened to 3,380-3,448 ft</strong> and the <strong>new dual-bore packer is landed in the narrow 3,450-3,458 ft window</strong>, pending log confirmation.
+  </div>
+
+  <div class="note">
+    <strong>FUTURE STATE -</strong> A corrected parallel-string dual completion. One short string delivers power fluid down to the jet pump. One long string carries disposal fluid down through the dual-bore packer and discharges below the packer, above the active disposal interval. Produced oil and spent power fluid return up the annulus above the packer to the production outlet.
+  </div>
+
+  <div class="grid">
+    <div class="figure">
+      <svg viewBox="0 0 980 1240" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Corrected future state schematic">
+        <defs>
+          <pattern id="ann" patternUnits="userSpaceOnUse" width="14" height="14">
+            <rect width="14" height="14" fill="#1b5e20" fill-opacity="0.06"/>
+            <circle cx="4" cy="4" r="1.2" fill="#1b5e20" fill-opacity="0.3"/>
+            <circle cx="10" cy="9" r="1" fill="#1b5e20" fill-opacity="0.28"/>
+          </pattern>
+        </defs>
+        <line x1="0" y1="60" x2="980" y2="60" stroke="#6b6242" stroke-dasharray="3,3"/>
+        <text x="12" y="48" font-family="Inter" font-size="11" fill="#6b6242" font-weight="700">GROUND LEVEL · 0 ft</text>
+        <rect x="410" y="20" width="160" height="40" fill="#0a2749" stroke="#c8102e" stroke-width="2"/>
+        <text x="490" y="38" text-anchor="middle" font-family="Inter" font-size="11" fill="#fff" font-weight="700">DUAL WELLHEAD</text>
+        <text x="490" y="52" text-anchor="middle" font-family="Inter" font-size="9" fill="#b8c7dc">OIL OUT · PF IN · WASTE IN</text>
+        <rect x="424" y="60" width="6" height="1080" fill="#2a3b5a"/>
+        <rect x="550" y="60" width="6" height="1080" fill="#2a3b5a"/>
+        <rect x="430" y="60" width="30" height="995" fill="url(#ann)"/>
+        <rect x="520" y="60" width="30" height="995" fill="url(#ann)"/>
+        <rect x="466" y="60" width="18" height="920" fill="#c8102e"/>
+        <rect x="496" y="60" width="18" height="1010" fill="#006878"/>
+        <text x="120" y="350" font-family="Inter" font-size="12" fill="#c8102e" font-weight="700">Power fluid string</text>
+        <text x="120" y="366" font-family="Inter" font-size="10" fill="#1a1a1a">2-7/8 in. EUE down to jet pump</text>
+        <line x1="270" y1="358" x2="466" y2="358" stroke="#c8102e" stroke-dasharray="3,3"/>
+        <text x="760" y="270" font-family="Inter" font-size="12" fill="#006878" font-weight="700">Injection string</text>
+        <text x="760" y="286" font-family="Inter" font-size="10" fill="#1a1a1a">2-7/8 in. EUE through packer</text>
+        <line x1="760" y1="290" x2="514" y2="290" stroke="#006878" stroke-dasharray="3,3"/>
+        <text x="120" y="610" font-family="Inter" font-size="12" fill="#1b5e20" font-weight="700">Oil return - annulus up</text>
+        <text x="120" y="626" font-family="Inter" font-size="10" fill="#1a1a1a">Production returns above packer</text>
+        <line x1="290" y1="618" x2="444" y2="618" stroke="#1b5e20" stroke-dasharray="3,3"/>
+        <rect x="462" y="930" width="26" height="26" fill="#0a2749" stroke="#c8102e" stroke-width="1.5"/>
+        <text x="475" y="947" text-anchor="middle" font-family="Inter" font-size="10" fill="#fff" font-weight="700">JP</text>
+        <text x="760" y="930" font-family="Inter" font-size="12" fill="#0a2749" font-weight="700">Jet pump BHA @ ~3,100 ft</text>
+        <line x1="488" y1="943" x2="760" y2="938" stroke="#0a2749" stroke-dasharray="3,3"/>
+
+        <line x1="400" y1="1018" x2="556" y2="1018" stroke="#1b5e20" stroke-width="48"/>
+        <line x1="400" y1="1070" x2="556" y2="1070" stroke="#1b5e20" stroke-width="20"/>
+        <text x="72" y="1022" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#1b5e20">3,200 ft</text>
+        <text x="72" y="1074" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#1b5e20">3,380 ft</text>
+        <text x="72" y="1088" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#1b5e20">3,448 ft</text>
+        <text x="760" y="1010" font-family="Inter" font-size="12" fill="#1b5e20" font-weight="700">Revised production perfs</text>
+        <text x="760" y="1026" font-family="Inter" font-size="10" fill="#1b5e20">3,200-3,360 ft and 3,380-3,448 ft</text>
+        <text x="760" y="1042" font-family="Inter" font-size="10" fill="#6b6242">No overlap with active disposal zone</text>
+
+        <rect x="396" y="1090" width="164" height="14" fill="#0a2749"/>
+        <rect x="396" y="1088" width="164" height="2" fill="#c8102e"/>
+        <rect x="396" y="1104" width="164" height="2" fill="#c8102e"/>
+        <rect x="496" y="1090" width="18" height="14" fill="#006878"/>
+        <text x="72" y="1100" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#0a2749" font-weight="700">~3,450-3,458 ft</text>
+        <text x="760" y="1092" font-family="Inter" font-size="12" fill="#c8102e" font-weight="700">New dual-bore packer window</text>
+        <text x="760" y="1108" font-family="Inter" font-size="10" fill="#c8102e">Set between revised production and disposal intervals</text>
+        <text x="760" y="1124" font-family="Inter" font-size="10" fill="#6b6242">Final landing depth pending CCL / gamma-ray confirmation</text>
+
+        <line x1="400" y1="1148" x2="556" y2="1148" stroke="#d97706" stroke-width="28"/>
+        <line x1="400" y1="1188" x2="556" y2="1188" stroke="#d97706" stroke-width="42"/>
+        <text x="72" y="1152" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,458 ft</text>
+        <text x="72" y="1192" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,568 ft</text>
+        <text x="72" y="1220" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,834 ft</text>
+        <text x="760" y="1170" font-family="Inter" font-size="12" fill="#7a3e00" font-weight="700">Existing active disposal perfs</text>
+        <text x="760" y="1186" font-family="Inter" font-size="10" fill="#7a3e00">Remain 3,458-3,834 ft</text>
+
+        <line x1="514" y1="1110" x2="514" y2="1138" stroke="#006878" stroke-width="6"/>
+        <line x1="514" y1="1138" x2="556" y2="1138" stroke="#006878" stroke-width="6"/>
+        <text x="760" y="1140" font-family="Inter" font-size="10" fill="#006878">Injection discharge must remain below packer and above disposal intake path</text>
+      </svg>
+    </div>
+    <aside class="legend">
+      <h3>Legend - Future State</h3>
+      <div class="group">
+        <div class="k"><span class="sw" style="background:#c8102e"></span>Power fluid down</div>
+        <div class="k"><span class="sw" style="background:#006878"></span>Waste down</div>
+        <div class="k"><span class="sw" style="background:#e8f0e8"></span>Oil up annulus</div>
+        <div class="k"><span class="sw" style="background:#1b5e20"></span>Revised production perfs</div>
+        <div class="k"><span class="sw" style="background:#d49a00"></span>Existing disposal perfs</div>
+        <div class="k"><span class="sw" style="background:#0a2749"></span>Dual-bore packer window</div>
+      </div>
+      <div class="small"><strong>Important:</strong> this future page is now internally consistent, but the final packer landing depth still needs field confirmation because the available window is tight.</div>
+    </aside>
+  </div>
+
+  <div class="section">
+    <h2>Future State — Corrected Construction Basis</h2>
+    <table class="table">
+      <thead><tr><th>Component</th><th>Specification</th><th>Depth (MD)</th><th>Status / Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Power Fluid String</strong> <span class="status-new">New</span></td><td class="mono">2-7/8 in. EUE</td><td class="mono">0 - ~3,100 ft</td><td>Terminates at jet pump BHA above packer.</td></tr>
+        <tr><td><strong>Injection String</strong> <span class="status-new">New</span></td><td class="mono">2-7/8 in. EUE</td><td class="mono">0 - below packer</td><td>Must pass through dual-bore packer and discharge below it.</td></tr>
+        <tr><td><strong>New Packer</strong> <span class="status-new">New</span></td><td>Dual-bore</td><td class="mono">~3,450-3,458 ft</td><td><span class="status-flag">Corrected</span> Existing 3,120 ft packer must be pulled. Final depth pending log confirmation.</td></tr>
+        <tr><td><strong>Production Perfs</strong> <span class="status-new">New</span></td><td>2 intervals</td><td class="mono">3,200-3,360 ft<br>3,380-3,448 ft</td><td><span class="status-flag">Corrected</span> Revised to eliminate overlap with disposal interval. Total revised net = <strong>228 ft</strong>.</td></tr>
+        <tr><td><strong>Disposal Perfs</strong></td><td>Existing 5 intervals</td><td class="mono">3,458-3,834 ft</td><td>Unchanged active SWD interval.</td></tr>
+        <tr><td><strong>Jet Pump BHA</strong> <span class="status-new">New</span></td><td>Nozzle / throat assembly</td><td class="mono">~3,100 ft</td><td>Wireline serviceable.</td></tr>
+        <tr><td><strong>Dual Wellhead</strong> <span class="status-new">New</span></td><td>PF IN · OIL OUT · WASTE IN</td><td class="mono">Surface</td><td>Required for corrected dual-completion concept.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warn"><strong>Engineering hold point:</strong> because the packer window is narrow, this concept should be treated as <strong>pre-signoff engineering basis</strong> until a log confirms exact top-of-disposal placement and acceptable packer seating depth.</div>
+
+  <div class="footer"><div>Tejas Environmental Solutions · Board-Confidential</div><div>Page 2 of 3 · Future State Corrected</div></div>
+</section>
+
+<section class="page">
+  <div class="header">
+    <div>
+      <div class="eyebrow" style="color:var(--green)">Reconciliation Log · Rev. 7</div>
+      <div class="small">Summary of what was resolved and what was corrected in this update.</div>
+    </div>
+    <div class="meta">April 2026 · Rev. 7<br><span style="color:var(--green);font-weight:700">6 material items addressed</span></div>
+  </div>
+
+  <h1>Reconciliation Log</h1>
+  <p class="subtitle">What changed, why it changed, and what still needs sign-off.</p>
+
+  <div class="item-block">
+    <div class="item-head"><div class="num">1</div><h3>Packer depth</h3><span class="status-ok">Resolved</span></div>
+    <div class="item-body">Current packer depth remains <strong>3,120 ft</strong> based on June 2023 Tejas workover reports. Older 3,205 ft and 3,149/3,150 ft references are historical states, not current state.</div>
+  </div>
+
+  <div class="item-block">
+    <div class="item-head"><div class="num">2</div><h3>Packer manufacturer era</h3><span class="status-ok">Resolved</span></div>
+    <div class="item-body">The current packer is treated as a <strong>Versatile On/Off unit from the 2023 workover era</strong>. Legacy D&amp;L references should not be carried into the current-state narrative.</div>
+  </div>
+
+  <div class="item-block">
+    <div class="item-head"><div class="num">3</div><h3>Active disposal perforations</h3><span class="status-ok">Resolved</span></div>
+    <div class="item-body">Correct active disposal intervals are <strong>five intervals from 3,458-3,834 ft totaling 318 ft</strong>. The simplified two-interval representation is no longer used as the current basis.</div>
+  </div>
+
+  <div class="item-block">
+    <div class="item-head"><div class="num">4</div><h3>PBTD / fill</h3><span class="status-ok">Resolved</span></div>
+    <div class="item-body">Current PBTD is <strong>4,002 ft</strong>. The old 3,820 ft sediment reference was legacy original-state information, not current well condition.</div>
+  </div>
+
+  <div class="item-block">
+    <div class="item-head"><div class="num">5</div><h3>Current tubing spec and volumetrics</h3><span class="status-ok">Resolved</span></div>
+    <div class="item-body">Current tubing is <strong>4-1/2 in. EUE polycore, 12.75 lb/ft, 3.4 in. minimum ID</strong>. The old 0.00579 bbl/ft number was removed as a current-state value and replaced with <strong>0.01123 bbl/ft</strong>.</div>
+  </div>
+
+  <div class="item-block">
+    <div class="item-head"><div class="num">6</div><h3>Future-state geometry</h3><span class="status-flag">Corrected</span></div>
+    <div class="item-body">
+      The prior future-state drawing had three internal contradictions: (1) packer below the top of disposal, (2) production interval overlapping disposal interval, and (3) injection discharge inconsistent with the new packer location. Rev. 7 corrects that by:
+      <ul>
+        <li>shortening production interval 2 to <strong>3,380-3,448 ft</strong></li>
+        <li>moving the target dual-bore packer window to <strong>~3,450-3,458 ft</strong></li>
+        <li>requiring injection discharge to remain <strong>below the packer</strong></li>
+      </ul>
+      Final placement still needs field confirmation.
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Summary Table</h2>
+    <table class="table">
+      <thead><tr><th>#</th><th>Item</th><th>Status</th><th>Current / Corrected Value</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td>Packer depth</td><td><span class="status-ok">Resolved</span></td><td class="mono">3,120 ft</td><td>Use as current state.</td></tr>
+        <tr><td class="mono">2</td><td>Packer manufacturer era</td><td><span class="status-ok">Resolved</span></td><td>Versatile On/Off</td><td>Carry forward as current basis until exact model ticket is pulled.</td></tr>
+        <tr><td class="mono">3</td><td>Disposal perforations</td><td><span class="status-ok">Resolved</span></td><td class="mono">3,458-3,834 ft · 5 intervals · 318 ft</td><td>Update all downstream references.</td></tr>
+        <tr><td class="mono">4</td><td>PBTD</td><td><span class="status-ok">Resolved</span></td><td class="mono">4,002 ft</td><td>Use as current cleanout basis.</td></tr>
+        <tr><td class="mono">5</td><td>Tubing / capacity</td><td><span class="status-ok">Resolved</span></td><td class="mono">4-1/2 in. polycore · 0.01123 bbl/ft</td><td>Recalculate any displacement or batch volumes.</td></tr>
+        <tr><td class="mono">6</td><td>Future-state geometry</td><td><span class="status-flag">Corrected</span></td><td>Prod 2 shortened; packer window shifted to ~3,450-3,458 ft</td><td>Confirm with log before sign-off.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer"><div>Tejas Environmental Solutions · Board-Confidential · Engineer Sign-Off Recommended</div><div>Page 3 of 3 · Reconciliation Log</div></div>
+</section>
+
+</div>
+
+<footer style="background:var(--navy-deep);color:#b8c7dc;padding:28px 0;margin-top:40px">
+  <div class="doc" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
+    <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase"><span style="color:#fff;font-weight:700">Tejas Environmental Solutions</span><br><span style="font-size:10px;color:#8a9bb4">Proudly Texas Owned</span></div>
+    <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;text-align:right;color:#8a9bb4">WE Big Lake SWD Well #2 · Permit #14600<br>Confidential · April 2026 · Rev. 7 Corrected</div>
+  </div>
+</footer>
+</body>
+</html>
