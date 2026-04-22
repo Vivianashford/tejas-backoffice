@@ -1,419 +1,1292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>WE Big Lake SWD Well #2 — Rev. 7 Corrected</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WE Big Lake SWD Well #2 — Well Schematics & Reconciliation | Tejas Environmental Solutions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --navy:#0a2749;
-  --navy-deep:#071c36;
-  --crimson:#c8102e;
-  --cream:#f1ece0;
-  --paper:#fcfaf5;
-  --rule:#d8cfb8;
-  --ink:#1a1a1a;
-  --soft:#4a4a4a;
-  --muted:#8a8578;
-  --green:#1b5e20;
-  --green-bg:#eaf4ea;
-  --amber:#d97706;
-  --amber-bg:#fff4e6;
-  --red-bg:#fde2e2;
-  --body:'Inter',sans-serif;
-  --serif:'Fraunces',serif;
-  --mono:'JetBrains Mono',monospace;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.6}
-.brand{background:var(--navy);color:#fff;border-bottom:3px solid var(--crimson)}
-.brand-inner,.doc{max-width:1280px;margin:0 auto;padding:0 40px}
-.brand-inner{display:flex;justify-content:space-between;align-items:center;gap:24px;padding-top:18px;padding-bottom:18px}
-.logo{font-weight:700;letter-spacing:.08em;font-size:14px}.logo small{display:block;color:#b8c7dc;font-weight:500;letter-spacing:.16em;text-transform:uppercase;font-size:10px}
-.conf{border:1px solid var(--crimson);padding:6px 12px;color:var(--crimson);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}
-.page{background:#fff;margin:40px 0;padding:56px 64px;box-shadow:0 8px 30px rgba(10,39,73,.08);border-top:1px solid var(--rule)}
-.header{display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid var(--rule);padding-bottom:18px;margin-bottom:32px}
-.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);font-weight:700}
-.meta{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-align:right}
-h1{font-family:var(--serif);font-size:48px;line-height:1.05;color:var(--navy);margin:0 0 10px}
-.subtitle{font-family:var(--serif);font-style:italic;font-size:21px;color:var(--soft);margin:0 0 28px}
-.bar{display:grid;grid-template-columns:repeat(4,1fr);background:var(--cream);border-left:4px solid var(--crimson);margin:0 0 28px}
-.bar .item{padding:18px 20px}.bar .item+.item{border-left:1px solid var(--rule)}
-.label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px}
-.val{font-family:var(--mono);font-size:13px;color:var(--navy)}
-.note,.warn,.ok{padding:18px 22px;margin:24px 0;border-left:4px solid}
-.note{background:#fcfaf5;border-color:var(--navy);color:var(--soft)}
-.warn{background:var(--amber-bg);border-color:var(--amber)}
-.ok{background:var(--green-bg);border-color:var(--green)}
-.grid{display:grid;grid-template-columns:1fr 300px;gap:28px;align-items:start;margin:34px 0}
-.figure{background:linear-gradient(180deg,#fcfaf5,#f4efe2);border:1px solid var(--rule);padding:28px}
-.legend{border:1px solid var(--rule);padding:22px;background:#fff}
-.legend h3,.section h2{font-family:var(--serif);color:var(--navy);margin:0 0 14px}
-.legend h3{font-size:18px;border-bottom:2px solid var(--crimson);padding-bottom:8px}
-.legend .group{margin-bottom:18px}.k{display:flex;gap:10px;align-items:center;padding:4px 0;font-size:12px}.sw{width:22px;height:14px;border:1px solid rgba(0,0,0,.12)}
-.table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
-.table th{background:var(--navy);color:#fff;text-align:left;padding:14px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
-.table td{padding:14px 16px;border-bottom:1px solid var(--rule);vertical-align:top}.table tr:nth-child(even) td{background:var(--paper)}
-.mono{font-family:var(--mono)}
-.status-ok,.status-new,.status-flag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700}
-.status-ok{background:var(--green-bg);color:#0d3811}.status-new{background:var(--red-bg);color:#8b0f24}.status-flag{background:var(--amber-bg);color:#7a3e00}
-.item-block{border:1px solid var(--rule);margin:0 0 28px;background:#fff}
-.item-head{display:flex;gap:18px;align-items:center;padding:18px 24px;background:var(--cream);border-bottom:1px solid var(--rule)}
-.num{width:42px;height:42px;border-radius:0;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:22px}
-.item-head h3{margin:0;flex:1;font-family:var(--serif);font-size:24px;color:var(--navy)}
-.item-body{padding:24px 28px}
-.footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
-.small{font-size:12px;color:var(--soft)}
-@media (max-width:1100px){.grid{grid-template-columns:1fr}.bar{grid-template-columns:repeat(2,1fr)}.page{padding:36px 28px}h1{font-size:34px}}
-@media print{body{background:#fff}.page{box-shadow:none;margin:0;page-break-after:always}}
+  :root {
+    --tejas-navy: #0a2749;
+    --tejas-navy-deep: #071c36;
+    --tejas-navy-soft: #143a6b;
+    --tejas-crimson: #c8102e;
+    --tejas-crimson-dk: #9a0b22;
+    --tejas-ivory: #f8f5ee;
+    --tejas-cream: #f1ece0;
+    --tejas-paper: #fcfaf5;
+    --tejas-rule: #d8cfb8;
+    --tejas-ink: #1a1a1a;
+    --tejas-ink-soft: #4a4a4a;
+    --tejas-ink-muted: #8a8578;
+    --flag-bg: #fff4e6;
+    --flag-border: #d97706;
+    --flag-ink: #7a3e00;
+    --resolved-bg: #eaf4ea;
+    --resolved-border: #1b5e20;
+    --resolved-ink: #0d3811;
+    --body-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --serif-font: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --mono-font: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--body-font);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--tejas-ink);
+    background: var(--tejas-paper);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .brand-bar {
+    background: var(--tejas-navy);
+    color: #fff;
+    padding: 18px 0;
+    border-bottom: 3px solid var(--tejas-crimson);
+  }
+  .brand-bar-inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+  }
+  .brand-logo { display: flex; align-items: center; gap: 16px; }
+  .brand-logo-mark { width: 44px; height: 44px; }
+  .brand-logo-text { display: flex; flex-direction: column; line-height: 1; }
+  .brand-logo-text .t-name { font-weight: 700; font-size: 14px; letter-spacing: 0.06em; color: #fff; }
+  .brand-logo-text .t-sub { font-weight: 400; font-size: 10px; letter-spacing: 0.14em; color: #b8c7dc; text-transform: uppercase; margin-top: 4px; }
+  .brand-tagline {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--tejas-crimson); font-weight: 600;
+    border-left: 1px solid rgba(255,255,255,0.2); padding-left: 24px;
+  }
+  .brand-tagline span { color: #b8c7dc; font-weight: 400; display: block; margin-top: 3px; }
+  .brand-confidential {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--tejas-crimson); font-weight: 600;
+    border: 1px solid var(--tejas-crimson); padding: 6px 14px;
+  }
+
+  .doc { max-width: 1320px; margin: 0 auto; padding: 0 48px; }
+  .page {
+    background: #fff;
+    margin: 48px 0;
+    padding: 72px 88px;
+    box-shadow: 0 1px 3px rgba(10,39,73,0.06), 0 10px 40px rgba(10,39,73,0.08);
+    border-top: 1px solid var(--tejas-rule);
+  }
+  .page-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 20px; border-bottom: 1px solid var(--tejas-rule); margin-bottom: 44px;
+    gap: 24px;
+  }
+  .page-header .eyebrow {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--tejas-crimson); font-weight: 600; margin-bottom: 6px;
+  }
+  .page-header .meta-right {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--tejas-ink-muted); text-align: right; flex-shrink: 0;
+  }
+  h1.page-title {
+    font-family: var(--serif-font); font-weight: 600; font-size: 52px; line-height: 1.08;
+    color: var(--tejas-navy); margin: 0 0 12px; letter-spacing: -0.015em;
+  }
+  .page-subtitle {
+    font-family: var(--serif-font); font-style: italic; font-weight: 400; font-size: 22px;
+    color: var(--tejas-ink-soft); margin: 0 0 32px; line-height: 1.4;
+  }
+
+  .permit-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    background: var(--tejas-cream); padding: 20px 28px; margin-bottom: 40px;
+    border-left: 4px solid var(--tejas-crimson);
+  }
+  .permit-item { padding-right: 16px; }
+  .permit-item + .permit-item { border-left: 1px solid var(--tejas-rule); padding-left: 24px; }
+  .permit-label {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--tejas-ink-muted); font-weight: 600; margin-bottom: 4px;
+  }
+  .permit-value { font-family: var(--mono-font); font-size: 13px; color: var(--tejas-navy); font-weight: 500; }
+  .permit-value strong { color: var(--tejas-crimson-dk); font-weight: 600; }
+
+  .narrative {
+    background: #fcfaf5; border-left: 3px solid var(--tejas-navy);
+    padding: 24px 28px; margin: 32px 0 40px;
+    font-size: 14.5px; line-height: 1.7; color: var(--tejas-ink-soft);
+  }
+  .narrative strong { color: var(--tejas-navy); font-weight: 600; }
+  .narrative .kw { color: var(--tejas-crimson-dk); font-weight: 600; }
+
+  .flag-banner {
+    background: var(--flag-bg); border: 1px solid var(--flag-border);
+    border-left: 4px solid var(--flag-border);
+    padding: 18px 24px; margin: 28px 0;
+    display: flex; gap: 18px; align-items: flex-start;
+  }
+  .flag-banner.resolved { background: var(--resolved-bg); border-color: var(--resolved-border); }
+  .flag-banner .flag-icon {
+    width: 28px; height: 28px; flex-shrink: 0;
+    background: var(--flag-border); color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .flag-banner.resolved .flag-icon { background: var(--resolved-border); }
+  .flag-banner .flag-body { flex: 1; font-size: 13.5px; line-height: 1.55; }
+  .flag-banner .flag-title {
+    font-weight: 700; color: var(--flag-ink);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .flag-banner.resolved .flag-title { color: var(--resolved-ink); }
+  .flag-banner a {
+    color: var(--flag-ink); font-weight: 600;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .flag-banner.resolved a { color: var(--resolved-ink); }
+
+  .flag-inline, .resolved-inline {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: #fff; font-size: 9px; font-weight: 700;
+    letter-spacing: 0.1em; padding: 2px 6px; margin-left: 6px;
+    vertical-align: middle; text-transform: uppercase;
+    border-radius: 2px; text-decoration: none;
+    cursor: pointer; font-family: var(--body-font);
+  }
+  .flag-inline { background: var(--flag-border); }
+  .flag-inline:hover { background: #b45309; }
+  .resolved-inline { background: var(--resolved-border); }
+  .resolved-inline:hover { background: #14431a; }
+
+  .schematic-wrap {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 32px;
+    margin: 48px 0;
+    align-items: flex-start;
+  }
+  .schematic-svg-box {
+    background: linear-gradient(180deg, #fcfaf5 0%, #f4efe2 100%);
+    border: 1px solid var(--tejas-rule);
+    padding: 32px;
+    position: relative;
+  }
+  .schematic-svg-box::before {
+    content: 'NOT TO SCALE · LINEAR DEPTH';
+    position: absolute; top: 16px; right: 20px;
+    font-size: 9px; letter-spacing: 0.2em;
+    color: var(--tejas-ink-muted); font-weight: 600;
+  }
+  .schematic-svg-box svg { width: 100%; height: auto; display: block; }
+
+  .legend {
+    background: #fff; border: 1px solid var(--tejas-rule);
+    padding: 26px 24px; font-size: 12.5px;
+  }
+  .legend h3 {
+    font-family: var(--serif-font); font-size: 18px; font-weight: 600;
+    margin: 0 0 14px; color: var(--tejas-navy);
+    padding-bottom: 10px; border-bottom: 2px solid var(--tejas-crimson);
+  }
+  .legend-group { margin-bottom: 20px; }
+  .legend-group:last-child { margin-bottom: 0; }
+  .legend-group-title {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--tejas-ink-muted); font-weight: 700; margin-bottom: 10px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; line-height: 1.5; }
+  .legend-swatch { width: 22px; height: 14px; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.1); }
+  .legend-swatch.striped {
+    background-image: repeating-linear-gradient(45deg, #a59479 0, #a59479 3px, #c9b890 3px, #c9b890 6px);
+  }
+  .legend-swatch.perf-d {
+    background: #d49a00;
+    background-image: repeating-linear-gradient(90deg, #d49a00 0 3px, #000 3px 4px);
+  }
+  .legend-swatch.perf-p {
+    background: #1b5e20;
+    background-image: repeating-linear-gradient(90deg, #1b5e20 0 3px, #000 3px 4px);
+  }
+  .legend-swatch.sediment {
+    background: #8a7550;
+    background-image: radial-gradient(circle at 3px 3px, rgba(0,0,0,0.25) 1px, transparent 1px);
+    background-size: 6px 6px;
+  }
+  .legend-swatch.annulus {
+    background: #e8f0e8;
+    background-image: radial-gradient(circle at 4px 4px, rgba(27,94,32,0.4) 1px, transparent 1px);
+    background-size: 7px 7px;
+  }
+  .legend-sub-explainer {
+    font-size: 11.5px; line-height: 1.55; color: var(--tejas-ink-soft);
+    background: var(--tejas-paper); padding: 12px 14px; border-left: 2px solid var(--tejas-navy);
+  }
+  .legend-sub-explainer strong { color: var(--tejas-navy); }
+
+  .table-section { margin: 64px 0 24px; }
+  .table-section h2 {
+    font-family: var(--serif-font); font-size: 28px; font-weight: 600; color: var(--tejas-navy);
+    margin: 0 0 6px; letter-spacing: -0.01em;
+  }
+  .table-section .table-lead {
+    font-family: var(--serif-font); font-style: italic; color: var(--tejas-ink-soft);
+    font-size: 15px; margin: 0 0 24px;
+  }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; }
+  .data-table thead th {
+    background: var(--tejas-navy); color: #fff; font-weight: 600;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 14px 16px; text-align: left;
+    border-right: 1px solid rgba(255,255,255,0.12);
+  }
+  .data-table thead th:last-child { border-right: none; }
+  .data-table tbody td {
+    padding: 16px 18px; border-bottom: 1px solid var(--tejas-rule);
+    vertical-align: top; line-height: 1.55;
+  }
+  .data-table tbody tr:nth-child(even) td { background: var(--tejas-paper); }
+  .data-table tbody tr:hover td { background: var(--tejas-cream); }
+  .data-table td strong { color: var(--tejas-navy); }
+  .data-table .mono { font-family: var(--mono-font); font-size: 12.5px; }
+  .data-table .status-flag {
+    color: var(--flag-ink); background: var(--flag-bg);
+    padding: 2px 8px; border-radius: 3px; font-weight: 600;
+    font-size: 11px; letter-spacing: 0.04em; display: inline-block;
+  }
+  .data-table .status-resolved {
+    color: var(--resolved-ink); background: var(--resolved-bg);
+    padding: 2px 8px; border-radius: 3px; font-weight: 600;
+    font-size: 11px; letter-spacing: 0.04em; display: inline-block;
+  }
+  .data-table .status-new {
+    color: var(--tejas-crimson-dk); background: #fde2e2;
+    padding: 2px 8px; border-radius: 3px; font-weight: 600;
+    font-size: 11px; letter-spacing: 0.04em; display: inline-block;
+  }
+
+  .page-footer {
+    margin-top: 56px; padding-top: 20px;
+    border-top: 1px solid var(--tejas-rule);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--tejas-ink-muted);
+  }
+  .page-footer .f-name { color: var(--tejas-navy); font-weight: 600; }
+
+  .disc-page {
+    background: linear-gradient(180deg, #fff 0%, #faf6ec 100%);
+    border-top: 4px solid var(--resolved-border);
+  }
+  .disc-intro {
+    background: var(--resolved-bg); border: 1px solid var(--resolved-border);
+    padding: 28px 32px; margin: 0 0 40px;
+  }
+  .disc-intro h3 {
+    font-family: var(--serif-font); font-size: 22px; color: var(--resolved-ink);
+    margin: 0 0 10px; font-weight: 600;
+  }
+  .disc-intro p { margin: 0 0 12px; font-size: 14.5px; line-height: 1.65; color: var(--tejas-ink); }
+  .disc-intro p:last-child { margin-bottom: 0; }
+
+  .disc-item {
+    background: #fff;
+    border: 1px solid var(--tejas-rule);
+    border-left: 5px solid var(--resolved-border);
+    margin-bottom: 36px; overflow: hidden;
+  }
+  .disc-item.partial { border-left-color: var(--flag-border); }
+  .disc-item.new-finding { border-left-color: var(--tejas-crimson); }
+  .disc-item-header {
+    display: flex; align-items: center; gap: 20px;
+    padding: 22px 32px;
+    background: var(--tejas-cream);
+    border-bottom: 1px solid var(--tejas-rule);
+  }
+  .disc-num {
+    width: 44px; height: 44px;
+    background: var(--tejas-navy); color: #fff;
+    font-family: var(--serif-font); font-weight: 700; font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .disc-item-title {
+    font-family: var(--serif-font);
+    font-size: 22px; font-weight: 600; color: var(--tejas-navy);
+    margin: 0; letter-spacing: -0.005em; flex: 1;
+  }
+  .disc-status-pill {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 700; padding: 6px 14px; border-radius: 3px; white-space: nowrap;
+  }
+  .disc-status-pill.resolved { background: var(--resolved-border); color: #fff; }
+  .disc-status-pill.partial { background: var(--flag-border); color: #fff; }
+  .disc-status-pill.new-finding { background: var(--tejas-crimson); color: #fff; }
+
+  .disc-body { padding: 32px 36px; }
+  .disc-summary { font-size: 14.5px; line-height: 1.7; color: var(--tejas-ink); margin: 0 0 20px; }
+  .disc-summary strong { color: var(--tejas-navy); font-weight: 700; }
+
+  .evidence-trail { margin: 24px 0 8px; border: 1px solid var(--tejas-rule); background: var(--tejas-paper); }
+  .evidence-trail-header {
+    padding: 14px 20px; background: var(--tejas-navy); color: #fff;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700;
+  }
+  .evidence-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 160px;
+    gap: 20px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--tejas-rule);
+    font-size: 13px;
+    line-height: 1.55;
+    align-items: baseline;
+  }
+  .evidence-row:last-child { border-bottom: none; }
+  .evidence-row.winner { background: #f4faf4; }
+  .evidence-row .ev-source {
+    font-weight: 600; color: var(--tejas-navy); font-size: 12px;
+  }
+  .evidence-row .ev-source em {
+    display: block; font-style: normal; font-size: 10.5px;
+    color: var(--tejas-ink-muted); font-weight: 400; margin-top: 3px;
+  }
+  .evidence-row .ev-quote {
+    color: var(--tejas-ink-soft); font-family: var(--mono-font);
+    font-size: 12px; line-height: 1.55;
+  }
+  .evidence-row .ev-quote strong {
+    color: var(--tejas-navy); font-weight: 700;
+    background: rgba(27,94,32,0.1); padding: 1px 4px;
+  }
+  .evidence-row .ev-date {
+    font-size: 10.5px; color: var(--tejas-ink-muted);
+    letter-spacing: 0.06em; text-transform: uppercase; text-align: right;
+  }
+
+  .disc-conclusion {
+    background: var(--resolved-bg); border-left: 4px solid var(--resolved-border);
+    padding: 20px 26px; margin: 24px 0 0;
+  }
+  .disc-conclusion.partial { background: var(--flag-bg); border-left-color: var(--flag-border); }
+  .disc-conclusion.new-finding { background: #fde2e2; border-left-color: var(--tejas-crimson); }
+  .disc-conclusion-label {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--resolved-ink); font-weight: 700; margin-bottom: 8px;
+  }
+  .disc-conclusion.partial .disc-conclusion-label { color: var(--flag-ink); }
+  .disc-conclusion.new-finding .disc-conclusion-label { color: var(--tejas-crimson-dk); }
+  .disc-conclusion-text { font-size: 14px; line-height: 1.65; color: var(--tejas-ink); margin: 0; }
+  .disc-conclusion-text strong { color: var(--tejas-navy); font-weight: 700; }
+
+  .disc-action {
+    margin-top: 18px; padding-top: 18px;
+    border-top: 1px dashed var(--tejas-rule);
+    display: grid; grid-template-columns: 150px 1fr; gap: 22px;
+    font-size: 13px; line-height: 1.6;
+  }
+  .disc-action-label {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--tejas-ink-muted); font-weight: 700; padding-top: 2px;
+  }
+  .disc-action-body { color: var(--tejas-ink-soft); }
+  .disc-action-body strong { color: var(--tejas-navy); }
+
+  .anchor-target { scroll-margin-top: 40px; }
+
+  @media (max-width: 1100px) {
+    .doc { padding: 0 24px; }
+    .page { padding: 48px 36px; }
+    .schematic-wrap { grid-template-columns: 1fr; }
+    .permit-bar { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .permit-item + .permit-item { border-left: none; padding-left: 0; }
+    h1.page-title { font-size: 36px; }
+    .evidence-row { grid-template-columns: 1fr; gap: 6px; }
+    .evidence-row .ev-date { text-align: left; }
+  }
+  @media (max-width: 640px) {
+    .brand-bar-inner { flex-wrap: wrap; padding: 0 20px; }
+    .brand-tagline { padding-left: 0; border-left: none; }
+    .page { padding: 32px 20px; }
+    h1.page-title { font-size: 28px; }
+    .page-header { flex-direction: column; gap: 8px; }
+    .page-header .meta-right { text-align: left; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    .brand-bar { position: static; }
+    .page { box-shadow: none; margin: 0; page-break-after: always; padding: 40px; }
+    .flag-banner, .disc-item { break-inside: avoid; }
+  }
 </style>
 </head>
 <body>
-<header class="brand">
-  <div class="brand-inner">
-    <div class="logo">TEJAS ENVIRONMENTAL<small>Solutions</small></div>
-    <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--crimson);font-weight:700">Proudly Texas Owned</div>
-    <div class="conf">Confidential</div>
+
+<header class="brand-bar">
+  <div class="brand-bar-inner">
+    <div class="brand-logo">
+      <div class="brand-logo-mark">
+        <svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true">
+          <path d="M6 10 L20 9 L22 3 L26 4 L26 9 L38 10 L38 20 L36 22 L36 28 L32 34 L26 36 L24 40 L20 38 L16 36 L12 34 L8 28 L6 24 Z"
+                fill="#ffffff" stroke="#c8102e" stroke-width="1.5"/>
+          <path d="M18 18 L19.5 21.5 L23 22 L20.5 24.5 L21 28 L18 26.3 L15 28 L15.5 24.5 L13 22 L16.5 21.5 Z"
+                fill="#c8102e"/>
+        </svg>
+      </div>
+      <div class="brand-logo-text">
+        <span class="t-name">TEJAS ENVIRONMENTAL</span>
+        <span class="t-sub">Solutions</span>
+      </div>
+    </div>
+    <div class="brand-tagline">
+      Proudly Texas Owned
+      <span>and Committed</span>
+    </div>
+    <div class="brand-confidential">Confidential</div>
   </div>
 </header>
 
 <div class="doc">
 
-<section class="page">
-  <div class="header">
+<!-- ================================================================
+     PAGE 1 — CURRENT STATE (forensically reconciled)
+     ================================================================ -->
+<section class="page" id="current-state">
+  <div class="page-header">
     <div>
-      <div class="eyebrow">Well Schematic · Rev. 7 · Current State Corrected</div>
-      <div class="small">Values reconciled against 2014 legacy schematic, 2015 RRC permit amendment, 2018-2019 maintenance records, 2019 CT cleanout reports, and 2023 Tejas workover reports.</div>
+      <div class="eyebrow">Well Schematic · Rev. 6 · Forensically Reconciled</div>
+      <div style="font-family: var(--serif-font); font-size: 14px; font-style: italic; color: var(--tejas-ink-soft);">
+        Values reconciled against 2014 legacy schematic, 2015 RRC permit amendment, 2018–2019 maintenance records, 2019 coiled-tubing cleanout reports, and 2023 Tejas workover daily reports.
+      </div>
     </div>
-    <div class="meta">April 2026 · Rev. 7<br><span style="color:var(--green);font-weight:700">Current-state values reconciled</span></div>
-  </div>
-
-  <h1>WE Big Lake SWD Well #2</h1>
-  <p class="subtitle">Current state - as last worked in June 2023 by Tejas Environmental.</p>
-
-  <div class="bar">
-    <div class="item"><div class="label">Permit</div><div class="val">#14600 · Commercial Amendment</div></div>
-    <div class="item"><div class="label">API</div><div class="val">42-383-39122</div></div>
-    <div class="item"><div class="label">UIC / District</div><div class="val">000110133 · 7C</div></div>
-    <div class="item"><div class="label">Location</div><div class="val">Reagan County, TX</div></div>
-  </div>
-
-  <div class="note">
-    <strong>CURRENT STATE -</strong> Commercial saltwater disposal well in service since roughly 2015. Waste fluid enters surface facilities, travels down the <strong>4-1/2 in. polycore-lined tubing</strong>, passes through the packer set at <strong>3,120 ft</strong>, and injects into the San Andres disposal interval through <strong>five active perforated intervals from 3,458-3,834 ft</strong>. The upper zone above the packer is currently uncompleted. The most recent major intervention was the June 2023 Tejas workover.
-  </div>
-
-  <div class="ok"><strong>Resolved:</strong> packer depth, packer manufacturer era, active disposal intervals, current PBTD, and current tubing spec have been brought into alignment. The previous volumetric error has also been corrected: <strong>4-1/2 in. polycore with 3.4 in. minimum ID is about 0.01123 bbl/ft</strong>, not 0.00579 bbl/ft.</div>
-
-  <div class="grid">
-    <div class="figure">
-      <svg viewBox="0 0 960 1220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Current state schematic corrected">
-        <defs>
-          <pattern id="cement" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-            <rect width="8" height="8" fill="#c9b890"/>
-            <line x1="0" y1="0" x2="0" y2="8" stroke="#a59479" stroke-width="2"/>
-          </pattern>
-          <pattern id="perf" patternUnits="userSpaceOnUse" width="6" height="10">
-            <rect width="6" height="10" fill="#d49a00"/>
-            <line x1="0" y1="0" x2="6" y2="0" stroke="#000" stroke-width="1"/>
-            <line x1="0" y1="5" x2="6" y2="5" stroke="#000" stroke-width="1"/>
-          </pattern>
-          <pattern id="fill" patternUnits="userSpaceOnUse" width="10" height="10">
-            <rect width="10" height="10" fill="#8a7550"/>
-            <circle cx="2" cy="2" r="1" fill="#6b5830"/>
-            <circle cx="7" cy="4" r="1" fill="#6b5830"/>
-            <circle cx="4" cy="7" r="1" fill="#6b5830"/>
-          </pattern>
-        </defs>
-        <line x1="0" y1="60" x2="960" y2="60" stroke="#6b6242" stroke-dasharray="3,3"/>
-        <text x="10" y="48" font-family="Inter" font-size="11" fill="#6b6242" font-weight="700">GROUND LEVEL · 0 ft</text>
-        <rect x="430" y="20" width="100" height="40" fill="#0a2749"/>
-        <text x="480" y="45" text-anchor="middle" font-family="Inter" font-size="11" fill="#fff" font-weight="700">WELLHEAD</text>
-        <rect x="414" y="60" width="12" height="160" fill="#555b6e"/>
-        <rect x="534" y="60" width="12" height="160" fill="#555b6e"/>
-        <rect x="404" y="60" width="10" height="160" fill="url(#cement)"/>
-        <rect x="546" y="60" width="10" height="160" fill="url(#cement)"/>
-        <text x="705" y="150" font-family="Inter" font-size="12" fill="#1a1a1a" font-weight="700">9-5/8 in. Surface Casing</text>
-        <text x="705" y="166" font-family="Inter" font-size="10" fill="#6b6242">0 - 586 ft · cemented to surface</text>
-        <rect x="420" y="60" width="6" height="1080" fill="#2a3b5a"/>
-        <rect x="534" y="60" width="6" height="1080" fill="#2a3b5a"/>
-        <rect x="426" y="742" width="6" height="398" fill="url(#cement)" opacity=".6"/>
-        <rect x="528" y="742" width="6" height="398" fill="url(#cement)" opacity=".6"/>
-        <text x="705" y="620" font-family="Inter" font-size="12" fill="#1a1a1a" font-weight="700">7 in. Production Casing</text>
-        <text x="705" y="636" font-family="Inter" font-size="10" fill="#6b6242">0 - 4,100 ft · liner shoe at TD</text>
-        <line x1="80" y1="742" x2="426" y2="742" stroke="#a59479" stroke-dasharray="4,3"/>
-        <text x="72" y="746" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#a59479">2,600 ft</text>
-        <text x="404" y="734" text-anchor="end" font-family="Inter" font-size="10" fill="#a59479" font-weight="700">TOP OF CEMENT</text>
-        <rect x="470" y="60" width="20" height="865" fill="#c8102e"/>
-        <text x="160" y="490" font-family="Inter" font-size="12" fill="#c8102e" font-weight="700">4-1/2 in. EUE POLYCORE TUBING</text>
-        <text x="160" y="508" font-family="Inter" font-size="10" fill="#1a1a1a">Western Falcon · 12.75 lb/ft · 3.4 in. min ID</text>
-        <text x="160" y="526" font-family="Inter" font-size="10" fill="#0d3811">Capacity corrected: 0.01123 bbl/ft</text>
-        <line x1="310" y1="500" x2="470" y2="500" stroke="#c8102e" stroke-dasharray="3,3"/>
-        <rect x="408" y="980" width="144" height="14" fill="#0a2749"/>
-        <rect x="408" y="978" width="144" height="2" fill="#c8102e"/>
-        <rect x="408" y="994" width="144" height="2" fill="#c8102e"/>
-        <text x="72" y="992" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#0a2749" font-weight="700">3,120 ft</text>
-        <text x="705" y="972" font-family="Inter" font-size="12" fill="#0a2749" font-weight="700">Packer @ 3,120 ft</text>
-        <text x="705" y="988" font-family="Inter" font-size="10" fill="#6b6242">Versatile On/Off unit · set June 2023</text>
-        <line x1="408" y1="1076" x2="552" y2="1076" stroke="#d97706" stroke-width="28"/>
-        <line x1="408" y1="1116" x2="552" y2="1116" stroke="#d97706" stroke-width="42"/>
-        <line x1="408" y1="1160" x2="552" y2="1160" stroke="#d97706" stroke-width="10"/>
-        <line x1="408" y1="1176" x2="552" y2="1176" stroke="#d97706" stroke-width="14"/>
-        <line x1="408" y1="1198" x2="552" y2="1198" stroke="#d97706" stroke-width="26"/>
-        <text x="72" y="1080" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,458 ft</text>
-        <text x="72" y="1120" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,568 ft</text>
-        <text x="72" y="1202" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,834 ft</text>
-        <text x="705" y="1100" font-family="Inter" font-size="12" fill="#7a3e00" font-weight="700">Active Disposal Perfs</text>
-        <text x="705" y="1116" font-family="Inter" font-size="10" fill="#7a3e00">5 intervals · 3,458-3,834 ft · 318 ft total</text>
-        <rect x="408" y="1112" width="144" height="0" fill="url(#perf)"/>
-        <rect x="408" y="1214" width="144" height="26" fill="url(#fill)"/>
-        <text x="72" y="1232" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#8a7550" font-weight="700">4,002 ft</text>
-        <text x="705" y="1230" font-family="Inter" font-size="12" fill="#6b5830" font-weight="700">PBTD / Fill @ 4,002 ft</text>
-        <text x="705" y="1246" font-family="Inter" font-size="10" fill="#6b6242">98 ft above TD</text>
-        <line x1="420" y1="1140" x2="540" y2="1140" stroke="#0a2749" stroke-width="2.5"/>
-        <text x="72" y="1144" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#0a2749" font-weight="700">4,100 ft TD</text>
-      </svg>
+    <div class="meta-right">
+      April 2026 &nbsp;·&nbsp; Revised<br>
+      <span style="color: var(--resolved-border); font-weight: 600;">5 items resolved from source docs</span>
     </div>
+  </div>
+
+  <h1 class="page-title">WE Big Lake SWD Well #2</h1>
+  <p class="page-subtitle">Current state — as last worked in June 2023 by Tejas Environmental.</p>
+
+  <div class="permit-bar">
+    <div class="permit-item">
+      <div class="permit-label">Permit</div>
+      <div class="permit-value"><strong>#14600</strong> · Commercial Amendment</div>
+    </div>
+    <div class="permit-item">
+      <div class="permit-label">API</div>
+      <div class="permit-value">42-383-39122</div>
+    </div>
+    <div class="permit-item">
+      <div class="permit-label">UIC / District</div>
+      <div class="permit-value">000110133 · 7C</div>
+    </div>
+    <div class="permit-item">
+      <div class="permit-label">Location</div>
+      <div class="permit-value">Reagan County, TX<br><span style="font-size:11px; color: var(--tejas-ink-muted);">Spraberry Trend Area · San Andres</span></div>
+    </div>
+  </div>
+
+  <div class="narrative">
+    <strong>CURRENT STATE —</strong> Commercial saltwater disposal well, in service since ~2015.
+    Waste fluid enters at the surface, travels down the <span class="kw">4-1/2" polycore-lined tubing</span>,
+    passes through the packer at <strong>3,120 ft</strong>, and is injected into the San Andres disposal
+    interval through <span class="kw">five perforated intervals from 3,458&ndash;3,834 ft (318 ft total net)</span>.
+    The upper zone above the packer is a future-production target and is currently uncompleted.
+    Most recent intervention: June 2023 Tejas workover (tubing &amp; packer replacement).
+    Most recent cleanout: January 2019 coiled-tubing acid job.
+  </div>
+
+  <div class="flag-banner resolved">
+    <div class="flag-icon">✓</div>
+    <div class="flag-body">
+      <div class="flag-title">Source Documents Reconciled</div>
+      The five items previously flagged on earlier revisions have been forensically traced
+      across all primary source documents. This revision reflects the <strong>actual current well state</strong> as
+      last worked in 2023, not the 2014 "as designed" values that had been carried forward on the
+      Trisun project documents. The full evidence trail for each item lives on the
+      <a href="#reconciliation">Reconciliation Log</a> (page 3).
+    </div>
+  </div>
+
+  <div class="schematic-wrap">
+    <div class="schematic-svg-box">
+      <svg viewBox="0 0 1000 1400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Current state well schematic">
+<defs>
+  <pattern id="cement-p1" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+    <rect width="8" height="8" fill="#c9b890"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#a59479" stroke-width="2"/>
+  </pattern>
+  <pattern id="perfs-d-p1" patternUnits="userSpaceOnUse" width="6" height="10">
+    <rect width="6" height="10" fill="#d49a00"/>
+    <line x1="0" y1="0" x2="6" y2="0" stroke="#000" stroke-width="1"/>
+    <line x1="0" y1="5" x2="6" y2="5" stroke="#000" stroke-width="1"/>
+  </pattern>
+  <pattern id="sediment-p1" patternUnits="userSpaceOnUse" width="10" height="10">
+    <rect width="10" height="10" fill="#8a7550"/>
+    <circle cx="2" cy="2" r="1" fill="#6b5830"/>
+    <circle cx="7" cy="4" r="1.2" fill="#6b5830"/>
+    <circle cx="4" cy="7" r="0.8" fill="#6b5830"/>
+    <circle cx="8" cy="9" r="1" fill="#6b5830"/>
+  </pattern>
+</defs>
+<line x1="0" y1="80" x2="1000" y2="80" stroke="#4a3c20" stroke-width="1.5" stroke-dasharray="3,3"/>
+<text x="12" y="70" font-family="Inter, sans-serif" font-size="11" fill="#6b6242" font-weight="600">GROUND LEVEL · 0 ft</text>
+<text x="12" y="56" font-family="Inter, sans-serif" font-size="10" fill="#6b6242">GL Elev ~ 2,662 ft</text>
+<rect x="454" y="40" width="100" height="40" fill="#0a2749" stroke="#0a2749"/>
+<text x="504" y="64" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">WELLHEAD</text>
+<rect x="444" y="80" width="10" height="11.707317073170728" fill="#3a3a3a"/>
+<rect x="564" y="80" width="10" height="11.707317073170728" fill="#3a3a3a"/>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">
+  <line x1="574" y1="95" x2="720" y2="95" stroke="#6b6242" stroke-width="0.6"/>
+  <text x="728" y="93" font-weight="600">14" Conductor</text>
+  <text x="728" y="107" fill="#6b6242" font-size="10">Set @ 40 ft MD · original</text>
+</g>
+<rect x="434" y="91.70731707317073" width="10" height="159.8048780487805" fill="#555b6e"/>
+<rect x="574" y="91.70731707317073" width="10" height="159.8048780487805" fill="#555b6e"/>
+<rect x="424" y="91.70731707317073" width="10" height="159.8048780487805" fill="url(#cement-p1)" opacity="0.9"/>
+<rect x="584" y="91.70731707317073" width="10" height="159.8048780487805" fill="url(#cement-p1)" opacity="0.9"/>
+<line x1="80" y1="251.5121951219512" x2="424" y2="251.5121951219512" stroke="#d8cfb8" stroke-width="0.5" stroke-dasharray="2,3"/>
+<text x="72" y="255.5121951219512" font-family="JetBrains Mono, monospace" font-size="11" fill="#6b6242" text-anchor="end">586 ft</text>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">
+  <line x1="594" y1="171.60975609756096" x2="720" y2="171.60975609756096" stroke="#6b6242" stroke-width="0.6"/>
+  <text x="728" y="167.60975609756096" font-weight="600">9-5/8" Surface Casing</text>
+  <text x="728" y="181.60975609756096" fill="#6b6242" font-size="10">36 lb/ft · J-55 STC</text>
+  <text x="728" y="193.60975609756096" fill="#6b6242" font-size="10">Cemented to surface</text>
+</g>
+<rect x="440" y="91.70731707317073" width="6" height="1188.2926829268292" fill="#2a3b5a"/>
+<rect x="562" y="91.70731707317073" width="6" height="1188.2926829268292" fill="#2a3b5a"/>
+<rect x="446" y="840.9756097560976" width="6" height="439.0243902439024" fill="url(#cement-p1)" opacity="0.55"/>
+<rect x="556" y="840.9756097560976" width="6" height="439.0243902439024" fill="url(#cement-p1)" opacity="0.55"/>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">
+  <line x1="578" y1="700.9756097560976" x2="720" y2="700.9756097560976" stroke="#6b6242" stroke-width="0.6"/>
+  <text x="728" y="696.9756097560976" font-weight="600">7" Production Casing</text>
+  <text x="728" y="710.9756097560976" fill="#6b6242" font-size="10">26 lb/ft · J-55 LTC</text>
+  <text x="728" y="722.9756097560976" fill="#6b6242" font-size="10">Liner shoe @ 4,100 ft TD</text>
+  <text x="728" y="734.9756097560976" fill="#6b6242" font-size="10">8-3/4" open hole to TD</text>
+</g>
+<line x1="80" y1="840.9756097560976" x2="446" y2="840.9756097560976" stroke="#a59479" stroke-width="1.2" stroke-dasharray="4,3"/>
+<text x="72" y="844.9756097560976" font-family="JetBrains Mono, monospace" font-size="11" fill="#a59479" text-anchor="end">2,600 ft</text>
+<text x="422" y="834.9756097560976" font-family="Inter, sans-serif" font-size="10" fill="#a59479" font-weight="600" text-anchor="end">TOP OF CEMENT</text>
+<rect x="494" y="80" width="20" height="913.170731707317" fill="#c8102e"/>
+<g font-family="Inter, sans-serif" fill="#1a1a1a">
+  <rect x="92" y="572.829268292683" width="240" height="92" fill="#fff" stroke="#c8102e" stroke-width="0.8"/>
+  <text x="104" y="590.829268292683" font-weight="700" fill="#c8102e" font-size="12">4-1/2" EUE POLYCORE TUBING</text>
+  <text x="104" y="606.829268292683" font-size="10.5">Western Falcon · 12.75 lb/ft</text>
+  <text x="104" y="620.829268292683" font-size="10.5">Min ID 3.4" · 0.00579 bbl/ft</text>
+  <text x="104" y="636.829268292683" fill="#6b6242" font-size="10">Re-run 2023 Tejas workover</text>
+  <text x="104" y="652.829268292683" fill="#0d3811" font-size="10" font-weight="600">✓ RESOLVED from Tejas reports</text>
+  <line x1="332" y1="610.829268292683" x2="494" y2="610.829268292683" stroke="#c8102e" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<line x1="80" y1="1016.5853658536586" x2="440" y2="1016.5853658536586" stroke="#d8cfb8" stroke-width="0.5" stroke-dasharray="2,3"/>
+<text x="72" y="1020.5853658536586" font-family="JetBrains Mono, monospace" font-size="11" fill="#6b6242" text-anchor="end">3,200 ft</text>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">
+  <text x="422" y="918.780487804878" font-weight="600" fill="#0a2749" text-anchor="end">UPPER ZONE — future target</text>
+  <text x="422" y="934.780487804878" fill="#6b6242" text-anchor="end" font-size="10">Not currently perforated</text>
+  <text x="422" y="948.780487804878" fill="#6b6242" text-anchor="end" font-size="10">13–19% porosity San Andres</text>
+</g>
+<line x1="80" y1="1059.9024390243903" x2="440" y2="1059.9024390243903" stroke="#b08a5a" stroke-width="0.8" stroke-dasharray="3,2"/>
+<text x='72' y='1063.9024390243903' font-family='JetBrains Mono, monospace' font-size='10' fill='#b08a5a' text-anchor='end'>3,348 ft</text>
+<text x='422' y='1055.9024390243903' font-family='Inter, sans-serif' font-size='9' fill='#b08a5a' font-style='italic' text-anchor='end'>Wilson's San Andres top</text>
+<g>
+  <rect x="432" y="986.170731707317" width="144" height="14" fill="#0a2749"/>
+  <rect x="432" y="984.170731707317" width="144" height="2" fill="#c8102e"/>
+  <rect x="432" y="1000.170731707317" width="144" height="2" fill="#c8102e"/>
+  <line x1="435" y1="986.170731707317" x2="441" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="445" y1="986.170731707317" x2="451" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="455" y1="986.170731707317" x2="461" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="465" y1="986.170731707317" x2="471" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="475" y1="986.170731707317" x2="481" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="485" y1="986.170731707317" x2="491" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="495" y1="986.170731707317" x2="501" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="505" y1="986.170731707317" x2="511" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="515" y1="986.170731707317" x2="521" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="525" y1="986.170731707317" x2="531" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="535" y1="986.170731707317" x2="541" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="545" y1="986.170731707317" x2="551" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="555" y1="986.170731707317" x2="561" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="565" y1="986.170731707317" x2="571" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+  <line x1="575" y1="986.170731707317" x2="581" y2="1000.170731707317" stroke="#fff" stroke-width="0.5"/>
+</g>
+<text x="72" y="997.170731707317" font-family="JetBrains Mono, monospace" font-size="11" fill="#0a2749" text-anchor="end" font-weight="700">3,120 ft</text>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="963.170731707317" width="240" height="92" fill="#fcfaf5" stroke="#0a2749" stroke-width="0.8"/>
+  <text x="757" y="981.170731707317" font-weight="700" fill="#0a2749" font-size="12">PACKER @ 3,120 ft</text>
+  <text x="757" y="997.170731707317" font-size="10">Versatile Oil Tools · On/Off</text>
+  <text x="757" y="1011.170731707317" font-size="10">4,000 PSI differential</text>
+  <text x="757" y="1025.170731707317" font-size="10">Set June 2023 Tejas workover</text>
+  <text x="757" y="1043.170731707317" fill="#0d3811" font-size="10" font-weight="600">✓ RESOLVED (was 3,205 in 2014)</text>
+  <line x1="578" y1="993.170731707317" x2="745" y2="1009.170731707317" stroke="#0a2749" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<rect x="446" y="1092.0975609756097" width="116" height="23.41463414634154" fill="url(#perfs-d-p1)"/>
+<line x1="424" y1="1095.0243902439024" x2="440" y2="1095.0243902439024" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1095.0243902439024" x2="584" y2="1095.0243902439024" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1100.8780487804877" x2="440" y2="1100.8780487804877" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1100.8780487804877" x2="584" y2="1100.8780487804877" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1106.7317073170732" x2="440" y2="1106.7317073170732" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1106.7317073170732" x2="584" y2="1106.7317073170732" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1112.5853658536585" x2="440" y2="1112.5853658536585" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1112.5853658536585" x2="584" y2="1112.5853658536585" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1124.2926829268292" width="116" height="36.878048780487916" fill="url(#perfs-d-p1)"/>
+<line x1="424" y1="1127.3658536585365" x2="440" y2="1127.3658536585365" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1127.3658536585365" x2="584" y2="1127.3658536585365" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1133.5121951219512" x2="440" y2="1133.5121951219512" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1133.5121951219512" x2="584" y2="1133.5121951219512" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1139.658536585366" x2="440" y2="1139.658536585366" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1139.658536585366" x2="584" y2="1139.658536585366" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1145.8048780487804" x2="440" y2="1145.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1145.8048780487804" x2="584" y2="1145.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1151.9512195121952" x2="440" y2="1151.9512195121952" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1151.9512195121952" x2="584" y2="1151.9512195121952" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1158.09756097561" x2="440" y2="1158.09756097561" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1158.09756097561" x2="584" y2="1158.09756097561" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1162.9268292682927" width="116" height="4.097560975609667" fill="url(#perfs-d-p1)"/>
+<line x1="424" y1="1163.609756097561" x2="440" y2="1163.609756097561" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1163.609756097561" x2="584" y2="1163.609756097561" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1164.9756097560976" x2="440" y2="1164.9756097560976" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1164.9756097560976" x2="584" y2="1164.9756097560976" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1166.341463414634" x2="440" y2="1166.341463414634" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1166.341463414634" x2="584" y2="1166.341463414634" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1169.9512195121952" width="116" height="7.024390243902417" fill="url(#perfs-d-p1)"/>
+<line x1="424" y1="1171.1219512195123" x2="440" y2="1171.1219512195123" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1171.1219512195123" x2="584" y2="1171.1219512195123" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1173.4634146341464" x2="440" y2="1173.4634146341464" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1173.4634146341464" x2="584" y2="1173.4634146341464" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1175.8048780487804" x2="440" y2="1175.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1175.8048780487804" x2="584" y2="1175.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1180.4878048780488" width="116" height="21.658536585365937" fill="url(#perfs-d-p1)"/>
+<line x1="424" y1="1184.0975609756097" x2="440" y2="1184.0975609756097" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1184.0975609756097" x2="584" y2="1184.0975609756097" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1191.3170731707319" x2="440" y2="1191.3170731707319" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1191.3170731707319" x2="584" y2="1191.3170731707319" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1198.5365853658536" x2="440" y2="1198.5365853658536" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1198.5365853658536" x2="584" y2="1198.5365853658536" stroke="#c8102e" stroke-width="1"/>
+<line x1="416" y1="1092.0975609756097" x2="424" y2="1092.0975609756097" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1095.5975609756097" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,458 ft</text>
+<line x1="416" y1="1115.5121951219512" x2="424" y2="1115.5121951219512" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1124.2926829268292" x2="424" y2="1124.2926829268292" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1123.4024390243903" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,538 / 3,568 ft</text>
+<line x1="416" y1="1161.1707317073171" x2="424" y2="1161.1707317073171" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1162.9268292682927" x2="424" y2="1162.9268292682927" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1167.0243902439024" x2="424" y2="1167.0243902439024" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1169.9512195121952" x2="424" y2="1169.9512195121952" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1176.9756097560976" x2="424" y2="1176.9756097560976" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1180.4878048780488" x2="424" y2="1180.4878048780488" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1173.2560975609756" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,694 / 3,700 / 3,714 / 3,724 / 3,748 / 3,760 ft</text>
+<line x1="416" y1="1202.1463414634147" x2="424" y2="1202.1463414634147" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1205.6463414634147" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,834 ft</text>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="1083.170731707317" width="240" height="185" fill="#fff4e6" stroke="#d97706" stroke-width="0.8"/>
+  <text x="757" y="1101.170731707317" font-weight="700" fill="#7a3e00" font-size="12">DISPOSAL PERFORATIONS</text>
+  <text x="757" y="1115.170731707317" font-size="10" fill="#7a3e00">5 intervals · 318 ft total · 6 SPF</text>
+  <text x="757" y="1137.170731707317" font-size="10.5">Interval 1: 3,458–3,538 ft <tspan fill="#6b6242">(80 ft)</tspan></text>
+  <text x="757" y="1153.170731707317" font-size="10.5">Interval 2: 3,568–3,694 ft <tspan fill="#6b6242">(126 ft)</tspan></text>
+  <text x="757" y="1169.170731707317" font-size="10.5">Interval 3: 3,700–3,714 ft <tspan fill="#6b6242">(14 ft)</tspan></text>
+  <text x="757" y="1185.170731707317" font-size="10.5">Interval 4: 3,724–3,748 ft <tspan fill="#6b6242">(24 ft)</tspan></text>
+  <text x="757" y="1201.170731707317" font-size="10.5">Interval 5: 3,760–3,834 ft <tspan fill="#6b6242">(74 ft)</tspan></text>
+  <text x="757" y="1253.170731707317" fill="#0d3811" font-size="10" font-weight="600">✓ RESOLVED — 5 intervals, not 2</text>
+  <line x1="584" y1="1161.1707317073171" x2="745" y2="1175.170731707317" stroke="#d97706" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<rect x="446" y="1251.3170731707316" width="116" height="28.682926829268354" fill="url(#sediment-p1)"/>
+<line x1="80" y1="1251.3170731707316" x2="446" y2="1251.3170731707316" stroke="#8a7550" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.7"/>
+<text x="72" y="1255.3170731707316" font-family="JetBrains Mono, monospace" font-size="11" fill="#8a7550" text-anchor="end" font-weight="600">4,002 ft</text>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="1288.170731707317" width="240" height="80" fill="#fff" stroke="#8a7550" stroke-width="0.8"/>
+  <text x="757" y="1306.170731707317" font-weight="700" fill="#6b5830" font-size="12">SEDIMENT / PBTD @ 4,002 ft</text>
+  <text x="757" y="1322.170731707317" font-size="10.5">98 ft of fill above TD</text>
+  <text x="757" y="1336.170731707317" fill="#6b6242" font-size="10">Per 2023 Tejas daily reports</text>
+  <text x="757" y="1354.170731707317" fill="#0d3811" font-size="10" font-weight="600">✓ RESOLVED (2014 "3,820" was original)</text>
+  <line x1="578" y1="1265.6585365853657" x2="745" y2="1328.170731707317" stroke="#8a7550" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<line x1="440" y1="1280" x2="568" y2="1280" stroke="#0a2749" stroke-width="2.5"/>
+<text x="72" y="1284" font-family="JetBrains Mono, monospace" font-size="11" fill="#0a2749" text-anchor="end" font-weight="700">4,100 ft</text>
+<text x="422" y="1276" font-family="Inter, sans-serif" font-size="9.5" fill="#0a2749" font-weight="600" text-anchor="end">LINER SHOE · TD</text>
+<text x="504" y="197.0731707317073" font-family="Inter, sans-serif" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="504" y="489.75609756097566" font-family="Inter, sans-serif" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="504" y="782.4390243902438" font-family="Inter, sans-serif" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="504" y="928.780487804878" font-family="Inter, sans-serif" font-size="12" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+</svg>
+    </div>
+
     <aside class="legend">
       <h3>Legend</h3>
-      <div class="group">
-        <div class="k"><span class="sw" style="background:#555b6e"></span>Surface casing</div>
-        <div class="k"><span class="sw" style="background:#2a3b5a"></span>Production casing</div>
-        <div class="k"><span class="sw" style="background:#c8102e"></span>Current 4-1/2 in. polycore tubing</div>
-        <div class="k"><span class="sw" style="background:#0a2749"></span>Packer</div>
-        <div class="k"><span class="sw" style="background:#d49a00"></span>Active disposal perforations</div>
-        <div class="k"><span class="sw" style="background:#8a7550"></span>Fill / PBTD</div>
+      <div class="legend-group">
+        <div class="legend-group-title">Wellbore</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#3a3a3a"></span> 14" Conductor</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#555b6e"></span> 9-5/8" Surface Casing</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#2a3b5a"></span> 7" Production Casing</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#c8102e"></span> 4-1/2" Polycore Tubing</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#0a2749"></span> Packer</div>
       </div>
-      <div class="small"><strong>Volumetrics:</strong> current tubing capacity is approximately <strong>0.01123 bbl/ft</strong> at 3.4 in. minimum ID.</div>
+      <div class="legend-group">
+        <div class="legend-group-title">Subsurface</div>
+        <div class="legend-item"><span class="legend-swatch striped"></span> Cement</div>
+        <div class="legend-item"><span class="legend-swatch perf-d"></span> Disposal Perforations</div>
+        <div class="legend-item"><span class="legend-swatch sediment"></span> Sediment Fill</div>
+      </div>
+      <div class="legend-group">
+        <div class="legend-group-title">Annotation</div>
+        <div class="legend-item">
+          <span class="resolved-inline" style="cursor:default; margin-left:0;">✓ RESOLVED</span>
+        </div>
+        <div style="font-size:11.5px; color: var(--tejas-ink-soft); margin-top: 4px; line-height: 1.5;">
+          Value reconciled from the evidence trail. See Reconciliation Log for the source chain.
+        </div>
+      </div>
     </aside>
   </div>
 
-  <div class="section">
+  <div class="table-section">
     <h2>Current State — Well Construction Data</h2>
-    <table class="table">
-      <thead><tr><th>Component</th><th>Specification</th><th>Depth (MD)</th><th>Status / Notes</th></tr></thead>
+    <p class="table-lead">Reconciled specifications. Values reflect the well as last worked (June 2023 Tejas workover), not 2014 "as designed" figures.</p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 20%;">Component</th>
+          <th style="width: 26%;">Specification</th>
+          <th style="width: 16%;">Depth (MD)</th>
+          <th style="width: 38%;">Status / Notes</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td><strong>Conductor</strong></td><td class="mono">14 in.</td><td class="mono">0 - 40 ft</td><td>Original construction.</td></tr>
-        <tr><td><strong>Surface Casing</strong></td><td class="mono">9-5/8 in. · 36 lb/ft · J-55 STC</td><td class="mono">0 - 586 ft</td><td>Cemented to surface.</td></tr>
-        <tr><td><strong>Production Casing</strong></td><td class="mono">7 in. · 26 lb/ft · J-55 LTC</td><td class="mono">0 - 4,100 ft</td><td>Liner shoe at TD.</td></tr>
-        <tr><td><strong>Top of Cement</strong></td><td>Behind 7 in. casing</td><td class="mono">2,600 ft</td><td>Legacy value pending formal verification for future recompletion.</td></tr>
-        <tr><td><strong>Tubing</strong></td><td class="mono">4-1/2 in. EUE polycore · 12.75 lb/ft · 3.4 in. min ID</td><td class="mono">0 - ~3,100 ft</td><td><span class="status-ok">Resolved</span> Current string from 2023. Capacity corrected to <strong>0.01123 bbl/ft</strong>.</td></tr>
-        <tr><td><strong>Packer</strong></td><td>Versatile On/Off</td><td class="mono">3,120 ft</td><td><span class="status-ok">Resolved</span> Current setting from June 2023.</td></tr>
-        <tr><td><strong>Upper Zone</strong></td><td>Not perforated</td><td class="mono">~3,120 - 3,458 ft</td><td>Future target only. Not currently completed.</td></tr>
-        <tr><td><strong>Disposal Perforations</strong></td><td>5 intervals · active</td><td class="mono">3,458 - 3,834 ft</td><td><span class="status-ok">Resolved</span> 318 ft total active perforated interval.</td></tr>
-        <tr><td><strong>PBTD / Fill</strong></td><td>Current fill</td><td class="mono">4,002 - 4,100 ft</td><td><span class="status-ok">Resolved</span> 98 ft fill above TD.</td></tr>
+        <tr>
+          <td><strong>Conductor</strong></td>
+          <td class="mono">14"</td>
+          <td class="mono">0 – 40 ft</td>
+          <td>Original construction. No known issues.</td>
+        </tr>
+        <tr>
+          <td><strong>Surface Casing</strong></td>
+          <td class="mono">9-5/8" · 36 lb/ft · J-55 STC</td>
+          <td class="mono">0 – 586 ft</td>
+          <td>Cemented to surface.</td>
+        </tr>
+        <tr>
+          <td><strong>Production Casing</strong></td>
+          <td class="mono">7" · 26 lb/ft · J-55 LTC</td>
+          <td class="mono">0 – 4,100 ft</td>
+          <td>Liner shoe at TD · 8-3/4" open hole to TD.</td>
+        </tr>
+        <tr>
+          <td><strong>Top of Cement</strong></td>
+          <td>Behind 7" casing</td>
+          <td class="mono">2,600 ft</td>
+          <td>Per 2014 schematic. Adequacy for future dual completion to be verified per RRC Permit Condition 1.</td>
+        </tr>
+        <tr>
+          <td><strong>Tubing</strong></td>
+          <td class="mono">4-1/2" EUE polycore · 12.75 lb/ft · 3.4" min ID</td>
+          <td class="mono">0 – ~3,100 ft</td>
+          <td>Western Falcon polycore, re-run in 2023 Tejas workover (invoice $41,335). <a href="#disc-5" class="status-resolved">✓ RESOLVED</a> — not 2-7/8" EUE</td>
+        </tr>
+        <tr>
+          <td><strong>Packer</strong></td>
+          <td>Versatile Oil Tools · On/Off · 4,000 PSI differential</td>
+          <td class="mono">3,120 ft</td>
+          <td>Set June 2023 Tejas workover. Isolates tubing from annulus. <a href="#disc-1" class="status-resolved">✓ RESOLVED depth</a> <a href="#disc-2" class="status-resolved">✓ RESOLVED mfr</a></td>
+        </tr>
+        <tr>
+          <td><strong>Upper Zone</strong></td>
+          <td>Not perforated</td>
+          <td class="mono">~3,120 – 3,458 ft</td>
+          <td>Future production target. 338 ft of uncompleted San Andres (13–19% porosity).</td>
+        </tr>
+        <tr>
+          <td><strong>Disposal Perfs</strong></td>
+          <td>5 intervals · 6 SPF · active</td>
+          <td class="mono">3,458 – 3,834 ft</td>
+          <td><strong>318 ft total perforated</strong> across 5 intervals (3,458–3,538; 3,568–3,694; 3,700–3,714; 3,724–3,748; 3,760–3,834). <a href="#disc-3" class="status-resolved">✓ RESOLVED</a> — not 2 intervals</td>
+        </tr>
+        <tr>
+          <td><strong>Sediment / PBTD</strong></td>
+          <td>Fill</td>
+          <td class="mono">4,002 – 4,100 ft</td>
+          <td>98 ft of fill above TD per 2023 Tejas reports. <a href="#disc-4" class="status-resolved">✓ RESOLVED</a> — 2014 "3,820 ft" was original, pre-injection figure</td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="footer"><div>Tejas Environmental Solutions · Board-Confidential</div><div>Page 1 of 3 · Current State</div></div>
+  <div class="page-footer">
+    <div><span class="f-name">Tejas Environmental Solutions</span> · Board-Confidential</div>
+    <div>Page 1 of 3 · Current State</div>
+  </div>
 </section>
 
-<section class="page">
-  <div class="header">
+<!-- ================================================================
+     PAGE 2 — FUTURE STATE (dual completion)
+     ================================================================ -->
+<section class="page" id="future-state">
+  <div class="page-header">
     <div>
-      <div class="eyebrow">Well Schematic · Rev. 7 · Future State Corrected</div>
-      <div class="small">Future-state geometry rebuilt so production and disposal intervals no longer overlap.</div>
-    </div>
-    <div class="meta">April 2026 · Rev. 7<br><span style="color:var(--amber);font-weight:700">Concept updated for engineering sign-off</span></div>
-  </div>
-
-  <h1>After the Dual Completion</h1>
-  <p class="subtitle">Corrected concept - oil production from the upper zone while disposal continues below, with the geometry fixed.</p>
-
-  <div class="bar">
-    <div class="item"><div class="label">Permit Path</div><div class="val">W-14 Amendment</div></div>
-    <div class="item"><div class="label">Artificial Lift</div><div class="val">Jet Pump</div></div>
-    <div class="item"><div class="label">Revised Production Perfs</div><div class="val">3,200-3,360 and 3,380-3,448 ft</div></div>
-    <div class="item"><div class="label">Target Packer Window</div><div class="val">~3,450-3,458 ft</div></div>
-  </div>
-
-  <div class="warn">
-    <strong>Critical correction:</strong> the previous revision was geometrically impossible. It placed the future packer at ~3,565 ft while the active disposal zone already begins at 3,458 ft, and it let the proposed production interval overlap the disposal interval by 106 ft. This revision removes that conflict. The future concept now assumes <strong>production interval 2 is shortened to 3,380-3,448 ft</strong> and the <strong>new dual-bore packer is landed in the narrow 3,450-3,458 ft window</strong>, pending log confirmation.
-  </div>
-
-  <div class="note">
-    <strong>FUTURE STATE -</strong> A corrected parallel-string dual completion. One short string delivers power fluid down to the jet pump. One long string carries disposal fluid down through the dual-bore packer and discharges below the packer, above the active disposal interval. Produced oil and spent power fluid return up the annulus above the packer to the production outlet.
-  </div>
-
-  <div class="grid">
-    <div class="figure">
-      <svg viewBox="0 0 980 1240" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Corrected future state schematic">
-        <defs>
-          <pattern id="ann" patternUnits="userSpaceOnUse" width="14" height="14">
-            <rect width="14" height="14" fill="#1b5e20" fill-opacity="0.06"/>
-            <circle cx="4" cy="4" r="1.2" fill="#1b5e20" fill-opacity="0.3"/>
-            <circle cx="10" cy="9" r="1" fill="#1b5e20" fill-opacity="0.28"/>
-          </pattern>
-        </defs>
-        <line x1="0" y1="60" x2="980" y2="60" stroke="#6b6242" stroke-dasharray="3,3"/>
-        <text x="12" y="48" font-family="Inter" font-size="11" fill="#6b6242" font-weight="700">GROUND LEVEL · 0 ft</text>
-        <rect x="410" y="20" width="160" height="40" fill="#0a2749" stroke="#c8102e" stroke-width="2"/>
-        <text x="490" y="38" text-anchor="middle" font-family="Inter" font-size="11" fill="#fff" font-weight="700">DUAL WELLHEAD</text>
-        <text x="490" y="52" text-anchor="middle" font-family="Inter" font-size="9" fill="#b8c7dc">OIL OUT · PF IN · WASTE IN</text>
-        <rect x="424" y="60" width="6" height="1080" fill="#2a3b5a"/>
-        <rect x="550" y="60" width="6" height="1080" fill="#2a3b5a"/>
-        <rect x="430" y="60" width="30" height="995" fill="url(#ann)"/>
-        <rect x="520" y="60" width="30" height="995" fill="url(#ann)"/>
-        <rect x="466" y="60" width="18" height="920" fill="#c8102e"/>
-        <rect x="496" y="60" width="18" height="1010" fill="#006878"/>
-        <text x="120" y="350" font-family="Inter" font-size="12" fill="#c8102e" font-weight="700">Power fluid string</text>
-        <text x="120" y="366" font-family="Inter" font-size="10" fill="#1a1a1a">2-7/8 in. EUE down to jet pump</text>
-        <line x1="270" y1="358" x2="466" y2="358" stroke="#c8102e" stroke-dasharray="3,3"/>
-        <text x="760" y="270" font-family="Inter" font-size="12" fill="#006878" font-weight="700">Injection string</text>
-        <text x="760" y="286" font-family="Inter" font-size="10" fill="#1a1a1a">2-7/8 in. EUE through packer</text>
-        <line x1="760" y1="290" x2="514" y2="290" stroke="#006878" stroke-dasharray="3,3"/>
-        <text x="120" y="610" font-family="Inter" font-size="12" fill="#1b5e20" font-weight="700">Oil return - annulus up</text>
-        <text x="120" y="626" font-family="Inter" font-size="10" fill="#1a1a1a">Production returns above packer</text>
-        <line x1="290" y1="618" x2="444" y2="618" stroke="#1b5e20" stroke-dasharray="3,3"/>
-        <rect x="462" y="930" width="26" height="26" fill="#0a2749" stroke="#c8102e" stroke-width="1.5"/>
-        <text x="475" y="947" text-anchor="middle" font-family="Inter" font-size="10" fill="#fff" font-weight="700">JP</text>
-        <text x="760" y="930" font-family="Inter" font-size="12" fill="#0a2749" font-weight="700">Jet pump BHA @ ~3,100 ft</text>
-        <line x1="488" y1="943" x2="760" y2="938" stroke="#0a2749" stroke-dasharray="3,3"/>
-
-        <line x1="400" y1="1018" x2="556" y2="1018" stroke="#1b5e20" stroke-width="48"/>
-        <line x1="400" y1="1070" x2="556" y2="1070" stroke="#1b5e20" stroke-width="20"/>
-        <text x="72" y="1022" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#1b5e20">3,200 ft</text>
-        <text x="72" y="1074" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#1b5e20">3,380 ft</text>
-        <text x="72" y="1088" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#1b5e20">3,448 ft</text>
-        <text x="760" y="1010" font-family="Inter" font-size="12" fill="#1b5e20" font-weight="700">Revised production perfs</text>
-        <text x="760" y="1026" font-family="Inter" font-size="10" fill="#1b5e20">3,200-3,360 ft and 3,380-3,448 ft</text>
-        <text x="760" y="1042" font-family="Inter" font-size="10" fill="#6b6242">No overlap with active disposal zone</text>
-
-        <rect x="396" y="1090" width="164" height="14" fill="#0a2749"/>
-        <rect x="396" y="1088" width="164" height="2" fill="#c8102e"/>
-        <rect x="396" y="1104" width="164" height="2" fill="#c8102e"/>
-        <rect x="496" y="1090" width="18" height="14" fill="#006878"/>
-        <text x="72" y="1100" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#0a2749" font-weight="700">~3,450-3,458 ft</text>
-        <text x="760" y="1092" font-family="Inter" font-size="12" fill="#c8102e" font-weight="700">New dual-bore packer window</text>
-        <text x="760" y="1108" font-family="Inter" font-size="10" fill="#c8102e">Set between revised production and disposal intervals</text>
-        <text x="760" y="1124" font-family="Inter" font-size="10" fill="#6b6242">Final landing depth pending CCL / gamma-ray confirmation</text>
-
-        <line x1="400" y1="1148" x2="556" y2="1148" stroke="#d97706" stroke-width="28"/>
-        <line x1="400" y1="1188" x2="556" y2="1188" stroke="#d97706" stroke-width="42"/>
-        <text x="72" y="1152" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,458 ft</text>
-        <text x="72" y="1192" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,568 ft</text>
-        <text x="72" y="1220" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#d97706">3,834 ft</text>
-        <text x="760" y="1170" font-family="Inter" font-size="12" fill="#7a3e00" font-weight="700">Existing active disposal perfs</text>
-        <text x="760" y="1186" font-family="Inter" font-size="10" fill="#7a3e00">Remain 3,458-3,834 ft</text>
-
-        <line x1="514" y1="1110" x2="514" y2="1138" stroke="#006878" stroke-width="6"/>
-        <line x1="514" y1="1138" x2="556" y2="1138" stroke="#006878" stroke-width="6"/>
-        <text x="760" y="1140" font-family="Inter" font-size="10" fill="#006878">Injection discharge must remain below packer and above disposal intake path</text>
-      </svg>
-    </div>
-    <aside class="legend">
-      <h3>Legend - Future State</h3>
-      <div class="group">
-        <div class="k"><span class="sw" style="background:#c8102e"></span>Power fluid down</div>
-        <div class="k"><span class="sw" style="background:#006878"></span>Waste down</div>
-        <div class="k"><span class="sw" style="background:#e8f0e8"></span>Oil up annulus</div>
-        <div class="k"><span class="sw" style="background:#1b5e20"></span>Revised production perfs</div>
-        <div class="k"><span class="sw" style="background:#d49a00"></span>Existing disposal perfs</div>
-        <div class="k"><span class="sw" style="background:#0a2749"></span>Dual-bore packer window</div>
+      <div class="eyebrow">Well Schematic · Rev. 6 · Future State</div>
+      <div style="font-family: var(--serif-font); font-size: 14px; font-style: italic; color: var(--tejas-ink-soft);">
+        Parallel-string dual completion with jet pump artificial lift, after proposed workover.
       </div>
-      <div class="small"><strong>Important:</strong> this future page is now internally consistent, but the final packer landing depth still needs field confirmation because the available window is tight.</div>
+    </div>
+    <div class="meta-right">
+      April 2026 &nbsp;·&nbsp; Revised<br>
+      <span style="color: var(--tejas-crimson-dk); font-weight: 600;">Packer must be reset for geometry</span>
+    </div>
+  </div>
+
+  <h1 class="page-title">After the Dual Completion</h1>
+  <p class="page-subtitle">Oil production from the upper zone; disposal continues into the lower zone — one wellbore, two jobs.</p>
+
+  <div class="permit-bar">
+    <div class="permit-item">
+      <div class="permit-label">Permit Path</div>
+      <div class="permit-value">W-14 Amendment (Gate 4)</div>
+    </div>
+    <div class="permit-item">
+      <div class="permit-label">Artificial Lift</div>
+      <div class="permit-value">Jet Pump · wireline-serviceable</div>
+    </div>
+    <div class="permit-item">
+      <div class="permit-label">Upper-Zone Perfs</div>
+      <div class="permit-value">3,200–3,360 &amp; 3,380–3,564 ft</div>
+    </div>
+    <div class="permit-item">
+      <div class="permit-label">Packer Placement</div>
+      <div class="permit-value"><strong>~3,565 ft</strong> · new set required</div>
+    </div>
+  </div>
+
+  <div class="narrative">
+    <strong>FUTURE STATE —</strong> After the dual-completion workover, the well produces oil from the
+    <span class="kw">upper zone</span> (3,200–3,564 ft, newly perforated in two intervals) via a jet pump,
+    while simultaneously continuing permitted waste injection into the
+    <span class="kw">lower zone</span> (3,458–3,834 ft existing perfs). This is a
+    <strong>parallel-string dual completion</strong> through a dual-bore packer: the
+    <span class="kw">power-fluid string</span> lands the jet pump just above the packer; the
+    <span class="kw">injection string</span> passes through the packer to discharge above the disposal perfs;
+    and the <span class="kw">tubing-casing annulus above the packer</span> returns commingled oil + spent
+    power fluid to the production outlet at the dual wellhead.
+  </div>
+
+  <div class="flag-banner">
+    <div class="flag-icon">!</div>
+    <div class="flag-body">
+      <div class="flag-title">Critical Geometry Finding — Packer Must Be Reset</div>
+      The existing packer at <strong>3,120 ft</strong> cannot serve the dual completion as drawn. Production
+      perfs proposed at 3,200–3,564 ft must be ABOVE the packer (so they communicate with the annulus
+      return to the production outlet), and disposal perfs at 3,458–3,834 ft must be BELOW it. The
+      packer must therefore sit between the two zones at roughly <strong>3,565 ft</strong>. The current 2023
+      packer must be pulled and a dual-bore packer set at the new depth. Budget impact: $30K–$80K
+      (already in the Gate 4 workover budget — see Well Plan §5.2 Risk 4).
+    </div>
+  </div>
+
+  <div class="schematic-wrap">
+    <div class="schematic-svg-box">
+      <svg viewBox="0 0 1000 1400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Future state dual completion schematic">
+<defs>
+  <pattern id="cement-p2" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+    <rect width="8" height="8" fill="#c9b890"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#a59479" stroke-width="2"/>
+  </pattern>
+  <pattern id="perfs-d-p2" patternUnits="userSpaceOnUse" width="6" height="10">
+    <rect width="6" height="10" fill="#d49a00"/>
+    <line x1="0" y1="0" x2="6" y2="0" stroke="#000" stroke-width="1"/>
+    <line x1="0" y1="5" x2="6" y2="5" stroke="#000" stroke-width="1"/>
+  </pattern>
+  <pattern id="perfs-p-p2" patternUnits="userSpaceOnUse" width="6" height="10">
+    <rect width="6" height="10" fill="#1b5e20"/>
+    <line x1="0" y1="0" x2="6" y2="0" stroke="#002b06" stroke-width="1"/>
+    <line x1="0" y1="5" x2="6" y2="5" stroke="#002b06" stroke-width="1"/>
+  </pattern>
+  <pattern id="sediment-p2" patternUnits="userSpaceOnUse" width="10" height="10">
+    <rect width="10" height="10" fill="#8a7550"/>
+    <circle cx="2" cy="2" r="1" fill="#6b5830"/>
+    <circle cx="7" cy="4" r="1.2" fill="#6b5830"/>
+    <circle cx="4" cy="7" r="0.8" fill="#6b5830"/>
+    <circle cx="8" cy="9" r="1" fill="#6b5830"/>
+  </pattern>
+  <pattern id="annulus-oil" patternUnits="userSpaceOnUse" width="14" height="14">
+    <rect width="14" height="14" fill="#1b5e20" fill-opacity="0.06"/>
+    <circle cx="4" cy="4" r="1.2" fill="#1b5e20" fill-opacity="0.3"/>
+    <circle cx="10" cy="9" r="1" fill="#1b5e20" fill-opacity="0.28"/>
+  </pattern>
+</defs>
+<line x1="0" y1="80" x2="1000" y2="80" stroke="#4a3c20" stroke-width="1.5" stroke-dasharray="3,3"/>
+<text x="12" y="70" font-family="Inter, sans-serif" font-size="11" fill="#6b6242" font-weight="600">GROUND LEVEL · 0 ft</text>
+<rect x="424" y="32" width="160" height="48" fill="#0a2749" stroke="#c8102e" stroke-width="2"/>
+<text x="504" y="52" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">DUAL WELLHEAD</text>
+<text x="504" y="68" font-family="Inter, sans-serif" font-size="9" fill="#b8c7dc" text-anchor="middle">OIL OUT ← · PF IN · → WASTE IN</text>
+<rect x="444" y="80" width="10" height="11.707317073170728" fill="#3a3a3a"/>
+<rect x="564" y="80" width="10" height="11.707317073170728" fill="#3a3a3a"/>
+<rect x="434" y="91.70731707317073" width="10" height="159.8048780487805" fill="#555b6e"/>
+<rect x="574" y="91.70731707317073" width="10" height="159.8048780487805" fill="#555b6e"/>
+<rect x="424" y="91.70731707317073" width="10" height="159.8048780487805" fill="url(#cement-p2)" opacity="0.9"/>
+<rect x="584" y="91.70731707317073" width="10" height="159.8048780487805" fill="url(#cement-p2)" opacity="0.9"/>
+<line x1="80" y1="251.5121951219512" x2="424" y2="251.5121951219512" stroke="#d8cfb8" stroke-width="0.5" stroke-dasharray="2,3"/>
+<text x="72" y="255.5121951219512" font-family="JetBrains Mono, monospace" font-size="11" fill="#6b6242" text-anchor="end">586 ft</text>
+<rect x="440" y="91.70731707317073" width="6" height="1188.2926829268292" fill="#2a3b5a"/>
+<rect x="562" y="91.70731707317073" width="6" height="1188.2926829268292" fill="#2a3b5a"/>
+<rect x="446" y="840.9756097560976" width="6" height="439.0243902439024" fill="url(#cement-p2)" opacity="0.55"/>
+<rect x="556" y="840.9756097560976" width="6" height="439.0243902439024" fill="url(#cement-p2)" opacity="0.55"/>
+<rect x="446" y="80" width="26" height="1043.4146341463415" fill="url(#annulus-oil)"/>
+<rect x="536" y="80" width="26" height="1043.4146341463415" fill="url(#annulus-oil)"/>
+<rect x="490" y="80" width="28" height="1043.4146341463415" fill="url(#annulus-oil)"/>
+<line x1="80" y1="840.9756097560976" x2="446" y2="840.9756097560976" stroke="#a59479" stroke-width="1.2" stroke-dasharray="4,3"/>
+<text x="72" y="844.9756097560976" font-family="JetBrains Mono, monospace" font-size="11" fill="#a59479" text-anchor="end">2,600 ft</text>
+<text x="422" y="834.9756097560976" font-family="Inter, sans-serif" font-size="10" fill="#a59479" font-weight="600" text-anchor="end">TOP OF CEMENT</text>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">
+  <line x1="594" y1="343.4146341463415" x2="720" y2="343.4146341463415" stroke="#6b6242" stroke-width="0.6"/>
+  <text x="728" y="339.4146341463415" font-weight="600">7" Production Casing</text>
+  <text x="728" y="353.4146341463415" fill="#6b6242" font-size="10">26 lb/ft · Liner shoe @ 4,100 ft</text>
+</g>
+<rect x="472" y="80" width="18" height="907.3170731707318" fill="#c8102e"/>
+<text x="481.0" y="197.0731707317073" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="481.0" y="431.2195121951219" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="481.0" y="665.3658536585366" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="481.0" y="899.5121951219513" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<rect x="518" y="80" width="18" height="1008.2926829268292" fill="#006878"/>
+<text x="527.0" y="197.0731707317073" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="527.0" y="431.2195121951219" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="527.0" y="665.3658536585366" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="527.0" y="899.5121951219513" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="527.0" y="1045.8536585365855" font-family="Inter, sans-serif" font-size="11" fill="#fff" font-weight="700" text-anchor="middle">↓</text>
+<text x="459.0" y="197.0731707317073" font-family="Inter, sans-serif" font-size="12" fill="#1b5e20" font-weight="700" text-anchor="middle">↑</text>
+<text x="459.0" y="431.2195121951219" font-family="Inter, sans-serif" font-size="12" fill="#1b5e20" font-weight="700" text-anchor="middle">↑</text>
+<text x="459.0" y="665.3658536585366" font-family="Inter, sans-serif" font-size="12" fill="#1b5e20" font-weight="700" text-anchor="middle">↑</text>
+<text x="459.0" y="899.5121951219513" font-family="Inter, sans-serif" font-size="12" fill="#1b5e20" font-weight="700" text-anchor="middle">↑</text>
+<g>
+  <rect x="466" y="973.3170731707318" width="30" height="28" fill="#0a2749" stroke="#c8102e" stroke-width="1.5"/>
+  <text x="481.0" y="991.3170731707318" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">JP</text>
+</g>
+<g>
+  <rect x="432" y="1113.4146341463415" width="144" height="20" fill="#0a2749"/>
+  <rect x="432" y="1111.4146341463415" width="144" height="2" fill="#c8102e"/>
+  <rect x="432" y="1133.4146341463415" width="144" height="2" fill="#c8102e"/>
+  <rect x="518" y="1113.4146341463415" width="18" height="20" fill="#006878"/>
+  <line x1="435" y1="1113.4146341463415" x2="441" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="445" y1="1113.4146341463415" x2="451" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="455" y1="1113.4146341463415" x2="461" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="465" y1="1113.4146341463415" x2="471" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="494" y1="1113.4146341463415" x2="500" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="504" y1="1113.4146341463415" x2="510" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="514" y1="1113.4146341463415" x2="520" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="540" y1="1113.4146341463415" x2="546" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="550" y1="1113.4146341463415" x2="556" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="560" y1="1113.4146341463415" x2="566" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+  <line x1="570" y1="1113.4146341463415" x2="576" y2="1133.4146341463415" stroke="#fff" stroke-width="0.5"/>
+</g>
+<text x="72" y="1127.4146341463415" font-family="JetBrains Mono, monospace" font-size="11" fill="#0a2749" text-anchor="end" font-weight="700">3,565 ft</text>
+<rect x="446" y="1016.5853658536586" width="116" height="46.82926829268297" fill="url(#perfs-p-p2)"/>
+<line x1="424" y1="1020.4878048780488" x2="440" y2="1020.4878048780488" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1020.4878048780488" x2="584" y2="1020.4878048780488" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1028.2926829268292" x2="440" y2="1028.2926829268292" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1028.2926829268292" x2="584" y2="1028.2926829268292" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1036.09756097561" x2="440" y2="1036.09756097561" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1036.09756097561" x2="584" y2="1036.09756097561" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1043.9024390243903" x2="440" y2="1043.9024390243903" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1043.9024390243903" x2="584" y2="1043.9024390243903" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1051.7073170731708" x2="440" y2="1051.7073170731708" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1051.7073170731708" x2="584" y2="1051.7073170731708" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1059.5121951219512" x2="440" y2="1059.5121951219512" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1059.5121951219512" x2="584" y2="1059.5121951219512" stroke="#1b5e20" stroke-width="1"/>
+<rect x="446" y="1069.2682926829268" width="116" height="53.85365853658527" fill="url(#perfs-p-p2)"/>
+<line x1="424" y1="1073.1149825783973" x2="440" y2="1073.1149825783973" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1073.1149825783973" x2="584" y2="1073.1149825783973" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1080.8083623693378" x2="440" y2="1080.8083623693378" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1080.8083623693378" x2="584" y2="1080.8083623693378" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1088.5017421602788" x2="440" y2="1088.5017421602788" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1088.5017421602788" x2="584" y2="1088.5017421602788" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1096.1951219512193" x2="440" y2="1096.1951219512193" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1096.1951219512193" x2="584" y2="1096.1951219512193" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1103.8885017421603" x2="440" y2="1103.8885017421603" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1103.8885017421603" x2="584" y2="1103.8885017421603" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1111.5818815331008" x2="440" y2="1111.5818815331008" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1111.5818815331008" x2="584" y2="1111.5818815331008" stroke="#1b5e20" stroke-width="1"/>
+<line x1="424" y1="1119.2752613240418" x2="440" y2="1119.2752613240418" stroke="#1b5e20" stroke-width="1"/>
+<line x1="568" y1="1119.2752613240418" x2="584" y2="1119.2752613240418" stroke="#1b5e20" stroke-width="1"/>
+<rect x="446" y="1092.0975609756097" width="116" height="23.41463414634154" fill="url(#perfs-d-p2)"/>
+<line x1="424" y1="1095.0243902439024" x2="440" y2="1095.0243902439024" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1095.0243902439024" x2="584" y2="1095.0243902439024" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1100.8780487804877" x2="440" y2="1100.8780487804877" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1100.8780487804877" x2="584" y2="1100.8780487804877" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1106.7317073170732" x2="440" y2="1106.7317073170732" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1106.7317073170732" x2="584" y2="1106.7317073170732" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1112.5853658536585" x2="440" y2="1112.5853658536585" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1112.5853658536585" x2="584" y2="1112.5853658536585" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1124.2926829268292" width="116" height="36.878048780487916" fill="url(#perfs-d-p2)"/>
+<line x1="424" y1="1127.3658536585365" x2="440" y2="1127.3658536585365" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1127.3658536585365" x2="584" y2="1127.3658536585365" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1133.5121951219512" x2="440" y2="1133.5121951219512" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1133.5121951219512" x2="584" y2="1133.5121951219512" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1139.658536585366" x2="440" y2="1139.658536585366" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1139.658536585366" x2="584" y2="1139.658536585366" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1145.8048780487804" x2="440" y2="1145.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1145.8048780487804" x2="584" y2="1145.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1151.9512195121952" x2="440" y2="1151.9512195121952" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1151.9512195121952" x2="584" y2="1151.9512195121952" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1158.09756097561" x2="440" y2="1158.09756097561" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1158.09756097561" x2="584" y2="1158.09756097561" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1162.9268292682927" width="116" height="4.097560975609667" fill="url(#perfs-d-p2)"/>
+<line x1="424" y1="1163.609756097561" x2="440" y2="1163.609756097561" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1163.609756097561" x2="584" y2="1163.609756097561" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1164.9756097560976" x2="440" y2="1164.9756097560976" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1164.9756097560976" x2="584" y2="1164.9756097560976" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1166.341463414634" x2="440" y2="1166.341463414634" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1166.341463414634" x2="584" y2="1166.341463414634" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1169.9512195121952" width="116" height="7.024390243902417" fill="url(#perfs-d-p2)"/>
+<line x1="424" y1="1171.1219512195123" x2="440" y2="1171.1219512195123" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1171.1219512195123" x2="584" y2="1171.1219512195123" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1173.4634146341464" x2="440" y2="1173.4634146341464" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1173.4634146341464" x2="584" y2="1173.4634146341464" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1175.8048780487804" x2="440" y2="1175.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1175.8048780487804" x2="584" y2="1175.8048780487804" stroke="#c8102e" stroke-width="1"/>
+<rect x="446" y="1180.4878048780488" width="116" height="21.658536585365937" fill="url(#perfs-d-p2)"/>
+<line x1="424" y1="1184.0975609756097" x2="440" y2="1184.0975609756097" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1184.0975609756097" x2="584" y2="1184.0975609756097" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1191.3170731707319" x2="440" y2="1191.3170731707319" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1191.3170731707319" x2="584" y2="1191.3170731707319" stroke="#c8102e" stroke-width="1"/>
+<line x1="424" y1="1198.5365853658536" x2="440" y2="1198.5365853658536" stroke="#c8102e" stroke-width="1"/>
+<line x1="568" y1="1198.5365853658536" x2="584" y2="1198.5365853658536" stroke="#c8102e" stroke-width="1"/>
+<line x1="416" y1="1016.5853658536586" x2="424" y2="1016.5853658536586" stroke="#1b5e20" stroke-width="0.8"/>
+<text x="410" y="1020.0853658536586" font-family="JetBrains Mono, monospace" font-size="10" fill="#1b5e20" text-anchor="end">3,200 ft</text>
+<line x1="416" y1="1063.4146341463415" x2="424" y2="1063.4146341463415" stroke="#1b5e20" stroke-width="0.8"/>
+<line x1="416" y1="1069.2682926829268" x2="424" y2="1069.2682926829268" stroke="#1b5e20" stroke-width="0.8"/>
+<text x="410" y="1069.8414634146343" font-family="JetBrains Mono, monospace" font-size="10" fill="#1b5e20" text-anchor="end">3,360 / 3,380 ft</text>
+<line x1="416" y1="1092.0975609756097" x2="424" y2="1092.0975609756097" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1095.5975609756097" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,458 ft</text>
+<line x1="416" y1="1115.5121951219512" x2="424" y2="1115.5121951219512" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1123.121951219512" x2="424" y2="1123.121951219512" stroke="#1b5e20" stroke-width="0.8"/>
+<line x1="416" y1="1124.2926829268292" x2="424" y2="1124.2926829268292" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1124.4756097560976" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,538 / 3,564 / 3,568 ft</text>
+<line x1="416" y1="1161.1707317073171" x2="424" y2="1161.1707317073171" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1162.9268292682927" x2="424" y2="1162.9268292682927" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1167.0243902439024" x2="424" y2="1167.0243902439024" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1169.9512195121952" x2="424" y2="1169.9512195121952" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1176.9756097560976" x2="424" y2="1176.9756097560976" stroke="#d97706" stroke-width="0.8"/>
+<line x1="416" y1="1180.4878048780488" x2="424" y2="1180.4878048780488" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1173.2560975609756" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,694 / 3,700 / 3,714 / 3,724 / 3,748 / 3,760 ft</text>
+<line x1="416" y1="1202.1463414634147" x2="424" y2="1202.1463414634147" stroke="#d97706" stroke-width="0.8"/>
+<text x="410" y="1205.6463414634147" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706" text-anchor="end">3,834 ft</text>
+<text x="527.0" y="1104.2926829268292" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#006878" text-anchor="middle">▼</text>
+<rect x="446" y="1251.3170731707316" width="116" height="28.682926829268354" fill="url(#sediment-p2)"/>
+<line x1="80" y1="1251.3170731707316" x2="446" y2="1251.3170731707316" stroke="#8a7550" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.7"/>
+<text x="72" y="1255.3170731707316" font-family="JetBrains Mono, monospace" font-size="11" fill="#8a7550" text-anchor="end" font-weight="600">4,002 ft</text>
+<line x1="440" y1="1280" x2="568" y2="1280" stroke="#0a2749" stroke-width="2.5"/>
+<text x="72" y="1284" font-family="JetBrains Mono, monospace" font-size="11" fill="#0a2749" text-anchor="end" font-weight="700">4,100 ft</text>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="953.3170731707318" width="240" height="64" fill="#fff" stroke="#0a2749" stroke-width="0.8"/>
+  <text x="757" y="971.3170731707318" font-weight="700" fill="#0a2749" font-size="12">JET PUMP BHA</text>
+  <text x="757" y="987.3170731707318" font-size="10.5">Nozzle/throat @ ~3,100 ft</text>
+  <text x="757" y="1001.3170731707318" font-size="10" fill="#6b6242">Wireline-serviceable · no moving parts</text>
+  <line x1="496" y1="987.3170731707318" x2="745" y2="985.3170731707318" stroke="#0a2749" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="1081.4146341463415" width="240" height="96" fill="#fcfaf5" stroke="#c8102e" stroke-width="1.2"/>
+  <text x="757" y="1099.4146341463415" font-weight="700" fill="#c8102e" font-size="12">NEW DUAL-BORE PACKER</text>
+  <text x="757" y="1113.4146341463415" font-weight="700" fill="#c8102e" font-size="11">@ 3,565 ft (reset required)</text>
+  <text x="757" y="1131.4146341463415" font-size="10">Isolates production perfs ABOVE</text>
+  <text x="757" y="1145.4146341463415" font-size="10">from disposal perfs BELOW</text>
+  <text x="757" y="1163.4146341463415" fill="#c8102e" font-size="10" font-weight="600">Existing packer @ 3,120 ft must be pulled</text>
+  <line x1="578" y1="1123.4146341463415" x2="745" y2="1131.4146341463415" stroke="#c8102e" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="694.6341463414634" width="240" height="132" fill="#eaf4ea" stroke="#1b5e20" stroke-width="0.8"/>
+  <text x="757" y="712.6341463414634" font-weight="700" fill="#1b5e20" font-size="12">NEW PRODUCTION PERFS</text>
+  <text x="757" y="726.6341463414634" font-size="10">Upper-zone oil from San Andres</text>
+  <text x="757" y="744.6341463414634" font-size="10.5"><tspan font-weight="600">Int 1:</tspan> 3,200–3,360 ft (160 ft)</text>
+  <text x="757" y="758.6341463414634" font-size="10" fill="#6b6242">960 shots @ 6 SPF</text>
+  <text x="757" y="774.6341463414634" font-size="10" fill="#c8102e" font-style="italic">Gap: 3,360–3,380 ft (no net sand)</text>
+  <text x="757" y="790.6341463414634" font-size="10.5"><tspan font-weight="600">Int 2:</tspan> 3,380–3,564 ft (184 ft)</text>
+  <text x="757" y="804.6341463414634" font-size="10" fill="#6b6242">1,104 shots @ 6 SPF</text>
+  <text x="757" y="820.6341463414634" font-weight="700" fill="#1b5e20" font-size="10.5">Total 344 ft net · 2,064 shots</text>
+  <line x1="584" y1="1069.8536585365853" x2="745" y2="760.6341463414634" stroke="#1b5e20" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="1191.4146341463415" width="240" height="80" fill="#fff4e6" stroke="#d97706" stroke-width="0.8"/>
+  <text x="757" y="1209.4146341463415" font-weight="700" fill="#7a3e00" font-size="12">EXISTING DISPOSAL PERFS</text>
+  <text x="757" y="1225.4146341463415" font-size="10">5 intervals · 3,458 – 3,834 ft</text>
+  <text x="757" y="1239.4146341463415" font-size="10">318 ft total · active commercial SWD</text>
+  <text x="757" y="1257.4146341463415" font-size="10" fill="#6b6242" font-style="italic">Continues after dual-completion workover</text>
+  <line x1="584" y1="1162.9268292682927" x2="745" y2="1231.4146341463415" stroke="#d97706" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="92" y="455.75609756097566" width="240" height="86" fill="#fff" stroke="#c8102e" stroke-width="0.8"/>
+  <text x="104" y="473.75609756097566" font-weight="700" fill="#c8102e" font-size="12">POWER FLUID STRING</text>
+  <text x="104" y="489.75609756097566" font-size="10.5">Clean PF travels DOWN from triplex</text>
+  <text x="104" y="503.75609756097566" font-size="10.5">Terminates at jet pump @ ~3,100 ft</text>
+  <text x="104" y="519.7560975609756" fill="#6b6242" font-size="9.5" font-style="italic">Does NOT pass through packer</text>
+  <text x="104" y="535.7560975609756" fill="#0d3811" font-size="9.5" font-weight="600">Red 2-7/8" EUE string (new)</text>
+  <line x1="332" y1="489.75609756097566" x2="472" y2="489.75609756097566" stroke="#c8102e" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="92" y="660.6341463414634" width="240" height="86" fill="#fff" stroke="#1b5e20" stroke-width="0.8"/>
+  <text x="104" y="678.6341463414634" font-weight="700" fill="#1b5e20" font-size="12">OIL RETURN — ANNULUS UP</text>
+  <text x="104" y="694.6341463414634" font-size="10.5">Oil + spent PF commingled</text>
+  <text x="104" y="708.6341463414634" font-size="10.5">Tubing-casing annulus ABOVE packer</text>
+  <text x="104" y="724.6341463414634" fill="#6b6242" font-size="9.5">Returns to production outlet at wellhead</text>
+  <text x="104" y="740.6341463414634" fill="#0d3811" font-size="9.5" font-weight="600">No tubing string — flows in annulus</text>
+  <line x1="332" y1="694.6341463414634" x2="455.0" y2="694.6341463414634" stroke="#1b5e20" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<g font-family="Inter, sans-serif" font-size="10" fill="#1a1a1a">
+  <rect x="745" y="280.1463414634146" width="240" height="80" fill="#fff" stroke="#006878" stroke-width="0.8"/>
+  <text x="757" y="298.1463414634146" font-weight="700" fill="#006878" font-size="12">INJECTION STRING</text>
+  <text x="757" y="314.1463414634146" font-size="10.5">Waste travels DOWN through tubing</text>
+  <text x="757" y="328.1463414634146" font-size="10.5">Passes THROUGH dual-bore packer</text>
+  <text x="757" y="344.1463414634146" font-size="10">Discharges @ 3,445 ft into disposal zone</text>
+  <line x1="745" y1="314.1463414634146" x2="536" y2="314.1463414634146" stroke="#006878" stroke-width="0.6" stroke-dasharray="2,2"/>
+</g>
+<g font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a">
+  <rect x="22" y="105" width="200" height="120" fill="#fff" stroke="#d8cfb8"/>
+  <text x="32" y="124" font-weight="700" fill="#0a2749" font-size="11">FLOW KEY</text>
+  <line x1="32" y1="132" x2="215" y2="132" stroke="#d8cfb8"/>
+  <rect x="32" y="142" width="16" height="11" fill="#c8102e"/>
+  <text x="54" y="151" font-size="10">Power fluid DOWN</text>
+  <rect x="32" y="160" width="16" height="11" fill="#006878"/>
+  <text x="54" y="169" font-size="10">Waste DOWN (injection)</text>
+  <rect x="32" y="178" width="16" height="11" fill="url(#annulus-oil)" stroke="#6b6242" stroke-width="0.3"/>
+  <text x="54" y="187" font-size="10">Oil UP (annulus)</text>
+  <text x="32" y="206" font-size="9" fill="#0a2749" font-weight="600">JP = Jet Pump BHA</text>
+  <text x="32" y="220" font-size="9" fill="#6b6242">Dual-bore packer isolates zones</text>
+</g>
+</svg>
+    </div>
+
+    <aside class="legend">
+      <h3>Legend — Future State</h3>
+      <div class="legend-group">
+        <div class="legend-group-title">Tubing Strings &amp; Flow</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#c8102e"></span> Power-fluid string · PF <strong>DOWN</strong></div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#006878"></span> Injection string · waste <strong>DOWN</strong></div>
+        <div class="legend-item"><span class="legend-swatch annulus"></span> Annulus · oil <strong>UP</strong> (above packer)</div>
+      </div>
+      <div class="legend-group">
+        <div class="legend-group-title">New Components</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#0a2749; border: 2px solid #c8102e"></span> Dual wellhead</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#0a2749"></span> Jet pump BHA</div>
+        <div class="legend-item"><span class="legend-swatch perf-p"></span> Production perfs (new)</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#0a2749; border: 2px solid #c8102e"></span> Dual-bore packer @ ~3,565 ft</div>
+      </div>
+      <div class="legend-group">
+        <div class="legend-group-title">Unchanged</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#2a3b5a"></span> 7" Production Casing</div>
+        <div class="legend-item"><span class="legend-swatch perf-d"></span> Disposal Perfs (existing, 5 intervals)</div>
+      </div>
+      <div class="legend-group">
+        <div class="legend-sub-explainer">
+          <strong>How it works.</strong> Power fluid goes down the red string to the jet pump above the packer.
+          The jet pump draws oil from the upper-zone perfs into the annulus, where commingled oil + spent PF
+          returns up to the production outlet. A separate teal string carries waste down through the
+          dual-bore packer to the disposal perfs below.
+        </div>
+      </div>
     </aside>
   </div>
 
-  <div class="section">
-    <h2>Future State — Corrected Construction Basis</h2>
-    <table class="table">
-      <thead><tr><th>Component</th><th>Specification</th><th>Depth (MD)</th><th>Status / Notes</th></tr></thead>
+  <div class="table-section">
+    <h2>Future State — Well Construction Data</h2>
+    <p class="table-lead">After the dual-completion workover. <span class="status-new">NEW</span> items are added; <span class="status-resolved">✓ RESOLVED</span> items carry current-state reconciled values forward.</p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 22%;">Component</th>
+          <th style="width: 26%;">Specification</th>
+          <th style="width: 18%;">Depth (MD)</th>
+          <th style="width: 34%;">Status / Notes</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td><strong>Power Fluid String</strong> <span class="status-new">New</span></td><td class="mono">2-7/8 in. EUE</td><td class="mono">0 - ~3,100 ft</td><td>Terminates at jet pump BHA above packer.</td></tr>
-        <tr><td><strong>Injection String</strong> <span class="status-new">New</span></td><td class="mono">2-7/8 in. EUE</td><td class="mono">0 - below packer</td><td>Must pass through dual-bore packer and discharge below it.</td></tr>
-        <tr><td><strong>New Packer</strong> <span class="status-new">New</span></td><td>Dual-bore</td><td class="mono">~3,450-3,458 ft</td><td><span class="status-flag">Corrected</span> Existing 3,120 ft packer must be pulled. Final depth pending log confirmation.</td></tr>
-        <tr><td><strong>Production Perfs</strong> <span class="status-new">New</span></td><td>2 intervals</td><td class="mono">3,200-3,360 ft<br>3,380-3,448 ft</td><td><span class="status-flag">Corrected</span> Revised to eliminate overlap with disposal interval. Total revised net = <strong>228 ft</strong>.</td></tr>
-        <tr><td><strong>Disposal Perfs</strong></td><td>Existing 5 intervals</td><td class="mono">3,458-3,834 ft</td><td>Unchanged active SWD interval.</td></tr>
-        <tr><td><strong>Jet Pump BHA</strong> <span class="status-new">New</span></td><td>Nozzle / throat assembly</td><td class="mono">~3,100 ft</td><td>Wireline serviceable.</td></tr>
-        <tr><td><strong>Dual Wellhead</strong> <span class="status-new">New</span></td><td>PF IN · OIL OUT · WASTE IN</td><td class="mono">Surface</td><td>Required for corrected dual-completion concept.</td></tr>
+        <tr>
+          <td><strong>Conductor</strong></td>
+          <td class="mono">14"</td>
+          <td class="mono">0 – 40 ft</td>
+          <td>Unchanged.</td>
+        </tr>
+        <tr>
+          <td><strong>Surface Casing</strong></td>
+          <td class="mono">9-5/8" · 36 lb/ft · J-55 STC</td>
+          <td class="mono">0 – 586 ft</td>
+          <td>Unchanged.</td>
+        </tr>
+        <tr>
+          <td><strong>Production Casing</strong></td>
+          <td class="mono">7" · 26 lb/ft · J-55 LTC</td>
+          <td class="mono">0 – 4,100 ft</td>
+          <td>Unchanged.</td>
+        </tr>
+        <tr>
+          <td><strong>Top of Cement</strong></td>
+          <td>Behind 7" casing</td>
+          <td class="mono">2,600 ft</td>
+          <td>Unchanged — verify adequacy per RRC Permit Condition 1.</td>
+        </tr>
+        <tr>
+          <td><strong>Power Fluid String</strong> <span class="status-new">NEW</span></td>
+          <td class="mono">2-7/8" EUE · carries PF down to jet pump</td>
+          <td class="mono">0 – ~3,100 ft</td>
+          <td>Short string; terminates above packer at jet pump BHA.</td>
+        </tr>
+        <tr>
+          <td><strong>Injection String</strong> <span class="status-new">NEW</span></td>
+          <td class="mono">2-7/8" EUE · passes through dual-bore packer</td>
+          <td class="mono">0 – ~3,445 ft</td>
+          <td>Long string; discharges waste above first disposal perf.</td>
+        </tr>
+        <tr>
+          <td><strong>Packer</strong> <span class="status-new">NEW</span></td>
+          <td>Dual-bore · 4,000+ PSI differential</td>
+          <td class="mono">~3,565 ft</td>
+          <td><strong>Existing packer at 3,120 ft must be pulled first.</strong> New packer isolates upper production zone from lower disposal zone. <a href="#disc-6" class="status-flag">⚑ Geometry finding</a></td>
+        </tr>
+        <tr>
+          <td><strong>Production Perfs</strong> <span class="status-new">NEW</span></td>
+          <td>6 SPF · 2 intervals</td>
+          <td class="mono">3,200 – 3,360 ft<br>3,380 – 3,564 ft</td>
+          <td>344 ft net · 2,064 shots · gap at 3,360–3,380 ft.</td>
+        </tr>
+        <tr>
+          <td><strong>Disposal Perfs</strong></td>
+          <td>5 intervals · existing</td>
+          <td class="mono">3,458 – 3,834 ft</td>
+          <td>318 ft total · continues active SWD after workover.</td>
+        </tr>
+        <tr>
+          <td><strong>Jet Pump BHA</strong> <span class="status-new">NEW</span></td>
+          <td>Nozzle/throat assembly</td>
+          <td class="mono">~3,100 ft (in tubing)</td>
+          <td>Wireline-serviceable · no moving parts downhole.</td>
+        </tr>
+        <tr>
+          <td><strong>Dual Wellhead</strong> <span class="status-new">NEW</span></td>
+          <td>3-outlet configuration</td>
+          <td class="mono">Surface</td>
+          <td>PF IN · OIL OUT · WASTE IN. Replaces single wellhead.</td>
+        </tr>
+        <tr>
+          <td><strong>Surface Equipment</strong> <span class="status-new">NEW</span></td>
+          <td>PF pump · separator · tanks</td>
+          <td class="mono">Surface</td>
+          <td>$58,500 – $137,000 (see Well Plan for breakdown).</td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="warn"><strong>Engineering hold point:</strong> because the packer window is narrow, this concept should be treated as <strong>pre-signoff engineering basis</strong> until a log confirms exact top-of-disposal placement and acceptable packer seating depth.</div>
-
-  <div class="footer"><div>Tejas Environmental Solutions · Board-Confidential</div><div>Page 2 of 3 · Future State Corrected</div></div>
+  <div class="page-footer">
+    <div><span class="f-name">Tejas Environmental Solutions</span> · Board-Confidential</div>
+    <div>Page 2 of 3 · Future State</div>
+  </div>
 </section>
 
-<section class="page">
-  <div class="header">
-    <div>
-      <div class="eyebrow" style="color:var(--green)">Reconciliation Log · Rev. 7</div>
-      <div class="small">Summary of what was resolved and what was corrected in this update.</div>
-    </div>
-    <div class="meta">April 2026 · Rev. 7<br><span style="color:var(--green);font-weight:700">6 material items addressed</span></div>
-  </div>
-
-  <h1>Reconciliation Log</h1>
-  <p class="subtitle">What changed, why it changed, and what still needs sign-off.</p>
-
-  <div class="item-block">
-    <div class="item-head"><div class="num">1</div><h3>Packer depth</h3><span class="status-ok">Resolved</span></div>
-    <div class="item-body">Current packer depth remains <strong>3,120 ft</strong> based on June 2023 Tejas workover reports. Older 3,205 ft and 3,149/3,150 ft references are historical states, not current state.</div>
-  </div>
-
-  <div class="item-block">
-    <div class="item-head"><div class="num">2</div><h3>Packer manufacturer era</h3><span class="status-ok">Resolved</span></div>
-    <div class="item-body">The current packer is treated as a <strong>Versatile On/Off unit from the 2023 workover era</strong>. Legacy D&amp;L references should not be carried into the current-state narrative.</div>
-  </div>
-
-  <div class="item-block">
-    <div class="item-head"><div class="num">3</div><h3>Active disposal perforations</h3><span class="status-ok">Resolved</span></div>
-    <div class="item-body">Correct active disposal intervals are <strong>five intervals from 3,458-3,834 ft totaling 318 ft</strong>. The simplified two-interval representation is no longer used as the current basis.</div>
-  </div>
-
-  <div class="item-block">
-    <div class="item-head"><div class="num">4</div><h3>PBTD / fill</h3><span class="status-ok">Resolved</span></div>
-    <div class="item-body">Current PBTD is <strong>4,002 ft</strong>. The old 3,820 ft sediment reference was legacy original-state information, not current well condition.</div>
-  </div>
-
-  <div class="item-block">
-    <div class="item-head"><div class="num">5</div><h3>Current tubing spec and volumetrics</h3><span class="status-ok">Resolved</span></div>
-    <div class="item-body">Current tubing is <strong>4-1/2 in. EUE polycore, 12.75 lb/ft, 3.4 in. minimum ID</strong>. The old 0.00579 bbl/ft number was removed as a current-state value and replaced with <strong>0.01123 bbl/ft</strong>.</div>
-  </div>
-
-  <div class="item-block">
-    <div class="item-head"><div class="num">6</div><h3>Future-state geometry</h3><span class="status-flag">Corrected</span></div>
-    <div class="item-body">
-      The prior future-state drawing had three internal contradictions: (1) packer below the top of disposal, (2) production interval overlapping disposal interval, and (3) injection discharge inconsistent with the new packer location. Rev. 7 corrects that by:
-      <ul>
-        <li>shortening production interval 2 to <strong>3,380-3,448 ft</strong></li>
-        <li>moving the target dual-bore packer window to <strong>~3,450-3,458 ft</strong></li>
-        <li>requiring injection discharge to remain <strong>below the packer</strong></li>
-      </ul>
-      Final placement still needs field confirmation.
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>Summary Table</h2>
-    <table class="table">
-      <thead><tr><th>#</th><th>Item</th><th>Status</th><th>Current / Corrected Value</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr><td class="mono">1</td><td>Packer depth</td><td><span class="status-ok">Resolved</span></td><td class="mono">3,120 ft</td><td>Use as current state.</td></tr>
-        <tr><td class="mono">2</td><td>Packer manufacturer era</td><td><span class="status-ok">Resolved</span></td><td>Versatile On/Off</td><td>Carry forward as current basis until exact model ticket is pulled.</td></tr>
-        <tr><td class="mono">3</td><td>Disposal perforations</td><td><span class="status-ok">Resolved</span></td><td class="mono">3,458-3,834 ft · 5 intervals · 318 ft</td><td>Update all downstream references.</td></tr>
-        <tr><td class="mono">4</td><td>PBTD</td><td><span class="status-ok">Resolved</span></td><td class="mono">4,002 ft</td><td>Use as current cleanout basis.</td></tr>
-        <tr><td class="mono">5</td><td>Tubing / capacity</td><td><span class="status-ok">Resolved</span></td><td class="mono">4-1/2 in. polycore · 0.01123 bbl/ft</td><td>Recalculate any displacement or batch volumes.</td></tr>
-        <tr><td class="mono">6</td><td>Future-state geometry</td><td><span class="status-flag">Corrected</span></td><td>Prod 2 shortened; packer window shifted to ~3,450-3,458 ft</td><td>Confirm with log before sign-off.</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="footer"><div>Tejas Environmental Solutions · Board-Confidential · Engineer Sign-Off Recommended</div><div>Page 3 of 3 · Reconciliation Log</div></div>
-</section>
-
-</div>
-
-<footer style="background:var(--navy-deep);color:#b8c7dc;padding:28px 0;margin-top:40px">
-  <div class="doc" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
-    <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase"><span style="color:#fff;font-weight:700">Tejas Environmental Solutions</span><br><span style="font-size:10px;color:#8a9bb4">Proudly Texas Owned</span></div>
-    <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;text-align:right;color:#8a9bb4">WE Big Lake SWD Well #2 · Permit #14600<br>Confidential · April 2026 · Rev. 7 Corrected</div>
-  </div>
-</footer>
-</body>
-</html>
+<!-- ================================================================
+     PAGE 3 — RECONCILIATION LOG (evidence-based)
+     ================================================================ -->
+<section class="page disc-page anchor-target" id="reconciliation">
+  <div class="page-header">
+    <div
