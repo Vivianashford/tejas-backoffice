@@ -1,6 +1,6 @@
 {
   "source": "Yahoo Finance chart API",
-  "updatedAt": "2026-04-23T04:55:13.682907+00:00",
+  "updatedAt": "2026-04-23T05:10:20.798176+00:00",
   "feeds": [
     {
       "sym": "WTI",
@@ -8,10 +8,10 @@
       "venue": "NYMEX",
       "unit": "USD/bbl",
       "sourceSymbol": "CL=F",
-      "last": 94.21,
+      "last": 94.12,
       "previousClose": 92.96,
-      "change": 1.25,
-      "pct": 1.34,
+      "change": 1.16,
+      "pct": 1.25,
       "history": [
         94.49,
         94.48,
@@ -23,9 +23,12 @@
         94.38,
         94.23,
         94.25,
-        94.21
+        94.19,
+        94.06,
+        94.25,
+        94.12
       ],
-      "asOf": 1776919512
+      "asOf": 1776920416
     },
     {
       "sym": "BRENT",
@@ -33,10 +36,10 @@
       "venue": "ICE",
       "unit": "USD/bbl",
       "sourceSymbol": "BZ=F",
-      "last": 103.13,
+      "last": 103.03,
       "previousClose": 101.91,
-      "change": 1.22,
-      "pct": 1.2,
+      "change": 1.12,
+      "pct": 1.1,
       "history": [
         103.2,
         103.31,
@@ -48,9 +51,12 @@
         103.28,
         103.16,
         103.19,
-        103.13
+        103.11,
+        103.0,
+        103.19,
+        103.03
       ],
-      "asOf": 1776919512
+      "asOf": 1776920416
     }
   ]
 }
