@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident Report Form</title>
+<!-- jsPDF + AutoTable for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root { --navy:#1B2A4A; --accent:#2E75B6; --red:#C23B22; --red-light:#FFF3F0; --gray:#666; --light:#F7F8FA; --border:#D0D5DD; --white:#FFFFFF; --shadow:0 2px 8px rgba(0,0,0,0.08); --radius:10px; --green:#2E7D32; --green-light:#E8F5E9; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#EEF1F5;color:#1a1a1a;line-height:1.5;min-height:100vh}
+  .header-bar{background:var(--navy);color:var(--white);padding:16px 20px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+  .header-bar h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+  .header-bar p{font-size:12px;opacity:.75;margin-top:2px}
+  .urgent-banner{background:var(--red-light);border-left:4px solid var(--red);padding:12px 16px;margin:16px auto;max-width:640px;border-radius:0 var(--radius) var(--radius) 0;font-size:13px;color:var(--red);font-weight:600;line-height:1.4}
+  .form-wrap{max-width:640px;margin:0 auto 40px;padding:0 16px}
+  .section{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .section-header{background:var(--navy);color:var(--white);padding:14px 20px;display:flex;align-items:center;gap:10px}
+  .section-header .num{background:var(--accent);color:var(--white);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .section-header h2{font-size:16px;font-weight:600}
+  .section-body{padding:20px}
+  .section-hint{font-size:13px;color:var(--gray);margin-bottom:16px;line-height:1.4}
+  .field{margin-bottom:18px}
+  label{display:block;font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px}
+  label .req{color:var(--red);margin-left:2px}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;font-family:inherit;color:#1a1a1a;background:var(--white);transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,117,182,.15)}
+  textarea{resize:vertical;min-height:120px}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip-group input[type=checkbox]{display:none}
+  .chip-group label.chip{display:inline-flex;align-items:center;padding:8px 16px;border:1.5px solid var(--border);border-radius:20px;font-size:14px;font-weight:500;color:var(--gray);cursor:pointer;transition:all .2s;user-select:none;margin-bottom:0}
+  .chip-group input:checked+label.chip{background:var(--accent);border-color:var(--accent);color:var(--white);font-weight:600}
+  .id-bar{background:var(--navy);color:var(--white);padding:10px 16px;margin:16px auto;max-width:640px;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;font-size:13px}
+  .id-bar .id-label{opacity:.7}
+  .id-bar .id-value{font-family:'SF Mono','Consolas',monospace;font-weight:700;letter-spacing:1px}
+  .photo-zone{border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+  .photo-zone:hover,.photo-zone.drag-over{border-color:var(--accent);background:rgba(46,117,182,.04)}
+  .photo-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .photo-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .photo-preview .thumb{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border)}
+  .photo-preview .thumb img{width:100%;height:100%;object-fit:cover}
+  .photo-preview .thumb .remove-thumb{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+  .cc-section{background:var(--light);border:1.5px dashed var(--border);border-radius:8px;padding:16px;margin-top:4px}
+  .cc-hint{font-size:12px;color:var(--gray);margin-top:6px;line-height:1.3}
+  .cc-error{font-size:12px;color:var(--red);margin-top:6px;display:none}
+  .recipients-info{background:var(--light);border-radius:8px;padding:12px 16px;margin-bottom:16px}
+  .recipients-info .email-tag{display:inline-block;background:var(--accent);color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;margin:2px 4px 2px 0}
+  .sig-canvas-wrap{border:1.5px solid var(--border);border-radius:8px;overflow:hidden;position:relative;touch-action:none;background:#FAFBFC}
+  .sig-canvas-wrap canvas{display:block;width:100%;height:150px;cursor:crosshair}
+  .sig-placeholder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#bbb;font-size:14px;pointer-events:none;transition:opacity .2s}
+  .clear-sig{display:inline-block;margin-top:8px;padding:6px 14px;font-size:13px;color:var(--gray);background:var(--light);border:1px solid var(--border);border-radius:6px;cursor:pointer}
+  .submit-section{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 20px;margin-bottom:16px}
+  .btn-submit{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:background .2s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn-submit:hover{background:#245F96}
+  .btn-submit:active{transform:scale(.99)}
+  .btn-submit:disabled{background:#999;cursor:not-allowed}
+  .submit-note{text-align:center;font-size:12px;color:var(--gray);margin-top:12px}
+  .spinner{display:none;width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center;padding:20px}
+  .overlay.show{display:flex}
+  .overlay-card{background:#fff;border-radius:16px;padding:40px 30px;text-align:center;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+  .overlay-card .icon-circle{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px}
+  .overlay-card .icon-circle.success{background:var(--green-light);color:var(--green)}
+  .overlay-card .icon-circle.error{background:var(--red-light);color:var(--red)}
+  .overlay-card h3{font-size:20px;color:var(--navy);margin-bottom:8px}
+  .overlay-card p{font-size:14px;color:var(--gray);margin-bottom:6px;line-height:1.5}
+  .overlay-card .email-list{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px}
+  .overlay-card .id-display{font-family:'SF Mono','Consolas',monospace;background:var(--light);padding:6px 14px;border-radius:6px;display:inline-block;font-size:14px;font-weight:700;color:var(--navy);margin:8px 0 16px;letter-spacing:1px}
+  @media(max-width:480px){.row-2{grid-template-columns:1fr}.header-bar h1{font-size:17px}.section-body{padding:16px}.id-bar{flex-direction:column;gap:4px;text-align:center}}
+  @media print{body{background:#fff}.header-bar{position:static;box-shadow:none}.btn-submit,.clear-sig,.urgent-banner,.cc-section,.photo-zone,.photo-zone input,.remove-thumb{display:none!important}.section{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.sig-canvas-wrap{border:1px solid #999}}
+</style>
+</head>
+<body>
+<div class="header-bar"><h1>Incident Report Form</h1><p>Health, Safety & Environment (HSE)</p></div>
+<div class="form-wrap">
+  <div class="urgent-banner"><span>&#9888;</span> All employees involved and witnesses must complete this form and submit to HSE within 48 hours of the incident.</div>
+  <div class="id-bar"><span class="id-label">Incident Report ID</span><span class="id-value" id="incidentId"></span></div>
+  <form id="incidentForm" enctype="multipart/form-data">
+    <!-- legacy hidden (unused by backend now) -->
+    <input type="hidden" id="hiddenId"><input type="hidden" id="hiddenTimestamp"><input type="hidden" id="hiddenTypes">
+    <div class="section"><div class="section-header"><div class="num">1</div><h2>Who Was Involved?</h2></div><div class="section-body">
+      <p class="section-hint">Enter your information and the names of anyone else involved or who witnessed the incident.</p>
+      <div class="field"><label>Your Full Name <span class="req">*</span></label><input id="reporterName" type="text" required placeholder="First and Last Name"></div>
+      <div class="row-2"><div class="field"><label>Position / Title <span class="req">*</span></label><input id="positionField" type="text" required placeholder="e.g. Field Operator"></div>
+      <div class="field"><label>Phone Number</label><input id="phoneField" type="tel" placeholder="(555) 555-5555"></div></div>
+      <div class="field"><label>Reporter Email</label><input id="reporterEmail" type="email" placeholder="you@company.com"></div>
+      <div class="field"><label>Others Involved / Witnesses</label><textarea id="witnessesField" rows="3" placeholder="List names and roles of anyone else involved or who witnessed the incident"></textarea></div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">2</div><h2>What Happened?</h2></div><div class="section-body">
+      <p class="section-hint">Describe exactly what happened, in order. Include as much detail as possible.</p>
+      <div class="field"><label>Type of Incident <span class="req">*</span></label>
+        <div class="chip-group" id="chipGroup">
+          <input type="checkbox" id="t1" value="Accident"><label for="t1" class="chip">Accident</label>
+          <input type="checkbox" id="t2" value="Spill"><label for="t2" class="chip">Spill</label>
+          <input type="checkbox" id="t3" value="Leak"><label for="t3" class="chip">Leak</label>
+          <input type="checkbox" id="t4" value="Near-Miss"><label for="t4" class="chip">Near-Miss</label>
+          <input type="checkbox" id="t5" value="First Aid"><label for="t5" class="chip">First Aid</label>
+          <input type="checkbox" id="t6" value="Medical Emergency"><label for="t6" class="chip">Medical Emergency</label>
+          <input type="checkbox" id="t7" value="Other"><label for="t7" class="chip">Other</label>
+        </div>
+      </div>
+      <div class="field"><label>Detailed Description <span class="req">*</span></label><textarea id="descField" rows="6" required placeholder="Describe what happened step by step, in the order it occurred..."></textarea></div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">3</div><h2>When Did It Happen?</h2></div><div class="section-body">
+      <div class="row-2"><div class="field"><label>Date of Incident <span class="req">*</span></label><input id="incidentDate" type="date" required></div>
+      <div class="field"><label>Approximate Time <span class="req">*</span></label><input id="incidentTime" type="time" required></div></div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">4</div><h2>Where Did It Happen?</h2></div><div class="section-body">
+      <p class="section-hint">Include the facility name and the specific location within the facility (e.g., Gonzales, washout bays).</p>
+      <div class="field"><label>Facility Name <span class="req">*</span></label><input id="facilityField" type="text" required placeholder="e.g. Gonzales Plant"></div>
+      <div class="field"><label>Specific Location Within Facility <span class="req">*</span></label><input id="locationField" type="text" required placeholder="e.g. Washout bays, loading dock, tank farm"></div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">5</div><h2>Why Did It Happen?</h2></div><div class="section-body">
+      <p class="section-hint">Explain why you believe this happened. Example: "The hose burst when the truck was being unloaded."</p>
+      <div class="field"><label>Root Cause / Explanation <span class="req">*</span></label><textarea id="whyField" rows="5" required placeholder="Explain the cause of the incident to the best of your knowledge..."></textarea></div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">6</div><h2>Photo / File Evidence</h2></div><div class="section-body">
+      <p class="section-hint">Attach photos of the scene, damage, equipment, or any other evidence. You can take photos directly from your phone camera.</p>
+      <div class="field"><div class="photo-zone" id="photoZone">
+        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx" capture="environment">
+        <div class="upload-text"><strong>Tap to take a photo</strong> or choose files</div>
+        <div class="upload-limit">JPG, PNG, PDF, DOC — max 5MB each, up to 5 files</div>
+      </div><div class="photo-preview" id="photoPreview"></div></div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">7</div><h2>Additional Information</h2></div><div class="section-body">
+      <p class="section-hint">Add anything else that helps paint a clear picture. The more detail, the better the report.</p>
+      <div class="field"><label>Additional Details</label><textarea id="additionalField" rows="5" placeholder="Any other relevant information, observations, or context..."></textarea></div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">8</div><h2>Signature</h2></div><div class="section-body">
+      <div class="row-2"><div class="field"><label>Printed Name <span class="req">*</span></label><input id="printedName" type="text" required placeholder="Your printed name"></div>
+      <div class="field"><label>Date Signed <span class="req">*</span></label><input id="signDate" type="date" required></div></div>
+      <div class="field" style="margin-top:12px"><label>Signature (draw below) <span class="req">*</span></label>
+        <div class="sig-canvas-wrap" id="sigWrap"><canvas id="sigCanvas"></canvas><div class="sig-placeholder" id="sigPlaceholder">Sign here with finger or mouse</div></div>
+        <button type="button" class="clear-sig" onclick="clearSig()">Clear Signature</button>
+      </div>
+    </div></div>
+
+    <div class="section"><div class="section-header"><div class="num">9</div><h2>Report Delivery</h2></div><div class="section-body">
+      <div class="recipients-info"><p style="font-weight:600;color:var(--navy);margin-bottom:8px;">This report (as a PDF) will be delivered to:</p>
+        <span class="email-tag">jbaustert@njectllc.com</span><span style="font-size:12px;color:var(--gray);margin:0 2px;">primary</span><br>
+        <span class="email-tag" style="margin-top:4px;">rseymour@swanenergyinc.onmicrosoft.com</span><span style="font-size:12px;color:var(--gray);margin:0 2px;">CC</span>
+      </div>
+      <div class="field"><label>CC Additional Recipients</label><div class="cc-section"><input type="text" id="additionalCC" placeholder="email1@company.com, email2@company.com"><p class="cc-hint">Add backup email addresses separated by commas.</p><p class="cc-error" id="ccError"></p></div></div>
+    </div></div>
+
+    <div class="submit-section"><button type="submit" class="btn-submit" id="submitBtn"><span id="btnText">Submit Incident Report</span><div class="spinner" id="btnSpinner"></div></button>
+      <p class="submit-note">A PDF report will be generated, emailed to HSE, and downloaded for your records.</p>
+    </div>
+  </form>
+</div>
+
+<div class="overlay" id="successOverlay"><div class="overlay-card"><div class="icon-circle success">&#10003;</div><h3>Report Submitted</h3><p>Your incident report PDF has been emailed to HSE.</p><div class="email-list">jbaustert@njectllc.com (primary)<br>rseymour@swanenergyinc.onmicrosoft.com (CC)</div><p style="font-size:12px;margin-bottom:4px;">Report ID:</p><div class="id-display" id="successId"></div><p style="font-size:12px;color:#999;margin-bottom:16px;">A PDF copy has been downloaded to your device.</p><div><button class="btn-action primary" id="redownloadBtn">&#8681; Download PDF Again</button><button class="btn-action secondary" onclick="resetForm()">Submit Another</button></div></div></div>
+<div class="overlay" id="errorOverlay"><div class="overlay-card"><div class="icon-circle error">&#10007;</div><h3 style="color:var(--red);">Submission Failed</h3><p>There was a problem sending your report. Your data has NOT been lost.</p><p style="font-size:13px;">Check your internet connection and try again. If the problem persists, use the button below to download the PDF and email it manually.</p><div style="margin-top:16px;"><button class="btn-action primary" id="fallbackDownloadBtn">&#8681; Download PDF</button><button class="btn-action secondary" onclick="document.getElementById('errorOverlay').classList.remove('show')">Try Again</button></div></div></div>
+
+<script>
+(function(){'use strict';const { jsPDF }=window.jspdf;function generateId(){const n=new Date(),y=n.getFullYear().toString().slice(-2),m=String(n.getMonth()+1).padStart(2,'0'),d=String(n.getDate()).padStart(2,'0'),h=String(n.getHours()).padStart(2,'0'),min=String(n.getMinutes()).padStart(2,'0'),rand=Math.random().toString(36).substring(2,6).toUpperCase();return 'IR-'+y+m+d+'-'+h+min+'-'+rand}
+let incidentId=generateId();document.getElementById('incidentId').textContent=incidentId;document.getElementById('hiddenId').value=incidentId;const today=new Date().toISOString().split('T')[0];document.getElementById('signDate').value=today;
+// Signature pad
+const canvas=document.getElementById('sigCanvas');const ctx=canvas.getContext('2d');const placeholder=document.getElementById('sigPlaceholder');let drawing=false,hasSig=false;function resizeCanvas(){const sigData=hasSig?canvas.toDataURL():null;const rect=canvas.parentElement.getBoundingClientRect();canvas.width=rect.width;canvas.height=150;ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';if(sigData&&hasSig){const img=new Image();img.onload=()=>ctx.drawImage(img,0,0);img.src=sigData}}resizeCanvas();window.addEventListener('resize',resizeCanvas);function getPos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return {x:t.clientX-r.left,y:t.clientY-r.top}}function startDraw(e){e.preventDefault();drawing=true;hasSig=true;placeholder.style.opacity='0';const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)}function draw(e){if(!drawing)return;e.preventDefault();const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke()}function stopDraw(){drawing=false}canvas.addEventListener('mousedown',startDraw);canvas.addEventListener('mousemove',draw);canvas.addEventListener('mouseup',stopDraw);canvas.addEventListener('mouseleave',stopDraw);canvas.addEventListener('touchstart',startDraw,{passive:false});canvas.addEventListener('touchmove',draw,{passive:false});canvas.addEventListener('touchend',stopDraw);window.clearSig=function(){ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;placeholder.style.opacity='1'}
+// Photos
+const fileInput=document.getElementById('fileInput');const photoPreview=document.getElementById('photoPreview');const photoZone=document.getElementById('photoZone');let selectedFiles=[];photoZone.addEventListener('dragover',e=>{e.preventDefault();photoZone.classList.add('drag-over')});photoZone.addEventListener('dragleave',()=>photoZone.classList.remove('drag-over'));photoZone.addEventListener('drop',()=>photoZone.classList.remove('drag-over'));fileInput&&fileInput.addEventListener('change',function(){const newFiles=Array.from(this.files);for(const file of newFiles){if(selectedFiles.length>=5)break;if(file.size>5*1024*1024){alert(file.name+' exceeds 5MB and was skipped.');continue}selectedFiles.push(file)}renderPreviews();rebuildFileInput()});function renderPreviews(){photoPreview.innerHTML='';selectedFiles.forEach((file,i)=>{const thumb=document.createElement('div');thumb.className='thumb';if(file.type.startsWith('image/')){const img=document.createElement('img');img.src=URL.createObjectURL(file);thumb.appendChild(img)}else{thumb.innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--light);font-size:10px;color:var(--gray);text-align:center;padding:4px;">'+file.name.slice(0,12)+'</div>'}const btn=document.createElement('button');btn.className='remove-thumb';btn.innerHTML='&times;';btn.type='button';btn.onclick=()=>{selectedFiles.splice(i,1);renderPreviews();rebuildFileInput()};thumb.appendChild(btn);photoPreview.appendChild(thumb)})}function rebuildFileInput(){const dt=new DataTransfer();selectedFiles.forEach(f=>dt.items.add(f));if(fileInput) fileInput.files=dt.files}
+function validateEmails(str){if(!str||!str.trim())return {valid:true,emails:[]};const emails=str.split(',').map(e=>e.trim()).filter(Boolean);const re=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;const invalid=emails.filter(e=>!re.test(e));return {valid:invalid.length===0,emails,invalid}}
+function getSelectedTypes(){const checked=document.querySelectorAll('#chipGroup input[type="checkbox"]:checked');return Array.from(checked).map(cb=>cb.value).join(', ')}
+let lastPdfBlob=null;function generatePDF(data){const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});const pageW=doc.internal.pageSize.getWidth();const pageH=doc.internal.pageSize.getHeight();const margin=18;const contentW=pageW-margin*2;let y=margin;doc.setFillColor(27,42,74);doc.rect(0,0,pageW,28,'F');doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text('HSE INCIDENT REPORT',pageW/2,12,{align:'center'});doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Health, Safety & Environment',pageW/2,18,{align:'center'});doc.setFillColor(46,117,182);doc.rect(0,28,pageW,10,'F');doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text('Report ID: '+data.id,margin,34.5);doc.text('Submitted: '+data.timestamp,pageW-margin,34.5,{align:'right'});y=46;function sectionHeader(t){if(y>pageH-40){doc.addPage();y=margin}doc.setFillColor(27,42,74);doc.rect(margin,y,contentW,8,'F');doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(t,margin+4,y+5.5);y+=12;doc.setTextColor(30,30,30)}function fieldRow(l,v){if(y>pageH-20){doc.addPage();y=margin}doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(100,100,100);doc.text(l,margin+2,y);doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);const lines=doc.splitTextToSize(v||'N/A',contentW-4);doc.text(lines,margin+2,y+5);y+=5+(lines.length*4.2)+3}function textBlock(l,v){if(y>pageH-30){doc.addPage();y=margin}doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(100,100,100);doc.text(l,margin+2,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);const lines=doc.splitTextToSize(v||'N/A',contentW-4);for(let i=0;i<lines.length;i++){if(y>pageH-15){doc.addPage();y=margin}doc.text(lines[i],margin+2,y);y+=4.2}y+=3}
+sectionHeader('1. WHO WAS INVOLVED');doc.autoTable({startY:y,margin:{left:margin,right:margin},theme:'grid',headStyles:{fillColor:[240,243,247],textColor:[27,42,74],fontStyle:'bold',fontSize:9},bodyStyles:{fontSize:9,textColor:[30,30,30]},columnStyles:{0:{cellWidth:38,fontStyle:'bold',textColor:[100,100,100]}},body:[['Reporter',data.reporterName],['Position',data.position],['Phone',data.phone||'N/A'],['Email',data.email||'N/A'],['Witnesses',data.witnesses||'None listed']],});y=doc.lastAutoTable.finalY+8;sectionHeader('2. WHAT HAPPENED');fieldRow('Incident Type',data.types);textBlock('Description',data.description);sectionHeader('3. WHEN');doc.autoTable({startY:y,margin:{left:margin,right:margin},theme:'grid',bodyStyles:{fontSize:9,textColor:[30,30,30]},columnStyles:{0:{cellWidth:38,fontStyle:'bold',textColor:[100,100,100]}},body:[['Date',data.incidentDate],['Time',data.incidentTime]],});y=doc.lastAutoTable.finalY+8;sectionHeader('4. WHERE');doc.autoTable({startY:y,margin:{left:margin,right:margin},theme:'grid',bodyStyles:{fontSize:9,textColor:[30,30,30]},columnStyles:{0:{cellWidth:38,fontStyle:'bold',textColor:[100,100,100]}},body:[['Facility',data.facility],['Location',data.location]],});y=doc.lastAutoTable.finalY+8;sectionHeader('5. ROOT CAUSE');textBlock('Explanation',data.rootCause);if(data.additional&&data.additional.trim()){sectionHeader('6. ADDITIONAL INFORMATION');textBlock('Details',data.additional)}if(data.photoCount>0){sectionHeader('7. PHOTO EVIDENCE');doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);doc.text(data.photoCount+' file(s) attached separately with this email.',margin+2,y);y+=8}if(y>pageH-60){doc.addPage();y=margin}sectionHeader('SIGNATURE');doc.autoTable({startY:y,margin:{left:margin,right:margin},theme:'grid',bodyStyles:{fontSize:9,textColor:[30,30,30]},columnStyles:{0:{cellWidth:38,fontStyle:'bold',textColor:[100,100,100]}},body:[['Printed Name',data.printedName],['Date Signed',data.dateSigned]],});y=doc.lastAutoTable.finalY+4;if(data.signatureDataUrl){if(y>pageH-40){doc.addPage();y=margin}doc.setFontSize(8);doc.setTextColor(100,100,100);doc.text('Signature:',margin+2,y+3);y+=5;doc.setDrawColor(200,200,200);doc.rect(margin,y,80,25);try{doc.addImage(data.signatureDataUrl,'PNG',margin+1,y+1,78,23)}catch(e){}y+=30}const totalPages=doc.internal.getNumberOfPages();for(let i=1;i<=totalPages;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(150,150,150);doc.text('HSE Incident Report  |  '+data.id+'  |  CONFIDENTIAL',margin,pageH-8);doc.text('Page '+i+' of '+totalPages,pageW-margin,pageH-8,{align:'right'})}return doc}
+const form=document.getElementById('incidentForm');form.addEventListener('submit',async function(e){e.preventDefault();const types=getSelectedTypes();if(!types){alert('Please select at least one Incident Type.');document.getElementById('chipGroup').scrollIntoView({behavior:'smooth',block:'center'});return}if(!hasSig){alert('Please provide your signature before submitting.');document.getElementById('sigWrap').scrollIntoView({behavior:'smooth',block:'center'});return}const ccInput=document.getElementById('additionalCC').value||'';const ccResult=validateEmails(ccInput);const ccErrorEl=document.getElementById('ccError');if(!ccResult.valid){ccErrorEl.style.display='block';ccErrorEl.textContent='Invalid email(s): '+ccResult.invalid.join(', ');document.getElementById('additionalCC').scrollIntoView({behavior:'smooth',block:'center'});return}ccErrorEl.style.display='none';const now=new Date();const timestamp=now.toLocaleString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});document.getElementById('hiddenTimestamp').value=now.toISOString();
+const btn=document.getElementById('submitBtn');const btnText=document.getElementById('btnText');const spinner=document.getElementById('btnSpinner');btn.disabled=true;btnText.textContent='Generating PDF & Sending...';spinner.style.display='block';
+try{const pdfData={id:incidentId,timestamp:timestamp,reporterName:document.getElementById('reporterName').value,position:document.getElementById('positionField').value,phone:document.getElementById('phoneField').value,email:document.getElementById('reporterEmail').value,witnesses:document.getElementById('witnessesField').value,types:types,description:document.getElementById('descField').value,incidentDate:document.getElementById('incidentDate').value,incidentTime:document.getElementById('incidentTime').value,facility:document.getElementById('facilityField').value,location:document.getElementById('locationField').value,rootCause:document.getElementById('whyField').value,additional:document.getElementById('additionalField').value,printedName:document.getElementById('printedName').value,dateSigned:document.getElementById('signDate').value,signatureDataUrl:canvas.toDataURL('image/png'),photoCount:(fileInput&&fileInput.files?fileInput.files.length:0),};const pdfDoc=generatePDF(pdfData);const pdfBlob=pdfDoc.output('blob');lastPdfBlob=pdfBlob;const pdfFileName='Incident_Report_'+incidentId+'.pdf';const pdfFile=new File([pdfBlob],pdfFileName,{type:'application/pdf'});
+// NDA-style backend via Worker + GHL proxy
+const WORKER_URL='https://arena-api.jean-475.workers.dev';const GHL_BASE=WORKER_URL+'/api/ghl';async function upsertContact(email,firstName,lastName){const res=await fetch(GHL_BASE+'/contacts/upsert',{method:'POST',headers:{'Authorization':'Bearer proxy','Version':'2021-07-28','Content-Type':'application/json'},body:JSON.stringify({locationId:'LSvdgiiT7ManCRx9CCwE',email,firstName,lastName})});const data=await res.json().catch(()=>({}));return data.contact?.id||''}
+const primaryEmail='jbaustert@njectllc.com';const ccEmail='rseymour@swanenergyinc.onmicrosoft.com';const primaryId=await upsertContact(primaryEmail,'HSE','Primary');const ccId=await upsertContact(ccEmail,'HSE','CC');async function uploadToContact(file,contactId,contactName,companyName,category){const fd=new FormData();fd.append('file',file,file.name||'incident.pdf');fd.append('contactId',contactId);fd.append('contactName',contactName);fd.append('companyName',companyName);fd.append('category',category);const resp=await fetch(WORKER_URL+'/api/upload-to-contact',{method:'POST',body:fd});const j=await resp.json().catch(()=>({}));return j.fileUrl||''}
+const facilityName=document.getElementById('facilityField').value||'Unknown Facility';const fileUrl=await uploadToContact(pdfFile,primaryId||ccId,'HSE Inbox',facilityName,'Incident Report');function buildEmailHtml(){const safe=s=>(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');return '<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:20px;">'+
+'<h2 style="margin:0 0 10px;color:#1B2A4A;">HSE Incident Report</h2>'+
+'<p style="margin:0 0 6px;color:#333;"><strong>ID:</strong> '+safe(incidentId)+'</p>'+
+'<p style="margin:0 0 6px;color:#333;"><strong>Facility:</strong> '+safe(facilityName)+'</p>'+
+'<p style="margin:0 0 6px;color:#333;"><strong>Date/Time:</strong> '+safe(pdfData.incidentDate)+' '+safe(pdfData.incidentTime)+'</p>'+
+'<p style="margin:12px 0 6px;color:#333;">A signed PDF report has been generated and archived.</p>'+
+(fileUrl?'<p style="margin:0 0 12px;"><a href="'+fileUrl+'" style="color:#2E75B6;font-weight:bold;">Download the Incident Report (PDF)</a></p>':'')+
+'<div style="margin-top:12px;padding:12px;border-left:3px solid #2E75B6;background:#F7F8FA;">'+
+'<div style="font-size:12px;color:#555;">Types: '+safe(pdfData.types)+'</div>'+
+'<div style="font-size:12px;color:#555;">Reporter: '+safe(pdfData.reporterName)+' ('+safe(pdfData.email)+')</div>'+
+'<div style="font-size:12px;color:#555;">Position: '+safe(pdfData.position)+'</div>'+
+'<div style="font-size:12px;color:#555;">Phone: '+safe(pdfData.phone)+'</div>'+
+'</div>'+
+'<p style="margin:16px 0 0;color:#666;font-size:12px;">Automated by Arena HSE. Reported at '+safe(pdfData.timestamp)+'.</p>'+
+'</div>'}
+async function sendEmail(contactId){if(!contactId)return;await fetch(GHL_BASE+'/conversations/messages',{method:'POST',headers:{'Authorization':'Bearer proxy','Version':'2021-07-28','Content-Type':'application/json'},body:JSON.stringify({type:'Email',contactId,subject:'HSE INCIDENT REPORT ['+incidentId+'] — '+facilityName+' — '+pdfData.incidentDate,html:buildEmailHtml(),emailFrom:'The Arena Partners <support@thearenapartners.com>'})})}
+await sendEmail(primaryId);await sendEmail(ccId);
+try{if(fileInput&&fileInput.files&&(primaryId||ccId)){for(let i=0;i<Math.min(fileInput.files.length,5);i++){const f=fileInput.files[i];await uploadToContact(f,primaryId||ccId,'HSE Inbox',facilityName,'Incident Evidence')}}}catch(_e){}
+// Download PDF for submitter
+(function downloadBlob(blob,filename){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),5000)})(pdfBlob,pdfFileName);
+// Success UI
+document.getElementById('successId').textContent=incidentId;document.getElementById('successOverlay').classList.add('show');
+}catch(err){console.error('Incident submit error:',err);if(lastPdfBlob){const url=URL.createObjectURL(lastPdfBlob);const a=document.createElement('a');a.href=url;a.download='Incident_Report_'+incidentId+'.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),5000)}document.getElementById('errorOverlay').classList.add('show')}
+finally{btn.disabled=false;btnText.textContent='Submit Incident Report';spinner.style.display='none'}
+});
+// Redownload buttons
+const redl=document.getElementById('redownloadBtn');redl&&redl.addEventListener('click',()=>{if(lastPdfBlob){const url=URL.createObjectURL(lastPdfBlob);const a=document.createElement('a');a.href=url;a.download='Incident_Report_'+incidentId+'.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),5000)}});
+const fb=document.getElementById('fallbackDownloadBtn');fb&&fb.addEventListener('click',()=>{if(lastPdfBlob){const url=URL.createObjectURL(lastPdfBlob);const a=document.createElement('a');a.href=url;a.download='Incident_Report_'+incidentId+'.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),5000)}});
+window.resetForm=function(){document.getElementById('successOverlay').classList.remove('show');form.reset();clearSig();selectedFiles=[];renderPreviews();incidentId=generateId();document.getElementById('incidentId').textContent=incidentId;document.getElementById('hiddenId').value=incidentId;document.getElementById('signDate').value=today;document.getElementById('ccError')&&(document.getElementById('ccError').style.display='none');lastPdfBlob=null;window.scrollTo({top:0,behavior:'smooth'})};
+})();
+</script>
+</body>
+</html>
