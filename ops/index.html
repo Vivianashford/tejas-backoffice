@@ -90,6 +90,14 @@ const BENCH = {
   total:    { target: 9475000, prior: 8808424 },
 };
 
+const DEFAULT_LOCATION_COSTS = {
+  bigLake:  { rent: 45000, insurance: 18000, utilities: 12000, maintenance: 25000, labor: 42000, other: 24000 },
+  gonzalez: { rent: 28000, insurance: 12000, utilities: 8000, maintenance: 15000, labor: 25000, other: 12000 },
+  liveOak:  { rent: 15000, insurance: 7000, utilities: 5000, maintenance: 8000, labor: 14000, other: 17000 },
+};
+const COST_LABELS = { rent: "Rent / Lease", insurance: "Insurance", utilities: "Utilities", maintenance: "Maintenance", labor: "Labor (Fixed)", other: "Other Fixed" };
+const locCostTotal = (lc) => Object.values(lc).reduce((s, v) => s + (Number(v) || 0), 0);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // PARSERS — full-featured (Brooks's parser was simplified; this needs the lot)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -335,21 +343,39 @@ function Btn({ children, primary, accent, onClick, style }) {
   return <button onClick={onClick} style={{ ...base, ...variant, ...style }}>{children}</button>;
 }
 
-// Sparkline — same intent as before, restyled in navy/crimson
+// Sparkline — with hover tooltips
 function Spark({ data, color = tj.navy900, height: h = 32, width: w = 120 }) {
+  const [tip, setTip] = useState(null);
   if (!data || data.length < 2) return null;
   const mn = Math.min(...data), mx = Math.max(...data), rng = mx - mn || 1;
-  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - mn) / rng) * (h - 4) - 2}`).join(" ");
+  const pts = data.map((v, i) => ({ x: (i / (data.length - 1)) * w, y: h - ((v - mn) / rng) * (h - 4) - 2, v }));
+  const polyline = pts.map(p => `${p.x},${p.y}`).join(" ");
   return (
-    <svg width={w} height={h} style={{ display: "block" }}>
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={w} cy={parseFloat(pts.split(" ").pop().split(",")[1])} r="2.5" fill={color} />
-    </svg>
+    <div style={{ position: "relative", display: "inline-block", width: w, height: h }}>
+      <svg width={w} height={h} style={{ display: "block" }}>
+        <polyline points={polyline} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={pts[pts.length - 1].x} cy={pts[pts.length - 1].y} r="2.5" fill={color} />
+        {pts.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={8} fill="transparent" style={{ cursor: "crosshair" }}
+            onMouseEnter={() => setTip(p)} onMouseLeave={() => setTip(null)} />
+        ))}
+      </svg>
+      {tip && (
+        <div style={{
+          position: "absolute", left: Math.min(Math.max(tip.x, 30), w - 30), top: tip.y - 30,
+          transform: "translateX(-50%)", background: tj.navy900, color: "#fff",
+          padding: "3px 8px", fontSize: 10, fontFamily: tj.fontMono,
+          whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10,
+          borderRadius: 3, boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+        }}>{typeof tip.v === "number" && Math.abs(tip.v) < 1 ? (tip.v * 100).toFixed(1) + "%" : fmtF(tip.v)}</div>
+      )}
+    </div>
   );
 }
 
-// Bar chart — Tejas palette, no rounded corners
+// Bar chart — Tejas palette, with hover tooltips
 function Bars({ data, labels, height: h = 140, colorFn, width: w = 300 }) {
+  const [tip, setTip] = useState(null);
   if (!data || data.length === 0) return null;
   const mx = Math.max(...data.map(Math.abs), 1);
   const hasNeg = data.some(d => d < 0);
@@ -358,21 +384,36 @@ function Bars({ data, labels, height: h = 140, colorFn, width: w = 300 }) {
   const negH = hasNeg ? h * 0.35 : 0;
   const bl = chartH;
   return (
-    <svg width={w} height={h + 24} style={{ display: "block" }}>
-      {data.map((v, i) => {
-        const x = i * ((w - 20) / data.length) + 10;
-        const barH = (Math.abs(v) / mx) * (v >= 0 ? chartH : negH);
-        const y = v >= 0 ? bl - barH : bl;
-        const c = colorFn ? colorFn(v) : v >= 0 ? tj.ok : tj.crimson;
-        return (
-          <g key={i}>
-            <rect x={x} y={y} width={bw} height={Math.max(barH, 1)} fill={c} opacity={0.85} />
-            {labels && <text x={x + bw / 2} y={h + 16} textAnchor="middle" fontSize="9" fill={tj.gray700} fontFamily={tj.fontSans} letterSpacing="0.06em">{labels[i]}</text>}
-          </g>
-        );
-      })}
-      <line x1={8} y1={bl} x2={w - 8} y2={bl} stroke={tj.navy900} strokeWidth="1" />
-    </svg>
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <svg width={w} height={h + 24} style={{ display: "block" }}>
+        {data.map((v, i) => {
+          const x = i * ((w - 20) / data.length) + 10;
+          const barH = (Math.abs(v) / mx) * (v >= 0 ? chartH : negH);
+          const y = v >= 0 ? bl - barH : bl;
+          const c = colorFn ? colorFn(v) : v >= 0 ? tj.ok : tj.crimson;
+          const hitW = Math.max(bw + 8, (w - 20) / data.length);
+          return (
+            <g key={i}>
+              <rect x={x - (hitW - bw) / 2} y={0} width={hitW} height={h} fill="transparent" style={{ cursor: "crosshair" }}
+                onMouseEnter={() => setTip({ x: x + bw / 2, y: Math.min(y, bl) - 8, v, label: labels?.[i] })}
+                onMouseLeave={() => setTip(null)} />
+              <rect x={x} y={y} width={bw} height={Math.max(barH, 1)} fill={c} opacity={0.85} pointerEvents="none" />
+              {labels && <text x={x + bw / 2} y={h + 16} textAnchor="middle" fontSize="9" fill={tj.gray700} fontFamily={tj.fontSans} letterSpacing="0.06em">{labels[i]}</text>}
+            </g>
+          );
+        })}
+        <line x1={8} y1={bl} x2={w - 8} y2={bl} stroke={tj.navy900} strokeWidth="1" />
+      </svg>
+      {tip && (
+        <div style={{
+          position: "absolute", left: Math.min(Math.max(tip.x, 30), w - 30), top: Math.max(tip.y - 24, 0),
+          transform: "translateX(-50%)", background: tj.navy900, color: "#fff",
+          padding: "4px 10px", fontSize: 11, fontFamily: tj.fontMono, fontWeight: 700,
+          whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10,
+          borderRadius: 3, boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+        }}>{fmtF(tip.v)}</div>
+      )}
+    </div>
   );
 }
 
@@ -430,6 +471,7 @@ function App() {
   const [W, setW] = useState(null);
   const [archive, setArchive] = useState([]);
   const [benchTargets, setBenchTargets] = useState(BENCH);
+  const [locationCosts, setLocationCosts] = useState(DEFAULT_LOCATION_COSTS);
   const [msg, setMsg] = useState("");
   const [stalenessDismissed, setStalenessDismissed] = useState(false);
   const [, forceTick] = useState(0);
@@ -440,10 +482,12 @@ function App() {
       try { const s = await window.storage.get("tejas-coo-w"); if (s?.value) setW(JSON.parse(s.value)); } catch (e) {}
       try { const s = await window.storage.get("tejas-coo-archive"); if (s?.value) setArchive(JSON.parse(s.value)); } catch (e) {}
       try { const s = await window.storage.get("tejas-coo-benchmarks"); if (s?.value) setBenchTargets(JSON.parse(s.value)); } catch (e) {}
+      try { const s = await window.storage.get("tejas-coo-location-costs"); if (s?.value) setLocationCosts(JSON.parse(s.value)); } catch (e) {}
     })();
   }, []);
   useEffect(() => { const id = setInterval(() => forceTick(n => n + 1), 60000); return () => clearInterval(id); }, []);
   useEffect(() => { (async () => { try { await window.storage.set("tejas-coo-benchmarks", JSON.stringify(benchTargets)); } catch (e) {} })(); }, [benchTargets]);
+  useEffect(() => { (async () => { try { await window.storage.set("tejas-coo-location-costs", JSON.stringify(locationCosts)); } catch (e) {} })(); }, [locationCosts]);
 
   // ── Snapshot builders ─────────────────────────────────────────────
   // Condense an upload into the small fixed-shape record we keep forever.
@@ -790,6 +834,8 @@ function App() {
                 const ar = d.rev.slice(-3).reduce((a, b) => a + b, 0) / 3;
                 const an = d.ni.slice(-3).reduce((a, b) => a + b, 0) / 3;
                 const m = ar > 0 ? an / ar : 0;
+                const lc = locationCosts[loc.k] || DEFAULT_LOCATION_COSTS[loc.k];
+                const lcTotal = locCostTotal(lc);
                 const colors = { healthy: tj.ok, watch: tj.warn, critical: tj.crimson };
                 const c = colors[loc.st];
                 return (
@@ -808,11 +854,52 @@ function App() {
                     <div style={{ fontSize: 12, color: tj.gray700 }}>
                       Margin: <b style={{ color: m >= 0.05 ? tj.ok : m >= 0 ? tj.warn : tj.crimson, fontFamily: tj.fontMono }}>{pct(m)}</b>
                     </div>
+                    <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${tj.border}` }}>
+                      <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Monthly Fixed Costs</div>
+                      <div style={{ fontFamily: tj.fontMono, fontSize: 16, fontWeight: 700, color: tj.crimson, marginTop: 2 }}>{fmtF(lcTotal)}</div>
+                      <div style={{ fontSize: 10, color: tj.gray500, marginTop: 2 }}>Coverage: <b style={{ color: ar > lcTotal * 2 ? tj.ok : ar > lcTotal * 1.5 ? tj.warn : tj.crimson, fontFamily: tj.fontMono }}>{ar > 0 ? (ar / lcTotal).toFixed(1) : "0.0"}×</b></div>
+                    </div>
                     <div style={{ marginTop: 10 }}><Spark data={d.rev.slice(-6)} color={c} width={180} height={28} /></div>
                   </Card>
                 );
               })}
             </div>
+
+            {/* Editable Fixed Costs */}
+            <Card padding={24} style={{ marginBottom: 20 }}>
+              <Eyebrow style={{ marginBottom: 4 }}>Monthly Fixed Costs by Location</Eyebrow>
+              <div style={{ fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif, marginBottom: 16 }}>
+                Edit costs below — saved automatically. Total consolidated: <b style={{ color: tj.navy900, fontFamily: tj.fontMono, fontStyle: "normal" }}>{fmtF(["bigLake", "gonzalez", "liveOak"].reduce((s, k) => s + locCostTotal(locationCosts[k] || DEFAULT_LOCATION_COSTS[k]), 0))}</b>/mo
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+                {[{ name: "Big Lake", key: "bigLake", color: tj.ok }, { name: "Gonzalez", key: "gonzalez", color: tj.warn }, { name: "Live Oak", key: "liveOak", color: tj.crimson }].map(loc => {
+                  const lc = locationCosts[loc.key] || DEFAULT_LOCATION_COSTS[loc.key];
+                  return (
+                    <Card key={loc.key} accent={loc.color} accentSide="left" cream padding={16}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+                        <Eyebrow color={loc.color}>{loc.name}</Eyebrow>
+                        <span style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: tj.navy900 }}>{fmtF(locCostTotal(lc))}</span>
+                      </div>
+                      {Object.keys(COST_LABELS).map(field => (
+                        <div key={field} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                          <label style={{ flex: "0 0 100px", fontSize: 10, color: tj.gray700, letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }}>{COST_LABELS[field]}</label>
+                          <input type="number" step="500" value={lc[field] || 0}
+                            onChange={e => setLocationCosts(prev => ({
+                              ...prev, [loc.key]: { ...(prev[loc.key] || DEFAULT_LOCATION_COSTS[loc.key]), [field]: Number(e.target.value || 0) }
+                            }))}
+                            style={{ flex: 1, padding: "6px 8px", border: `1px solid ${tj.border}`, fontFamily: tj.fontMono, fontSize: 12, color: tj.navy900, background: tj.white, maxWidth: 120 }} />
+                        </div>
+                      ))}
+                      <button onClick={() => setLocationCosts(prev => ({ ...prev, [loc.key]: { ...DEFAULT_LOCATION_COSTS[loc.key] } }))}
+                        style={{ marginTop: 6, background: "transparent", border: `1px solid ${tj.border}`, color: tj.gray500, padding: "3px 10px", fontSize: 9, fontWeight: 700, cursor: "pointer", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: tj.fontSans }}>
+                        Reset to default
+                      </button>
+                    </Card>
+                  );
+                })}
+              </div>
+            </Card>
+
             <Card padding={24}>
               <Eyebrow style={{ marginBottom: 16 }}>Net Income · last 6 months</Eyebrow>
               <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
@@ -1481,6 +1568,146 @@ function App() {
                   </div>
                 </div>
               </Card>
+
+              {/* ─── WHAT'S MISSING ─── */}
+              {mRevs.length >= 2 && (() => {
+                const annualTarget = (benchTargets.bigLake?.target || 0) + (benchTargets.gonzalez?.target || 0) + (benchTargets.liveOak?.target || 0);
+                const annualGap = annualTarget - projectedAnnual;
+                const latestMonthRev = mRevs[mRevs.length - 1] || 0;
+                const monthlyTarget = annualTarget / 12;
+                const monthlyGap = monthlyTarget - latestMonthRev;
+                const locAnalysis = [
+                  { name: "Big Lake", key: "bigLake", color: tj.ok },
+                  { name: "Gonzalez", key: "gonzalez", color: tj.warn },
+                  { name: "Live Oak", key: "liveOak", color: tj.crimson },
+                ].map(loc => {
+                  const target = benchTargets[loc.key]?.target || 0;
+                  const share = annualTarget > 0 ? target / annualTarget : 0.33;
+                  const actualShare = curRev > 0 ? (D[loc.key]?.rev?.[i] || 0) / curRev : 0;
+                  const expectedMonthly = monthlyTarget * share;
+                  const actualMonthly = D[loc.key]?.rev?.[i] || 0;
+                  const gap = expectedMonthly - actualMonthly;
+                  const underperforming = gap > 0;
+                  return { ...loc, share, actualShare, expectedMonthly, actualMonthly, gap, underperforming };
+                });
+                const worstLoc = locAnalysis.reduce((w, l) => (!w || l.gap > w.gap) ? l : w, null);
+                return (
+                  <Card accent={tj.crimson} padding={24} style={{ marginBottom: 20 }}>
+                    <Eyebrow color={tj.crimson} style={{ marginBottom: 12 }}>What's Missing · Gap Analysis</Eyebrow>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginBottom: 16 }}>
+                      <div>
+                        <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Monthly Revenue Gap</div>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 26, fontWeight: 700, color: monthlyGap > 0 ? tj.crimson : tj.ok, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                          {monthlyGap > 0 ? `-${fmtF(monthlyGap)}` : `+${fmtF(-monthlyGap)}`}
+                        </div>
+                        <div style={{ fontSize: 11, color: tj.gray500, marginTop: 2 }}>vs {fmtF(monthlyTarget)}/mo target</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Annual Revenue Gap</div>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 26, fontWeight: 700, color: annualGap > 0 ? tj.crimson : tj.ok, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                          {annualGap > 0 ? `-${fmtF(annualGap)}` : `+${fmtF(-annualGap)}`}
+                        </div>
+                        <div style={{ fontSize: 11, color: tj.gray500, marginTop: 2 }}>projected vs {fmtF(annualTarget)} target</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: tj.gray500, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 700 }}>Biggest Drag</div>
+                        <div style={{ fontFamily: tj.fontSerif, fontSize: 26, fontWeight: 700, color: worstLoc?.color || tj.crimson, marginTop: 4 }}>
+                          {worstLoc?.name || "—"}
+                        </div>
+                        <div style={{ fontSize: 11, color: tj.gray500, marginTop: 2 }}>{worstLoc && worstLoc.gap > 0 ? `${fmtF(worstLoc.gap)} below its share` : "On target"}</div>
+                      </div>
+                    </div>
+                    <div style={{ borderTop: `1px solid ${tj.border}`, paddingTop: 14 }}>
+                      <Eyebrow color={tj.gray700} style={{ marginBottom: 10 }}>Per-Location Make-Up Needed</Eyebrow>
+                      {locAnalysis.map(loc => {
+                        const pctOfTarget = loc.expectedMonthly > 0 ? loc.actualMonthly / loc.expectedMonthly : 1;
+                        return (
+                          <div key={loc.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: `1px solid ${tj.border}` }}>
+                            <div style={{ width: 8, height: 8, borderRadius: "50%", background: loc.color, flexShrink: 0 }} />
+                            <div style={{ flex: "0 0 90px", fontSize: 13, fontWeight: 700, color: tj.navy900 }}>{loc.name}</div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ background: tj.surfaceCream, border: `1px solid ${tj.border}`, height: 14, position: "relative" }}>
+                                <div style={{ background: loc.color, height: "100%", width: `${Math.min(pctOfTarget * 100, 100)}%`, opacity: 0.8 }} />
+                              </div>
+                            </div>
+                            <div style={{ flex: "0 0 70px", textAlign: "right", fontFamily: tj.fontMono, fontSize: 12, fontWeight: 700, color: loc.underperforming ? tj.crimson : tj.ok }}>
+                              {loc.gap > 0 ? `-${fmt(loc.gap)}` : `+${fmt(-loc.gap)}`}
+                            </div>
+                            <div style={{ flex: "0 0 50px", textAlign: "right", fontFamily: tj.fontMono, fontSize: 11, color: tj.gray500 }}>
+                              {(pctOfTarget * 100).toFixed(0)}%
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                );
+              })()}
+
+              {/* ─── WEEKLY PROJECTION ─── */}
+              {W && W.locations && W.locations.length > 0 && (() => {
+                const weekRevs = weeklySnaps.map(w => w.weekRev);
+                const weekPLs = weeklySnaps.map(w => w.weekPL);
+                const projWeekRev = projectForward(weekRevs.length >= 2 ? weekRevs : [wR], 4);
+                const projWeekPL = projectForward(weekPLs.length >= 2 ? weekPLs : [wP], 4);
+                const dailyTotals = W.locations[0]?.totalRevenue?.daily?.map((_, di) =>
+                  W.locations.reduce((s, l) => s + (l.totalRevenue?.daily?.[di]?.total || 0), 0)
+                ) || [];
+                const validDays = dailyTotals.filter(d => d > 0);
+                const avgDailyRev = validDays.length > 0 ? validDays.reduce((s, v) => s + v, 0) / validDays.length : 0;
+                const projDailyNextWeek = Array.from({ length: 7 }, () => avgDailyRev);
+                return (
+                  <Card padding={24} style={{ marginBottom: 20 }}>
+                    <Eyebrow style={{ marginBottom: 4 }}>Weekly & Daily Projections</Eyebrow>
+                    <div style={{ fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif, marginBottom: 16 }}>
+                      Based on {weekRevs.length >= 2 ? `${weekRevs.length} weeks of uploaded data` : "current week"} · daily avg from {validDays.length} active days
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20 }}>
+                      <div>
+                        <Eyebrow color={tj.navy900} style={{ marginBottom: 8 }}>Next 4 Weeks · Revenue</Eyebrow>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          {projWeekRev.map((v, j) => (
+                            <Card key={j} cream padding={10} style={{ flex: "1 1 80px", minWidth: 80, textAlign: "center" }}>
+                              <div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Wk +{j + 1}</div>
+                              <div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: tj.navy900, marginTop: 4 }}>{fmt(v)}</div>
+                            </Card>
+                          ))}
+                        </div>
+                        <div style={{ marginTop: 8, fontSize: 11, color: tj.gray700 }}>
+                          4-week projected total: <b style={{ fontFamily: tj.fontMono, color: tj.navy900 }}>{fmtF(projWeekRev.reduce((s, v) => s + v, 0))}</b>
+                        </div>
+                      </div>
+                      <div>
+                        <Eyebrow color={tj.navy900} style={{ marginBottom: 8 }}>Next 4 Weeks · P/L</Eyebrow>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          {projWeekPL.map((v, j) => (
+                            <Card key={j} cream padding={10} style={{ flex: "1 1 80px", minWidth: 80, textAlign: "center" }}>
+                              <div style={{ fontSize: 9, color: tj.gray500, letterSpacing: "0.08em", fontWeight: 700, textTransform: "uppercase" }}>Wk +{j + 1}</div>
+                              <div style={{ fontFamily: tj.fontMono, fontSize: 14, fontWeight: 700, color: v >= 0 ? tj.ok : tj.crimson, marginTop: 4 }}>{fmtF(v)}</div>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    {avgDailyRev > 0 && (
+                      <div style={{ borderTop: `1px solid ${tj.border}`, paddingTop: 14 }}>
+                        <Eyebrow color={tj.gray700} style={{ marginBottom: 10 }}>Projected Daily Revenue · Next Week</Eyebrow>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, di) => (
+                            <Card key={di} cream padding={8} style={{ flex: "1 1 60px", minWidth: 60, textAlign: "center" }}>
+                              <div style={{ fontSize: 9, color: tj.gray500, fontWeight: 700 }}>{day}</div>
+                              <div style={{ fontFamily: tj.fontMono, fontSize: 12, fontWeight: 700, color: tj.navy900, marginTop: 2 }}>{fmt(projDailyNextWeek[di])}</div>
+                            </Card>
+                          ))}
+                        </div>
+                        <div style={{ fontSize: 11, color: tj.gray500, fontStyle: "italic", fontFamily: tj.fontSerif, marginTop: 8 }}>
+                          Average daily revenue: <b style={{ fontFamily: tj.fontMono, color: tj.navy900, fontStyle: "normal" }}>{fmtF(avgDailyRev)}</b> · projected week: <b style={{ fontFamily: tj.fontMono, color: tj.navy900, fontStyle: "normal" }}>{fmtF(avgDailyRev * 7)}</b>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                );
+              })()}
 
               {/* ─── Archive summary ─── */}
               <Card padding={20} style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
