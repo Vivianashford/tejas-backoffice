@@ -601,7 +601,7 @@ function Section({ title, children, defaultOpen=true, eyebrowColor }) {
 /* ═══════════════════════════════════════════
    MAIN APP
    ═══════════════════════════════════════════ */
-function BriefingCard({ D, W, i, monthlyTarget, remainingDays, monthName, today, locationsMeta }) {
+function BriefingCard({ D, W, i, monthlyTarget, remainingDays, monthName, today, locationsMeta, lastPopDay }) {
  const [genMsg, setGenMsg] = useState("");
  const [copied, setCopied] = useState(false);
  const wMR = W?.locations?.reduce((s,l)=>s+(l.totalRevenue?.mtd||0),0) || 0;
@@ -1023,7 +1023,7 @@ function App() {
       })()}
 
       {/* ─── GENERATE MESSAGE ─── */}
-      <BriefingCard D={D} W={W} i={i} monthlyTarget={monthlyTarget} remainingDays={remainingDays} monthName={monthName} today={today} locationsMeta={locationsMeta} />
+      <BriefingCard D={D} W={W} i={i} monthlyTarget={monthlyTarget} remainingDays={remainingDays} monthName={monthName} today={today} locationsMeta={locationsMeta} lastPopDay={lastPopDay} />
 
       {/* ─── ACTIVE LOCATIONS ─── */}
       <Eyebrow style={{ marginBottom:16, fontSize:12 }}>Locations</Eyebrow>
