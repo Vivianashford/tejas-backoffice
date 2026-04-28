@@ -246,7 +246,8 @@ function extractWeekly(csvText) {
    loc.water.daily.push({ day: parseNum(r[b]), night: parseNum(r[b+1]), total: parseNum(r[b+2]) });
   }
   loc.water.weekTotal = parseNum(r[24]);
-  loc.water.mtd = parseNum(r[27]);
+  const findMtd = (row) => { for (let c = 25; c <= 35; c++) { const v = parseNum(String(row[c]||"")); if (v !== 0) return v; } return 0; };
+  loc.water.mtd = findMtd(r);
   for (let j = i + 1; j < Math.min(i + 15, rows.length); j++) {
    const sr = rows[j];
    if (!sr?.[1]) continue;
@@ -267,7 +268,7 @@ function extractWeekly(csvText) {
      t.daily.push({ day: parseNum(sr[b]), night: parseNum(sr[b+1]), total: parseNum(sr[b+2]) });
     }
     t.weekTotal = parseNum(sr[24]);
-    t.mtd = parseNum(sr[27]);
+    t.mtd = findMtd(sr);
    }
    if (sr[0]?.trim() && locNames.some(n => sr[0].trim().toLowerCase().includes(n.toLowerCase()))) break;
    if (lb === "p/l") break;
