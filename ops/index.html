@@ -610,13 +610,17 @@ function BriefingCard({ D, W, i, monthlyTarget, remainingDays, monthName, today,
  const companyDailyNeedGen = companyMonthGapGen / remainingDays;
  function buildMsg() {
   const d = today.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  const noMTD = wMR === 0;
   const lines = [];
   lines.push(`📋 TEJAS DAILY TARGETS — ${d}`);
+  if (noMTD) lines.push(`⚠️ MTD data not loaded — upload weekly CSV for accurate numbers`);
   lines.push("");
   lines.push(`🏢 COMPANY`);
-  lines.push(`  • Need today to hit monthly goal: ${fmtF(companyDailyNeedGen)}`);
+  lines.push(`  • Monthly target: ${fmtF(monthlyTarget)}`);
+  if (!noMTD) lines.push(`  • MTD revenue: ${fmtF(wMR)}`);
+  lines.push(`  • Need today to hit goal: ${fmtF(companyDailyNeedGen)}`);
   lines.push(`  • Daily breakeven: ${fmtF(dailyBreakevenGen)}`);
-  lines.push(`  • MTD Revenue: ${fmtF(wMR)} / ${fmtF(monthlyTarget)}`);
+  lines.push(`  • Days left in ${monthName}: ${remainingDays}`);
   lines.push("");
   locationsMeta.forEach(loc => {
    const wLoc = W?.locations?.find(l=>l.name.toLowerCase().includes(loc.name.split(" ")[0].toLowerCase()));
@@ -625,13 +629,15 @@ function BriefingCard({ D, W, i, monthlyTarget, remainingDays, monthName, today,
    const locGap = Math.max(0, locTarget - locMTD);
    const locDailyNeedGen = locGap / remainingDays;
    const locBE = dailyBreakevenGen * BENCH[loc.k].weight;
+   const locYesterday = lastPopDay >= 0 ? (wLoc?.totalRevenue?.daily?.[lastPopDay]?.total || 0) : 0;
    lines.push(`📍 ${loc.name.toUpperCase()}`);
-   lines.push(`  • Need today to hit goal: ${locDailyNeedGen > 0 ? fmtF(locDailyNeedGen) : "TARGET HIT ✅"}`);
+   lines.push(`  • Monthly target: ${fmtF(locTarget)}`);
+   if (!noMTD) lines.push(`  • MTD revenue: ${fmtF(locMTD)}`);
+   lines.push(`  • Need today to hit goal: ${fmtF(locDailyNeedGen)}`);
    lines.push(`  • Breakeven today: ${fmtF(locBE)}`);
-   lines.push(`  • MTD: ${fmtF(locMTD)} / ${fmtF(locTarget)}`);
+   if (locYesterday > 0) lines.push(`  • Yesterday: ${fmtF(locYesterday)}`);
    lines.push("");
   });
-  lines.push(`${remainingDays} days left in ${monthName}.`);
   return lines.join("\n");
  }
  function handleGenerate() { setGenMsg(buildMsg()); setCopied(false); }
