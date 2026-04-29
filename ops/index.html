@@ -275,7 +275,22 @@ function extractWeekly(csvText) {
   }
   locations.push(loc);
  }
- return { dates, updatedThru, locations, uploadedAt: new Date().toISOString() };
+ // Debug: capture raw column values from the first location's totalRevenue row
+ let _debugRows = [];
+ for (let i = 0; i < rows.length; i++) {
+  const r = rows[i];
+  if (!r?.[0]) continue;
+  if (locNames.some(n => r[0].trim().toLowerCase().includes(n.toLowerCase()))) {
+   for (let j = i+1; j < Math.min(i+15, rows.length); j++) {
+    const sr = rows[j];
+    if (sr?.[1]?.trim().toLowerCase().includes("total revenue")) {
+     _debugRows.push({ loc: r[0].trim(), cols: sr.slice(20,35).map((v,ci) => ({col:20+ci, val:String(v||"")})) });
+     break;
+    }
+   }
+  }
+ }
+ return { dates, updatedThru, locations, uploadedAt: new Date().toISOString(), _debug: _debugRows };
 }
 
 /* ═══════════════════════════════════════════
@@ -827,6 +842,11 @@ function App() {
      </div>
     </div>
     {msg && <div style={{ maxWidth:1280, margin:"6px auto 0", fontSize:11, color:tj.sky, fontWeight:700 }}>{msg}</div>}
+    {W?._debug?.length > 0 && <div style={{ maxWidth:1280, margin:"6px auto 0", background:"#111", color:"#0f0", fontFamily:"monospace", fontSize:10, padding:"8px 12px", lineHeight:1.6 }}>
+     🔍 CSV DEBUG — Total Revenue row columns (cols 20–34):
+     {W._debug.map((d,di) => <div key={di}><b style={{color:"#ff0"}}>{d.loc}:</b> {d.cols.map(c => `[${c.col}]=${c.val||"(empty)"}`).join("  ")}</div>)}
+     <div style={{color:"#888",marginTop:4}}>weekTotal=col24 · MTD should be the MONTHLY cumulative revenue. Share a screenshot of this with the developer.</div>
+    </div>}
    </div>
 
    <div style={{ maxWidth:1280, margin:"0 auto", padding:"20px 32px 48px" }}>
