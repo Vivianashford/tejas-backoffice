@@ -246,7 +246,7 @@ function extractWeekly(csvText) {
    loc.water.daily.push({ day: parseNum(r[b]), night: parseNum(r[b+1]), total: parseNum(r[b+2]) });
   }
   loc.water.weekTotal = parseNum(r[24]);
-  const findMtd = (row) => { for (let c = 25; c <= 35; c++) { const v = parseNum(String(row[c]||"")); if (v !== 0) return v; } return 0; };
+  const findMtd = (row) => { const v27 = parseNum(String(row[27]||"")); if (v27 !== 0) return v27; const v26 = parseNum(String(row[26]||"")); if (v26 !== 0) return v26; const v28 = parseNum(String(row[28]||"")); if (v28 !== 0) return v28; return 0; };
   loc.water.mtd = findMtd(r);
   for (let j = i + 1; j < Math.min(i + 15, rows.length); j++) {
    const sr = rows[j];
