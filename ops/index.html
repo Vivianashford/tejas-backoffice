@@ -223,7 +223,7 @@ function extractWeekly(csvText) {
  for (let i = 0; i < 12; i++) {
   const r = rows[i];
   if (r && r.filter(c => dp.test(c)).length >= 3) {
-   for (let c = 3; c < 22; c += 3) if (dp.test(r[c])) dates.push(r[c].trim());
+   for (let c = 3; c < 21; c += 3) if (dp.test(r[c])) dates.push(r[c].trim());
    break;
   }
  }
@@ -241,7 +241,7 @@ function extractWeekly(csvText) {
   const loc = { name: ln };
   const fields = ["water","solids","solidsRev","washouts","oilSold","totalRevenue","laborCost","overhead","pl"];
   fields.forEach(f => { loc[f] = { daily: [], weekTotal: 0, mtd: 0 }; });
-  for (let d = 0; d < 7; d++) {
+  for (let d = 0; d < 6; d++) {
    const b = 3 + d * 3;
    loc.water.daily.push({ day: parseNum(r[b]), night: parseNum(r[b+1]), total: parseNum(r[b+2]) });
   }
@@ -263,7 +263,7 @@ function extractWeekly(csvText) {
    else if (lb === "p/l") t = loc.pl;
    if (t) {
     t.daily = [];
-    for (let d = 0; d < 7; d++) {
+    for (let d = 0; d < 6; d++) {
      const b = 3 + d * 3;
      t.daily.push({ day: parseNum(sr[b]), night: parseNum(sr[b+1]), total: parseNum(sr[b+2]) });
     }
