@@ -1,6 +1,6 @@
 {
   "source": "Yahoo Finance chart API",
-  "updatedAt": "2026-05-14T21:40:58.807725+00:00",
+  "updatedAt": "2026-05-14T21:55:59.862750+00:00",
   "feeds": [
     {
       "sym": "WTI",
@@ -9,9 +9,9 @@
       "unit": "USD/bbl",
       "sourceSymbol": "CL=F",
       "last": 102.02,
-      "previousClose": 101.02,
-      "change": 1.0,
-      "pct": 0.99,
+      "previousClose": 101.17,
+      "change": 0.85,
+      "pct": 0.84,
       "history": [
         101.61,
         101.76,
@@ -43,9 +43,9 @@
       "unit": "USD/bbl",
       "sourceSymbol": "BZ=F",
       "last": 106.55,
-      "previousClose": 105.63,
-      "change": 0.92,
-      "pct": 0.87,
+      "previousClose": 105.72,
+      "change": 0.83,
+      "pct": 0.79,
       "history": [
         106.05,
         106.12,
