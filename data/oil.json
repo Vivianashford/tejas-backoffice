@@ -1,6 +1,6 @@
 {
   "source": "Yahoo Finance chart API",
-  "updatedAt": "2026-05-16T04:26:00.433064+00:00",
+  "updatedAt": "2026-05-16T04:41:00.549447+00:00",
   "feeds": [
     {
       "sym": "WTI",
@@ -8,10 +8,10 @@
       "venue": "NYMEX",
       "unit": "USD/bbl",
       "sourceSymbol": "CL=F",
-      "last": 101.16,
+      "last": 101.02,
       "previousClose": 96.92,
-      "change": 4.24,
-      "pct": 4.37,
+      "change": 4.1,
+      "pct": 4.23,
       "history": [
         101.11,
         101.1,
