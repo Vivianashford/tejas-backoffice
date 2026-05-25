@@ -1,6 +1,6 @@
 {
   "source": "Yahoo Finance chart API",
-  "updatedAt": "2026-05-25T06:11:24.835156+00:00",
+  "updatedAt": "2026-05-25T06:26:39.523026+00:00",
   "feeds": [
     {
       "sym": "WTI",
@@ -13,7 +13,7 @@
       "change": 0.0,
       "pct": 0.0,
       "history": [],
-      "asOf": 1779688878
+      "asOf": 1779689798
     },
     {
       "sym": "BRENT",
@@ -26,7 +26,7 @@
       "change": 0.0,
       "pct": 0.0,
       "history": [],
-      "asOf": 1779688664
+      "asOf": 1779689619
     }
   ]
 }
